@@ -54,7 +54,9 @@ export default async function SubmissionsPage() {
             <tbody>
               {userSubmissions.map((s) => (
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 transition-colors">
-                  <td className="px-5 py-3 font-medium text-gray-900">{s.title}</td>
+                  <td className="px-5 py-3 font-medium text-gray-900">
+                    <Link href={`/submissions/${s.id}`} className="hover:text-brand-600 transition-colors">{s.title}</Link>
+                  </td>
                   <td className="px-5 py-3 text-gray-500 capitalize">{s.category}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>

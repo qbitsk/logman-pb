@@ -4,6 +4,8 @@ import { submissions, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { clsx } from "clsx";
 
 const statusStyles: Record<string, string> = {
@@ -53,12 +55,15 @@ export default async function AdminSubmissionsPage() {
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Status</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Submitted by</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Date</th>
+                <th className="px-5 py-3"></th>
               </tr>
             </thead>
             <tbody>
               {rows.map((s) => (
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 transition-colors">
-                  <td className="px-5 py-3 font-medium text-gray-900">{s.title}</td>
+                  <td className="px-5 py-3 font-medium text-gray-900">
+                    <Link href={`/submissions/${s.id}`} className="hover:text-brand-600 transition-colors">{s.title}</Link>
+                  </td>
                   <td className="px-5 py-3 text-gray-500 capitalize">{s.category}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>
@@ -71,6 +76,12 @@ export default async function AdminSubmissionsPage() {
                   </td>
                   <td className="px-5 py-3 text-gray-400">
                     {s.createdAt.toLocaleDateString()}
+                  </td>
+                  <td className="px-5 py-3">
+                    <Link href={`/admin/submissions/${s.id}`} className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-brand-600 border border-brand-200 rounded-lg hover:bg-brand-50 transition-colors">
+                      <Pencil className="w-3 h-3" />
+                      Edit
+                    </Link>
                   </td>
                 </tr>
               ))}
