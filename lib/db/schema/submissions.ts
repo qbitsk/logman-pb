@@ -1,0 +1,31 @@
+import { pgTable, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { users } from "./users";
+
+export const statusEnum = pgEnum("submission_status", [
+  "draft",
+  "submitted",
+  "reviewed",
+  "approved",
+  "rejected",
+]);
+
+export const submissions = pgTable("submissions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+
+  // Form fields — customise these to your actual domain
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  notes: text("notes"),
+
+  status: statusEnum("status").notNull().default("draft"),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type Submission = typeof submissions.$inferSelect;
+export type NewSubmission = typeof submissions.$inferInsert;
