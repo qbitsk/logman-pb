@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { publicRoutes, routePermissions, hasRequiredRole, type Role } from "@/lib/auth/permissions";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Always allow public routes
