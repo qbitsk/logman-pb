@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "@/lib/auth/client";
 import {
   LayoutDashboard, FileText, Users, Download,
   LogOut, ShieldCheck, Menu, X,
-  Triangle, Layers,
+  Layers,
+  Triangle,
 } from "lucide-react";
 import { useState } from "react";
 import { clsx } from "clsx";
@@ -59,7 +61,7 @@ export function Sidebar() {
       <div className="px-6 py-5 border-b border-brand-100">
         <div className="flex items-center gap-2 pl-10 md:pl-0">
           <Triangle className="w-6 h-6 text-brand-600" />
-          <span className="font-bold text-brand-950 text-lg">Logman PB</span>
+          <Image src="/images/logo-brand.png" alt="Logman PB" width={100} height={24} />
         </div>
       </div>
 

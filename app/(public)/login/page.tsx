@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Triangle } from "lucide-react";
 
 export default function LoginPage() {
@@ -30,12 +31,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600 mb-4">
-            <Triangle className="w-6 h-6 text-white" />
+        <div className="text-center mb-2">
+          <div className="flex items-center justify-center gap-3 mb-5">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600">
+              <Triangle className="w-6 h-6 text-white" />
+            </div>
+            <Image src="/images/logo-brand.png" alt="Logman PB" width={140} height={32} />
           </div>
-          <h1 className="text-2xl font-bold text-brand-950">Logman PB</h1>
-          <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
         </div>
 
         <div className="card">
