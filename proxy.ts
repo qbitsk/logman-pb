@@ -17,13 +17,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Read the session token from cookie
-  // Better Auth uses "better-auth.session_token" by default
+  // Read the session token from cookie.
+  // On HTTPS (Vercel) better-auth prefixes cookie names with "__Secure-".
   const sessionToken =
+    request.cookies.get("__Secure-better-auth.session_token")?.value ??
     request.cookies.get("better-auth.session_token")?.value;
 
   if (!sessionToken) {
     // No session — redirect to login
+    console.error("No session token found in cookies");
+
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
@@ -39,12 +42,22 @@ export async function proxy(request: NextRequest) {
   );
 
   if (!sessionRes.ok) {
+    console.error("Failed to validate session token");
+
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
 
   const sessionData = await sessionRes.json();
-  const userRole = (sessionData?.user?.role ?? "user") as Role;
+
+  // Session token present but expired/invalid on the server side
+  if (!sessionData?.user) {
+    console.error("Session token expired or invalid");
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const userRole = (sessionData.user.role ?? "user") as Role;
 
   // Check route-level role requirements
   const matchedRoute = routePermissions.find((r) =>
