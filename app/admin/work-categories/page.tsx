@@ -327,7 +327,7 @@ export default function WorkCategoriesPage() {
           ) : categories.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">No categories yet.</div>
           ) : (
-            <div className="card p-0 overflow-hidden">
+            <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
@@ -375,7 +375,7 @@ export default function WorkCategoriesPage() {
           ) : components.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">No components yet.</div>
           ) : (
-            <div className="card p-0 overflow-hidden">
+            <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
@@ -423,7 +423,7 @@ export default function WorkCategoriesPage() {
           ) : defects.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">No defect categories yet.</div>
           ) : (
-            <div className="card p-0 overflow-hidden">
+            <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">

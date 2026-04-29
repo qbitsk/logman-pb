@@ -81,7 +81,7 @@ export default function AdminUsersPage() {
         </button>
       </div>
 
-      <div className="card p-0 overflow-hidden">
+      <div className="card p-0 overflow-x-auto">
         {loading ? (
           <div className="p-8 text-center text-gray-400">Loading…</div>
         ) : (
