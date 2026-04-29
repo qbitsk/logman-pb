@@ -16,6 +16,8 @@ export async function GET() {
     .select({
       id: submissions.id,
       workCategoryId: submissions.workCategoryId,
+      workStationId: submissions.workStationId,
+      units: submissions.units,
       status: submissions.status,
       notes: submissions.notes,
       createdAt: submissions.createdAt,

@@ -18,6 +18,8 @@ const statusStyles: Record<string, string> = {
 type Submission = {
   id: string;
   workCategoryId: string;
+  workStationId: string | null;
+  units: number | null;
   notes: string | null;
   status: string;
   createdAt: Date;
@@ -32,17 +34,26 @@ type WorkCategory = {
   type: string | null;
 };
 
+type WorkStation = {
+  id: string;
+  name: string;
+  workCategoryId: string;
+};
+
 type Props = {
   submission?: Submission;
   workCategories: WorkCategory[];
+  workStations: WorkStation[];
 };
 
-export function SubmissionForm({ submission, workCategories }: Props) {
+export function SubmissionForm({ submission, workCategories, workStations }: Props) {
   const router = useRouter();
   const isEdit = !!submission;
 
   const [form, setForm] = useState({
     workCategoryId: submission?.workCategoryId ?? (workCategories[0]?.id ?? ""),
+    workStationId: submission?.workStationId ?? "",
+    units: submission?.units?.toString() ?? "",
     notes: submission?.notes ?? "",
     status: submission?.status ?? "draft",
   });
@@ -51,8 +62,17 @@ export function SubmissionForm({ submission, workCategories }: Props) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  function set(key: "workCategoryId" | "notes" | "status", value: string) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const filteredStations = workStations.filter(
+    (ws) => ws.workCategoryId === form.workCategoryId
+  );
+
+  function set(key: "workCategoryId" | "workStationId" | "units" | "notes" | "status", value: string) {
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
+      // Reset station when category changes
+      if (key === "workCategoryId") next.workStationId = "";
+      return next;
+    });
     setErrors((prev) => ({ ...prev, [key]: undefined }));
     setSuccess(false);
   }
@@ -63,7 +83,12 @@ export function SubmissionForm({ submission, workCategories }: Props) {
     setSuccess(false);
 
     if (!isEdit) {
-      const result = submissionSchema.safeParse({ workCategoryId: form.workCategoryId, notes: form.notes });
+      const result = submissionSchema.safeParse({
+        workCategoryId: form.workCategoryId,
+        workStationId: form.workStationId || null,
+        units: form.units ? parseInt(form.units, 10) : null,
+        notes: form.notes,
+      });
       if (!result.success) {
         const fieldErrors: typeof errors = {};
         result.error.issues.forEach((issue) => {
@@ -80,8 +105,8 @@ export function SubmissionForm({ submission, workCategories }: Props) {
       const url = isEdit ? `/api/admin/submissions/${submission!.id}` : "/api/submissions";
       const method = isEdit ? "PATCH" : "POST";
       const body = isEdit
-        ? JSON.stringify({ ...form, notes: form.notes || null })
-        : JSON.stringify({ workCategoryId: form.workCategoryId, notes: form.notes });
+        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, notes: form.notes || null })
+        : JSON.stringify({ workCategoryId: form.workCategoryId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, notes: form.notes });
 
       const res = await fetch(url, {
         method,
@@ -171,6 +196,43 @@ export function SubmissionForm({ submission, workCategories }: Props) {
             ))}
           </select>
           {errors.workCategoryId && <p className="text-red-600 text-xs mt-1">{errors.workCategoryId}</p>}
+        </div>
+
+        <div>
+          <label className="label" htmlFor="workStationId">
+            Work Station <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <select
+            id="workStationId"
+            name="workStationId"
+            value={form.workStationId}
+            onChange={(e) => set("workStationId", e.target.value)}
+            className="input"
+          >
+            <option value="">— None —</option>
+            {filteredStations.map((ws) => (
+              <option key={ws.id} value={ws.id}>
+                {ws.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="label" htmlFor="units">
+            Units <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <input
+            id="units"
+            name="units"
+            type="number"
+            min={1}
+            value={form.units}
+            onChange={(e) => set("units", e.target.value)}
+            className="input"
+            placeholder="e.g. 10"
+          />
+          {errors.units && <p className="text-red-600 text-xs mt-1">{errors.units}</p>}
         </div>
 
         <div>

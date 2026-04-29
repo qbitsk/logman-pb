@@ -8,6 +8,8 @@ import { z } from "zod";
 
 const patchSchema = z.object({
   workCategoryId: z.string().min(1).optional(),
+  workStationId: z.string().optional().nullable(),
+  units: z.number().int().positive().optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   status: z.enum(["draft", "submitted", "reviewed", "approved", "rejected"]).optional(),
 });
@@ -33,6 +35,8 @@ export async function GET(
     .select({
       id: submissions.id,
       workCategoryId: submissions.workCategoryId,
+      workStationId: submissions.workStationId,
+      units: submissions.units,
       notes: submissions.notes,
       status: submissions.status,
       createdAt: submissions.createdAt,

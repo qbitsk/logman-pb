@@ -43,6 +43,8 @@ export async function POST(request: NextRequest) {
     .insert(submissions)
     .values({
       workCategoryId: result.data.workCategoryId,
+      workStationId: result.data.workStationId ?? null,
+      units: result.data.units ?? null,
       notes: result.data.notes,
       userId: session.user.id,
       status: "submitted",

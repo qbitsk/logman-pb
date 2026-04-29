@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions } from "@/lib/db/schema";
+import { submissions, workStations } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -36,6 +36,15 @@ export default async function UserSubmissionDetailPage({
     .limit(1);
 
   if (!submission) notFound();
+
+  const workStation = submission.workStationId
+    ? await db
+        .select({ name: workStations.name })
+        .from(workStations)
+        .where(eq(workStations.id, submission.workStationId))
+        .limit(1)
+        .then((r) => r[0] ?? null)
+    : null;
 
   return (
     <div className="max-w-2xl">
@@ -74,6 +83,20 @@ export default async function UserSubmissionDetailPage({
           <p className="label">Category</p>
           <p className="text-sm text-gray-800 capitalize">{submission.workCategoryId}</p>
         </div>
+
+        {workStation && (
+          <div>
+            <p className="label">Work Station</p>
+            <p className="text-sm text-gray-800">{workStation.name}</p>
+          </div>
+        )}
+
+        {submission.units != null && (
+          <div>
+            <p className="label">Units</p>
+            <p className="text-sm text-gray-800">{submission.units}</p>
+          </div>
+        )}
 
         {submission.notes && (
           <div>

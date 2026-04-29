@@ -25,6 +25,7 @@ export default async function AdminSubmissionsPage() {
       id: submissions.id,
       categoryName: workCategories.name,
       status: submissions.status,
+      units: submissions.units,
       createdAt: submissions.createdAt,
       userName: users.name,
       userEmail: users.email,
@@ -52,6 +53,7 @@ export default async function AdminSubmissionsPage() {
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Date</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Category</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600">Units</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Status</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Submitted by</th>
                 <th className="px-5 py-3"></th>
@@ -66,6 +68,7 @@ export default async function AdminSubmissionsPage() {
                     </Link>
                   </td>
                   <td className="px-5 py-3 text-gray-500 capitalize">{s.categoryName}</td>
+                  <td className="px-5 py-3 text-gray-500">{s.units ?? <span className="text-gray-300">—</span>}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>
                       {s.status}

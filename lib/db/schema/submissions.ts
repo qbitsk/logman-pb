@@ -1,6 +1,7 @@
-import { pgTable, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { workCategories } from "./work-categories";
+import { workStations } from "./work-stations";
 
 export const statusEnum = pgEnum("submission_status", [
   "draft",
@@ -19,6 +20,9 @@ export const submissions = pgTable("submissions", {
   workCategoryId: text("work_category_id")
     .notNull()
     .references(() => workCategories.id),
+  workStationId: text("work_station_id")
+    .references(() => workStations.id),
+  units: integer("units"),
   notes: text("notes"),
 
   status: statusEnum("status").notNull().default("draft"),
