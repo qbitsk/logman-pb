@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
 import { submissions } from "@/lib/db/schema";
-import { eq, count } from "drizzle-orm";
+import { eq, count, and } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Plus, FileText, CheckCircle, Clock } from "lucide-react";
@@ -13,9 +13,9 @@ export default async function DashboardPage() {
     db.select({ count: count() }).from(submissions)
       .where(eq(submissions.userId, session!.user.id)),
     db.select({ count: count() }).from(submissions)
-      .where(eq(submissions.userId, session!.user.id)),
+      .where(and(eq(submissions.userId, session!.user.id), eq(submissions.status, "submitted"))),
     db.select({ count: count() }).from(submissions)
-      .where(eq(submissions.userId, session!.user.id)),
+      .where(and(eq(submissions.userId, session!.user.id), eq(submissions.status, "approved"))),
   ]);
 
   const stats = [
