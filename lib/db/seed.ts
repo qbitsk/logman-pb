@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { users, accounts, workCategories, workStations } from "./schema";
+import { users, accounts, workCategories, workStations, workComponents, workComponentDefects } from "./schema";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { eq } from "drizzle-orm";
 
@@ -54,8 +54,26 @@ async function seed() {
     console.log("Default WorkCategory seeded.");
   }
 
-  // Seed WorkStations linked to the first WorkCategory
+  // Seed WorkComponents linked to the first WorkCategory
   const firstCategory = await db.select().from(workCategories).limit(1);
+  const existingComponents = await db.select().from(workComponents).limit(1);
+  if (existingComponents.length > 0) {
+    console.log("WorkComponents already exist. Skipping.");
+  } else if (firstCategory.length > 0) {
+    const workCategoryId = firstCategory[0].id;
+    const [firstComponent] = await db
+      .insert(workComponents)
+      .values({ name: "Komponent 1", workCategoryId, createdAt: now, updatedAt: now })
+      .returning();
+    await db.insert(workComponentDefects).values([
+      { name: "Vada 1", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
+      { name: "Vada 2", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
+      { name: "Vada 3", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
+    ]);
+    console.log("WorkComponents and WorkComponentDefects seeded.");
+  }
+
+  // Seed WorkStations linked to the first WorkCategory
   const existingStations = await db.select().from(workStations).limit(1);
   if (existingStations.length > 0) {
     console.log("WorkStations already exist. Skipping.");

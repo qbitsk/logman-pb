@@ -43,6 +43,13 @@
       "when": 1777454680382,
       "tag": "0005_chemical_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777459644213,
+      "tag": "0006_sticky_the_leader",
+      "breakpoints": true
     }
   ]
 }
