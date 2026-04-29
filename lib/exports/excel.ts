@@ -64,11 +64,14 @@ export async function generateSubmissionsExcel(
 }
 
 export async function generateSubmissionsCSV(
-  submissions: (Submission & { userName: string; userEmail: string })[]
+  submissions: (Omit<Submission, "workStationId" | "units" | "shift"> & { workStationId: string | null; units: number | null; shift: number | null; userName: string; userEmail: string })[]
 ): Promise<string> {
   const headers = [
     "ID",
-    "Category",
+    "Work Category",
+    "Work Station",
+    "Units",
+    "Shift",
     "Status",
     "Submitted By",
     "Email",
@@ -76,8 +79,8 @@ export async function generateSubmissionsCSV(
     "Created At",
   ];
 
-  const escape = (val: string | null | undefined) => {
-    if (!val) return "";
+  const escape = (val: string | number | null | undefined) => {
+    if (val === null || val === undefined) return "";
     const str = String(val);
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {
       return `"${str.replace(/"/g, '""')}"`;
@@ -88,7 +91,10 @@ export async function generateSubmissionsCSV(
   const rows = submissions.map((s) =>
     [
       s.id,
-      s.category,
+      s.workCategoryId,
+      s.workStationId ?? "",
+      s.units ?? "",
+      s.shift ?? "",
       s.status,
       s.userName,
       s.userEmail,
