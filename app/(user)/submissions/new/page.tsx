@@ -2,12 +2,14 @@ import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { workCategories, workStations } from "@/lib/db/schema";
+import { workCategories, workStations, workComponents, workComponentDefectCategories } from "@/lib/db/schema";
 
 export default async function NewSubmissionPage() {
-  const [categories, stations] = await Promise.all([
+  const [categories, stations, components, defectCategories] = await Promise.all([
     db.select().from(workCategories),
     db.select().from(workStations),
+    db.select().from(workComponents),
+    db.select().from(workComponentDefectCategories),
   ]);
 
   return (
@@ -23,7 +25,12 @@ export default async function NewSubmissionPage() {
       <p className="text-gray-500 text-sm mb-6">Fill in the form below and submit your data.</p>
 
       <div className="card max-w-2xl">
-        <SubmissionForm workCategories={categories} workStations={stations} />
+        <SubmissionForm
+          workCategories={categories}
+          workStations={stations}
+          workComponents={components}
+          workComponentDefectCategories={defectCategories}
+        />
       </div>
     </div>
   );

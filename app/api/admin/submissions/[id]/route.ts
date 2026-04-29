@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users } from "@/lib/db/schema";
+import { submissions, users, workComponentDefects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
+import { workComponentDefectSchema } from "@/lib/validations/submission";
 
 const patchSchema = z.object({
   workCategoryId: z.string().min(1).optional(),
@@ -12,6 +13,7 @@ const patchSchema = z.object({
   units: z.number().int().positive().optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   status: z.enum(["draft", "submitted", "reviewed", "approved", "rejected"]).optional(),
+  workComponentDefects: z.array(workComponentDefectSchema).optional(),
 });
 
 async function requireAdmin() {
@@ -75,13 +77,28 @@ export async function PATCH(
     );
   }
 
+  const { workComponentDefects: defectsPayload, ...submissionData } = result.data;
+
   const [updated] = await db
     .update(submissions)
-    .set({ ...result.data, updatedAt: new Date() })
+    .set({ ...submissionData, updatedAt: new Date() })
     .where(eq(submissions.id, id))
     .returning();
 
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Replace defects: delete existing, insert new
+  await db.delete(workComponentDefects).where(eq(workComponentDefects.submissionId, id));
+  if (defectsPayload?.length) {
+    await db.insert(workComponentDefects).values(
+      defectsPayload.map((d) => ({
+        submissionId: id,
+        workComponentId: d.workComponentId,
+        workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+        units: d.units,
+      }))
+    );
+  }
 
   return NextResponse.json(updated);
 }

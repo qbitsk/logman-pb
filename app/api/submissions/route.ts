@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions } from "@/lib/db/schema";
+import { submissions, workComponentDefects } from "@/lib/db/schema";
 import { submissionSchema } from "@/lib/validations/submission";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -50,6 +50,17 @@ export async function POST(request: NextRequest) {
       status: "submitted",
     })
     .returning();
+
+  if (result.data.workComponentDefects?.length) {
+    await db.insert(workComponentDefects).values(
+      result.data.workComponentDefects.map((d) => ({
+        submissionId: submission.id,
+        workComponentId: d.workComponentId,
+        workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+        units: d.units,
+      }))
+    );
+  }
 
   // Fire emails (non-blocking — don't await in critical path)
   Promise.all([

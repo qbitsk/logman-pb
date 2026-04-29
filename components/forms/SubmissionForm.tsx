@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import { submissionSchema, type SubmissionInput } from "@/lib/validations/submission";
+import { Trash2, Plus } from "lucide-react";
 
 const STATUSES = ["draft", "submitted", "reviewed", "approved", "rejected"] as const;
 
@@ -40,13 +41,35 @@ type WorkStation = {
   workCategoryId: string;
 };
 
+type WorkComponent = {
+  id: string;
+  name: string;
+  workCategoryId: string;
+};
+
+type WorkComponentDefectCategory = {
+  id: string;
+  name: string;
+  workComponentId: string;
+};
+
+type DefectEntry = {
+  _key: string;
+  workComponentId: string;
+  workComponentDefectCategoryId: string;
+  units: string;
+};
+
 type Props = {
   submission?: Submission;
   workCategories: WorkCategory[];
   workStations: WorkStation[];
+  workComponents: WorkComponent[];
+  workComponentDefectCategories: WorkComponentDefectCategory[];
+  existingDefects?: { workComponentId: string; workComponentDefectCategoryId: string; units: number }[];
 };
 
-export function SubmissionForm({ submission, workCategories, workStations }: Props) {
+export function SubmissionForm({ submission, workCategories, workStations, workComponents, workComponentDefectCategories, existingDefects }: Props) {
   const router = useRouter();
   const isEdit = !!submission;
 
@@ -57,6 +80,14 @@ export function SubmissionForm({ submission, workCategories, workStations }: Pro
     notes: submission?.notes ?? "",
     status: submission?.status ?? "draft",
   });
+  const [defects, setDefects] = useState<DefectEntry[]>(() =>
+    (existingDefects ?? []).map((d) => ({
+      _key: crypto.randomUUID(),
+      workComponentId: d.workComponentId,
+      workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+      units: d.units.toString(),
+    }))
+  );
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof SubmissionInput, string>>>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -73,8 +104,39 @@ export function SubmissionForm({ submission, workCategories, workStations }: Pro
       if (key === "workCategoryId") next.workStationId = "";
       return next;
     });
+    if (key === "workCategoryId") {
+      setDefects((prev) =>
+        prev.map((d) => ({ ...d, workComponentId: "", workComponentDefectCategoryId: "" }))
+      );
+    }
     setErrors((prev) => ({ ...prev, [key]: undefined }));
     setSuccess(false);
+  }
+
+  function addDefect() {
+    setDefects((prev) => [
+      ...prev,
+      { _key: crypto.randomUUID(), workComponentId: "", workComponentDefectCategoryId: "", units: "" },
+    ]);
+  }
+
+  function removeDefect(key: string) {
+    setDefects((prev) => prev.filter((d) => d._key !== key));
+  }
+
+  function setDefect(
+    key: string,
+    field: "workComponentId" | "workComponentDefectCategoryId" | "units",
+    value: string
+  ) {
+    setDefects((prev) =>
+      prev.map((d) => {
+        if (d._key !== key) return d;
+        const next = { ...d, [field]: value };
+        if (field === "workComponentId") next.workComponentDefectCategoryId = "";
+        return next;
+      })
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -104,9 +166,17 @@ export function SubmissionForm({ submission, workCategories, workStations }: Pro
     try {
       const url = isEdit ? `/api/admin/submissions/${submission!.id}` : "/api/submissions";
       const method = isEdit ? "PATCH" : "POST";
+      const parsedDefects = defects
+        .filter((d) => d.workComponentId && d.workComponentDefectCategoryId && d.units)
+        .map((d) => ({
+          workComponentId: d.workComponentId,
+          workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+          units: parseInt(d.units, 10),
+        }));
+
       const body = isEdit
-        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, notes: form.notes || null })
-        : JSON.stringify({ workCategoryId: form.workCategoryId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, notes: form.notes });
+        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, notes: form.notes || null, workComponentDefects: parsedDefects })
+        : JSON.stringify({ workCategoryId: form.workCategoryId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, notes: form.notes, workComponentDefects: parsedDefects });
 
       const res = await fetch(url, {
         method,
@@ -250,6 +320,68 @@ export function SubmissionForm({ submission, workCategories, workStations }: Pro
             maxLength={isEdit ? 500 : undefined}
           />
           {errors.notes && <p className="text-red-600 text-xs mt-1">{errors.notes}</p>}
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="label">Defects</label>
+            <button type="button" onClick={addDefect} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
+              <Plus className="w-3 h-3" /> Add Defect
+            </button>
+          </div>
+          {defects.length === 0 && (
+            <p className="text-sm text-gray-400 italic">No defects added.</p>
+          )}
+          <div className="space-y-2">
+            {defects.map((defect) => {
+              const filteredComponents = workComponents.filter(
+                (wc) => wc.workCategoryId === form.workCategoryId
+              );
+              const filteredDefectCategories = workComponentDefectCategories.filter(
+                (dc) => dc.workComponentId === defect.workComponentId
+              );
+              return (
+                <div key={defect._key} className="flex gap-2 items-center">
+                  <select
+                    value={defect.workComponentId}
+                    onChange={(e) => setDefect(defect._key, "workComponentId", e.target.value)}
+                    className="input flex-1"
+                  >
+                    <option value="">— Component —</option>
+                    {filteredComponents.map((wc) => (
+                      <option key={wc.id} value={wc.id}>{wc.name}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={defect.workComponentDefectCategoryId}
+                    onChange={(e) => setDefect(defect._key, "workComponentDefectCategoryId", e.target.value)}
+                    className="input flex-1"
+                    disabled={!defect.workComponentId}
+                  >
+                    <option value="">— Defect Category —</option>
+                    {filteredDefectCategories.map((dc) => (
+                      <option key={dc.id} value={dc.id}>{dc.name}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={1}
+                    value={defect.units}
+                    onChange={(e) => setDefect(defect._key, "units", e.target.value)}
+                    className="input w-24"
+                    placeholder="Units"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeDefect(defect._key)}
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {success && <p className="text-sm text-emerald-600">Changes saved.</p>}

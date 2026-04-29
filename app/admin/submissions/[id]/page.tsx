@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, workCategories, workStations } from "@/lib/db/schema";
+import { submissions, users, workCategories, workStations, workComponents, workComponentDefectCategories, workComponentDefects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
@@ -16,7 +16,7 @@ export default async function AdminSubmissionDetailPage({
 
   const { id } = await params;
 
-  const [[row], categories, stations] = await Promise.all([
+  const [[row], categories, stations, components, defectCategories] = await Promise.all([
     db
       .select({
         id: submissions.id,
@@ -36,7 +36,18 @@ export default async function AdminSubmissionDetailPage({
       .limit(1),
     db.select().from(workCategories),
     db.select().from(workStations),
+    db.select().from(workComponents),
+    db.select().from(workComponentDefectCategories),
   ]);
+
+  const existingDefects = await db
+    .select({
+      workComponentId: workComponentDefects.workComponentId,
+      workComponentDefectCategoryId: workComponentDefects.workComponentDefectCategoryId,
+      units: workComponentDefects.units,
+    })
+    .from(workComponentDefects)
+    .where(eq(workComponentDefects.submissionId, id));
 
   if (!row) notFound();
 
@@ -46,7 +57,14 @@ export default async function AdminSubmissionDetailPage({
         <h1 className="text-2xl font-bold text-brand-950">Submission Detail</h1>
         <p className="text-sm text-gray-500 mt-1">#{row.id}</p>
       </div>
-      <SubmissionForm submission={row} workCategories={categories} workStations={stations} />
+      <SubmissionForm
+        submission={row}
+        workCategories={categories}
+        workStations={stations}
+        workComponents={components}
+        workComponentDefectCategories={defectCategories}
+        existingDefects={existingDefects}
+      />
     </div>
   );
 }
