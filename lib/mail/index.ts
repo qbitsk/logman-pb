@@ -18,16 +18,14 @@ export async function sendWelcomeEmail(user: { name: string; email: string }) {
 
 export async function sendSubmissionConfirmation(params: {
   user: { name: string; email: string };
-  submissionTitle: string;
   submissionId: string;
 }) {
   return resend.emails.send({
     from: FROM,
     to: params.user.email,
-    subject: `Submission received: ${params.submissionTitle}`,
+    subject: `Submission received`,
     react: SubmissionReceivedEmail({
       userName: params.user.name,
-      submissionTitle: params.submissionTitle,
       submissionUrl: `${APP_URL}/submissions/${params.submissionId}`,
     }),
   });
@@ -36,16 +34,14 @@ export async function sendSubmissionConfirmation(params: {
 export async function sendAdminNotification(params: {
   adminEmail: string;
   submitterName: string;
-  submissionTitle: string;
   submissionId: string;
 }) {
   return resend.emails.send({
     from: FROM,
     to: params.adminEmail,
-    subject: `New submission: ${params.submissionTitle}`,
+    subject: `New submission`,
     react: AdminNotificationEmail({
       submitterName: params.submitterName,
-      submissionTitle: params.submissionTitle,
       submissionUrl: `${APP_URL}/admin/submissions/${params.submissionId}`,
     }),
   });

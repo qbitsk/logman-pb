@@ -16,8 +16,6 @@ export const submissions = pgTable("submissions", {
     .references(() => users.id, { onDelete: "cascade" }),
 
   // Form fields — customise these to your actual domain
-  title: text("title").notNull(),
-  description: text("description").notNull(),
   category: text("category").notNull(),
   notes: text("notes"),
 

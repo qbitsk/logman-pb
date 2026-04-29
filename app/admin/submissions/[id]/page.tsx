@@ -19,8 +19,6 @@ export default async function AdminSubmissionDetailPage({
   const [row] = await db
     .select({
       id: submissions.id,
-      title: submissions.title,
-      description: submissions.description,
       category: submissions.category,
       notes: submissions.notes,
       status: submissions.status,

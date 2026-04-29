@@ -18,8 +18,6 @@ const statusStyles: Record<string, string> = {
 type Props = {
   submission: {
     id: string;
-    title: string;
-    description: string;
     category: string;
     notes: string | null;
     status: string;
@@ -33,8 +31,6 @@ type Props = {
 export function SubmissionDetailForm({ submission }: Props) {
   const router = useRouter();
   const [form, setForm] = useState({
-    title: submission.title,
-    description: submission.description,
     category: submission.category,
     notes: submission.notes ?? "",
     status: submission.status,
@@ -113,21 +109,6 @@ export function SubmissionDetailForm({ submission }: Props) {
           </div>
         </div>
 
-        {/* Title */}
-        <div>
-          <label className="label" htmlFor="title">Title</label>
-          <input
-            id="title"
-            name="title"
-            className="input"
-            value={form.title}
-            onChange={handleChange}
-            minLength={3}
-            maxLength={100}
-            required
-          />
-        </div>
-
         {/* Category */}
         <div>
           <label className="label" htmlFor="category">Category</label>
@@ -142,21 +123,6 @@ export function SubmissionDetailForm({ submission }: Props) {
               <option key={c} value={c} className="capitalize">{c.charAt(0).toUpperCase() + c.slice(1)}</option>
             ))}
           </select>
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="label" htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            className="input min-h-[120px] resize-y"
-            value={form.description}
-            onChange={handleChange}
-            minLength={10}
-            maxLength={2000}
-            required
-          />
         </div>
 
         {/* Notes */}

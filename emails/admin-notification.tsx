@@ -5,12 +5,11 @@ import {
 
 interface AdminNotificationEmailProps {
   submitterName: string;
-  submissionTitle: string;
   submissionUrl: string;
 }
 
 export function AdminNotificationEmail({
-  submitterName, submissionTitle, submissionUrl,
+  submitterName, submissionUrl,
 }: AdminNotificationEmailProps) {
   return (
     <Html>
@@ -20,7 +19,7 @@ export function AdminNotificationEmail({
         <Container style={container}>
           <Heading style={h1}>New Submission 🔔</Heading>
           <Text style={text}>
-            <strong>{submitterName}</strong> has submitted: <strong>{submissionTitle}</strong>
+            <strong>{submitterName}</strong> has submitted a new submission.
           </Text>
           <Text style={text}>Review it in the admin panel.</Text>
           <Section style={buttonSection}>

@@ -13,12 +13,10 @@ export async function generateSubmissionsExcel(
   // Column definitions
   sheet.columns = [
     { header: "ID", key: "id", width: 38 },
-    { header: "Title", key: "title", width: 30 },
     { header: "Category", key: "category", width: 15 },
     { header: "Status", key: "status", width: 12 },
     { header: "Submitted By", key: "userName", width: 20 },
     { header: "Email", key: "userEmail", width: 30 },
-    { header: "Description", key: "description", width: 40 },
     { header: "Notes", key: "notes", width: 30 },
     { header: "Created At", key: "createdAt", width: 20 },
     { header: "Updated At", key: "updatedAt", width: 20 },
@@ -70,12 +68,10 @@ export async function generateSubmissionsCSV(
 ): Promise<string> {
   const headers = [
     "ID",
-    "Title",
     "Category",
     "Status",
     "Submitted By",
     "Email",
-    "Description",
     "Notes",
     "Created At",
   ];
@@ -92,12 +88,10 @@ export async function generateSubmissionsCSV(
   const rows = submissions.map((s) =>
     [
       s.id,
-      s.title,
       s.category,
       s.status,
       s.userName,
       s.userEmail,
-      s.description,
       s.notes ?? "",
       s.createdAt?.toISOString() ?? "",
     ]

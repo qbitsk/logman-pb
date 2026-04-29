@@ -15,11 +15,9 @@ export async function GET() {
   const rows = await db
     .select({
       id: submissions.id,
-      title: submissions.title,
       category: submissions.category,
       status: submissions.status,
       notes: submissions.notes,
-      description: submissions.description,
       createdAt: submissions.createdAt,
       updatedAt: submissions.updatedAt,
       userId: submissions.userId,

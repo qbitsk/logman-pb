@@ -23,7 +23,6 @@ export default async function AdminSubmissionsPage() {
   const rows = await db
     .select({
       id: submissions.id,
-      title: submissions.title,
       category: submissions.category,
       status: submissions.status,
       createdAt: submissions.createdAt,
@@ -50,7 +49,6 @@ export default async function AdminSubmissionsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Title</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Category</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Status</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Submitted by</th>
@@ -61,9 +59,6 @@ export default async function AdminSubmissionsPage() {
             <tbody>
               {rows.map((s) => (
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 transition-colors">
-                  <td className="px-5 py-3 font-medium text-gray-900">
-                    <Link href={`/submissions/${s.id}`} className="hover:text-brand-600 transition-colors">{s.title}</Link>
-                  </td>
                   <td className="px-5 py-3 text-gray-500 capitalize">{s.category}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>

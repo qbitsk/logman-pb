@@ -19,8 +19,6 @@ export function SubmissionForm() {
   const [serverError, setServerError] = useState("");
 
   const [form, setForm] = useState<SubmissionInput>({
-    title: "",
-    description: "",
     category: "general",
     notes: "",
   });
@@ -76,16 +74,6 @@ export function SubmissionForm() {
       )}
 
       <div>
-        <label className="label" htmlFor="title">Title *</label>
-        <input
-          id="title" type="text"
-          value={form.title} onChange={(e) => set("title", e.target.value)}
-          className="input" placeholder="Brief title for your submission"
-        />
-        {errors.title && <p className="text-red-600 text-xs mt-1">{errors.title}</p>}
-      </div>
-
-      <div>
         <label className="label" htmlFor="category">Category *</label>
         <select
           id="category"
@@ -97,16 +85,6 @@ export function SubmissionForm() {
           ))}
         </select>
         {errors.category && <p className="text-red-600 text-xs mt-1">{errors.category}</p>}
-      </div>
-
-      <div>
-        <label className="label" htmlFor="description">Description *</label>
-        <textarea
-          id="description" rows={4}
-          value={form.description} onChange={(e) => set("description", e.target.value)}
-          className="input resize-none" placeholder="Provide a detailed description…"
-        />
-        {errors.description && <p className="text-red-600 text-xs mt-1">{errors.description}</p>}
       </div>
 
       <div>

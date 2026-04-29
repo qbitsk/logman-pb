@@ -52,14 +52,12 @@ export async function POST(request: NextRequest) {
   Promise.all([
     sendSubmissionConfirmation({
       user: { name: session.user.name, email: session.user.email },
-      submissionTitle: submission.title,
       submissionId: submission.id,
     }),
     // Replace with your actual admin email or fetch from DB
     sendAdminNotification({
       adminEmail: process.env.ADMIN_EMAIL ?? "admin@yourdomain.com",
       submitterName: session.user.name,
-      submissionTitle: submission.title,
       submissionId: submission.id,
     }),
   ]).catch(console.error);

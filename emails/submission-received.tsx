@@ -5,23 +5,22 @@ import {
 
 interface SubmissionReceivedEmailProps {
   userName: string;
-  submissionTitle: string;
   submissionUrl: string;
 }
 
 export function SubmissionReceivedEmail({
-  userName, submissionTitle, submissionUrl,
+  userName, submissionUrl,
 }: SubmissionReceivedEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Your submission "{submissionTitle}" has been received</Preview>
+      <Preview>Your submission has been received</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>Submission Received ✅</Heading>
           <Text style={text}>Hi {userName},</Text>
           <Text style={text}>
-            We've received your submission: <strong>{submissionTitle}</strong>.
+            We've received your submission.
             Our team will review it and get back to you.
           </Text>
           <Section style={buttonSection}>

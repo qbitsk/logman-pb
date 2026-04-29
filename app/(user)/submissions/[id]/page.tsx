@@ -59,7 +59,6 @@ export default async function UserSubmissionDetailPage({
       </div>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-950">{submission.title}</h1>
         <div className="flex items-center gap-3 mt-2">
           <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[submission.status])}>
             {submission.status}
@@ -74,11 +73,6 @@ export default async function UserSubmissionDetailPage({
         <div>
           <p className="label">Category</p>
           <p className="text-sm text-gray-800 capitalize">{submission.category}</p>
-        </div>
-
-        <div>
-          <p className="label">Description</p>
-          <p className="text-sm text-gray-800 whitespace-pre-wrap">{submission.description}</p>
         </div>
 
         {submission.notes && (
