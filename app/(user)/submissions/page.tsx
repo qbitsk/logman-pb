@@ -77,7 +77,7 @@ export default async function SubmissionsPage() {
                       {s.status}
                     </span>
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3 text-end">
                     <Link href={`/submissions/${s.id}/edit`} className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-brand-600 border border-brand-200 rounded-lg hover:bg-brand-50 transition-colors">
                       <Pencil className="w-3 h-3" />
                       Edit
