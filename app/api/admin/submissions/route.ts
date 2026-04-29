@@ -15,7 +15,7 @@ export async function GET() {
   const rows = await db
     .select({
       id: submissions.id,
-      category: submissions.category,
+      workCategoryId: submissions.workCategoryId,
       status: submissions.status,
       notes: submissions.notes,
       createdAt: submissions.createdAt,

@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import type { Submission } from "@/lib/db/schema";
 
 export async function generateSubmissionsExcel(
-  submissions: (Submission & { userName: string; userEmail: string })[]
+  submissions: (Omit<Submission, "workCategoryId"> & { workCategoryId: string; userName: string; userEmail: string })[]
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "My App";
@@ -13,7 +13,7 @@ export async function generateSubmissionsExcel(
   // Column definitions
   sheet.columns = [
     { header: "ID", key: "id", width: 38 },
-    { header: "Category", key: "category", width: 15 },
+    { header: "Category", key: "workCategoryId", width: 38 },
     { header: "Status", key: "status", width: 12 },
     { header: "Submitted By", key: "userName", width: 20 },
     { header: "Email", key: "userEmail", width: 30 },

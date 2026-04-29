@@ -1,8 +1,12 @@
 import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { db } from "@/lib/db";
+import { workCategories } from "@/lib/db/schema";
 
-export default function NewSubmissionPage() {
+export default async function NewSubmissionPage() {
+  const categories = await db.select().from(workCategories);
+
   return (
     <div>
       <Link
@@ -16,7 +20,7 @@ export default function NewSubmissionPage() {
       <p className="text-gray-500 text-sm mb-6">Fill in the form below and submit your data.</p>
 
       <div className="card max-w-2xl">
-        <SubmissionForm />
+        <SubmissionForm workCategories={categories} />
       </div>
     </div>
   );

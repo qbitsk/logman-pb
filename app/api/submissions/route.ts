@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
   const [submission] = await db
     .insert(submissions)
     .values({
-      ...result.data,
+      workCategoryId: result.data.workCategoryId,
+      notes: result.data.notes,
       userId: session.user.id,
       status: "submitted",
     })

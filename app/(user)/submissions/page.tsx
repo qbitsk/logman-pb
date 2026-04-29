@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions } from "@/lib/db/schema";
+import { submissions, workCategories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -18,10 +18,17 @@ const statusStyles: Record<string, string> = {
 export default async function SubmissionsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
 
-  const userSubmissions = await db.query.submissions.findMany({
-    where: eq(submissions.userId, session!.user.id),
-    orderBy: (s, { desc }) => [desc(s.createdAt)],
-  });
+  const userSubmissions = await db
+    .select({
+      id: submissions.id,
+      status: submissions.status,
+      createdAt: submissions.createdAt,
+      categoryName: workCategories.name,
+    })
+    .from(submissions)
+    .innerJoin(workCategories, eq(submissions.workCategoryId, workCategories.id))
+    .where(eq(submissions.userId, session!.user.id))
+    .orderBy(submissions.createdAt);
 
   return (
     <div>
@@ -45,24 +52,26 @@ export default async function SubmissionsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
+                <th className="text-left px-5 py-3 font-semibold text-gray-600">Date</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Category</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Status</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Date</th>
               </tr>
             </thead>
             <tbody>
               {userSubmissions.map((s) => (
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 transition-colors">
+                  <td className="px-5 py-3 text-gray-400">
+                    <Link href={`/submissions/${s.id}`} className="hover:text-brand-600 transition-colors">
+                      {s.createdAt.toLocaleDateString()}
+                    </Link>
+                  </td>
                   <td className="px-5 py-3 text-gray-500 capitalize">
-                    <Link href={`/submissions/${s.id}`} className="hover:text-brand-600 transition-colors capitalize">{s.category}</Link>
+                    {s.categoryName}
                   </td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>
                       {s.status}
                     </span>
-                  </td>
-                  <td className="px-5 py-3 text-gray-400">
-                    {s.createdAt.toLocaleDateString()}
                   </td>
                 </tr>
               ))}

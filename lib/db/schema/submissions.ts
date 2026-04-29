@@ -1,5 +1,6 @@
 import { pgTable, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { workCategories } from "./work-categories";
 
 export const statusEnum = pgEnum("submission_status", [
   "draft",
@@ -15,8 +16,9 @@ export const submissions = pgTable("submissions", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
 
-  // Form fields — customise these to your actual domain
-  category: text("category").notNull(),
+  workCategoryId: text("work_category_id")
+    .notNull()
+    .references(() => workCategories.id),
   notes: text("notes"),
 
   status: statusEnum("status").notNull().default("draft"),

@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 
 const patchSchema = z.object({
-  category: z.enum(["general", "technical", "financial", "hr", "other"]).optional(),
+  workCategoryId: z.string().min(1).optional(),
   notes: z.string().max(500).optional().nullable(),
   status: z.enum(["draft", "submitted", "reviewed", "approved", "rejected"]).optional(),
 });
@@ -32,7 +32,7 @@ export async function GET(
   const [row] = await db
     .select({
       id: submissions.id,
-      category: submissions.category,
+      workCategoryId: submissions.workCategoryId,
       notes: submissions.notes,
       status: submissions.status,
       createdAt: submissions.createdAt,

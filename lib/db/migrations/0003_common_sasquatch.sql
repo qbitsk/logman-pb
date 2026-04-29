@@ -1,0 +1,1 @@
+ALTER TABLE "work_categories" ADD COLUMN "name" text NOT NULL;

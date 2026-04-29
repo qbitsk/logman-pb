@@ -1,9 +1,7 @@
 import { z } from "zod";
 
 export const submissionSchema = z.object({
-  category: z.enum(["general", "technical", "financial", "hr", "other"], {
-    errorMap: () => ({ message: "Please select a valid category" }),
-  }),
+  workCategoryId: z.string().min(1, "Please select a category"),
   notes: z.string().max(500, "Notes must be under 500 characters").optional(),
 });
 

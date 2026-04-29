@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { users, accounts } from "./schema";
+import { users, accounts, workCategories } from "./schema";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { eq } from "drizzle-orm";
 
@@ -28,6 +28,32 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function seed() {
+  const now = new Date();
+
+  // Seed a default WorkCategory
+  const existingCategory = await db.select().from(workCategories).limit(1);
+  if (existingCategory.length > 0) {
+    console.log("WorkCategory already exists. Skipping.");
+  } else {
+    
+    await db.insert(workCategories).values({
+      id: crypto.randomUUID(),
+      name: "Výklopný hák",
+      type: "assembly",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    await db.insert(workCategories).values({
+      id: crypto.randomUUID(),
+      name: "Alu Had",
+      type: "assembly",
+      createdAt: now,
+      updatedAt: now,
+    });
+    console.log("Default WorkCategory seeded.");
+  }
+
   console.log(`Seeding admin user: ${ADMIN_EMAIL}`);
 
   const existing = await db
@@ -38,35 +64,34 @@ async function seed() {
 
   if (existing.length > 0) {
     console.log("Admin user already exists. Skipping.");
-    process.exit(0);
+  } else {
+    const id = crypto.randomUUID();
+    const hashedPassword = await hashPassword(ADMIN_PASSWORD);
+
+    await db.insert(users).values({
+      id,
+      name: ADMIN_NAME,
+      email: ADMIN_EMAIL,
+      emailVerified: true,
+      role: "admin",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    await db.insert(accounts).values({
+      id: crypto.randomUUID(),
+      accountId: ADMIN_EMAIL,
+      providerId: "credential",
+      userId: id,
+      password: hashedPassword,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    console.log("Admin user created successfully.");
   }
 
-  const id = crypto.randomUUID();
-  const hashedPassword = await hashPassword(ADMIN_PASSWORD);
-  const now = new Date();
-
-  await db.insert(users).values({
-    id,
-    name: ADMIN_NAME,
-    email: ADMIN_EMAIL,
-    emailVerified: true,
-    role: "admin",
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  await db.insert(accounts).values({
-    id: crypto.randomUUID(),
-    accountId: ADMIN_EMAIL,
-    providerId: "credential",
-    userId: id,
-    password: hashedPassword,
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  console.log("Admin user created successfully.");
-  process.exit(0);
+  process.exit(1);
 }
 
 seed().catch((err) => {

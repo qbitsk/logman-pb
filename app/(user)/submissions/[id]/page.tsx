@@ -72,7 +72,7 @@ export default async function UserSubmissionDetailPage({
       <div className="card space-y-5">
         <div>
           <p className="label">Category</p>
-          <p className="text-sm text-gray-800 capitalize">{submission.category}</p>
+          <p className="text-sm text-gray-800 capitalize">{submission.workCategoryId}</p>
         </div>
 
         {submission.notes && (

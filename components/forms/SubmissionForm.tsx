@@ -6,7 +6,6 @@ import { clsx } from "clsx";
 import { submissionSchema, type SubmissionInput } from "@/lib/validations/submission";
 
 const STATUSES = ["draft", "submitted", "reviewed", "approved", "rejected"] as const;
-const CATEGORIES = ["general", "technical", "financial", "hr", "other"] as const;
 
 const statusStyles: Record<string, string> = {
   draft:     "bg-gray-100 text-gray-600",
@@ -18,7 +17,7 @@ const statusStyles: Record<string, string> = {
 
 type Submission = {
   id: string;
-  category: string;
+  workCategoryId: string;
   notes: string | null;
   status: string;
   createdAt: Date;
@@ -27,16 +26,23 @@ type Submission = {
   userEmail: string;
 };
 
-type Props = {
-  submission?: Submission;
+type WorkCategory = {
+  id: string;
+  name: string;
+  type: string | null;
 };
 
-export function SubmissionForm({ submission }: Props = {}) {
+type Props = {
+  submission?: Submission;
+  workCategories: WorkCategory[];
+};
+
+export function SubmissionForm({ submission, workCategories }: Props) {
   const router = useRouter();
   const isEdit = !!submission;
 
   const [form, setForm] = useState({
-    category: submission?.category ?? "general",
+    workCategoryId: submission?.workCategoryId ?? (workCategories[0]?.id ?? ""),
     notes: submission?.notes ?? "",
     status: submission?.status ?? "draft",
   });
@@ -45,7 +51,7 @@ export function SubmissionForm({ submission }: Props = {}) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  function set(key: "category" | "notes" | "status", value: string) {
+  function set(key: "workCategoryId" | "notes" | "status", value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
     setSuccess(false);
@@ -57,7 +63,7 @@ export function SubmissionForm({ submission }: Props = {}) {
     setSuccess(false);
 
     if (!isEdit) {
-      const result = submissionSchema.safeParse({ category: form.category, notes: form.notes });
+      const result = submissionSchema.safeParse({ workCategoryId: form.workCategoryId, notes: form.notes });
       if (!result.success) {
         const fieldErrors: typeof errors = {};
         result.error.issues.forEach((issue) => {
@@ -75,7 +81,7 @@ export function SubmissionForm({ submission }: Props = {}) {
       const method = isEdit ? "PATCH" : "POST";
       const body = isEdit
         ? JSON.stringify({ ...form, notes: form.notes || null })
-        : JSON.stringify({ category: form.category, notes: form.notes });
+        : JSON.stringify({ workCategoryId: form.workCategoryId, notes: form.notes });
 
       const res = await fetch(url, {
         method,
@@ -150,19 +156,21 @@ export function SubmissionForm({ submission }: Props = {}) {
         )}
 
         <div>
-          <label className="label" htmlFor="category">Category{!isEdit && " *"}</label>
+          <label className="label" htmlFor="workCategoryId">Category{!isEdit && " *"}</label>
           <select
-            id="category"
-            name="category"
-            value={form.category}
-            onChange={(e) => set("category", e.target.value)}
+            id="workCategoryId"
+            name="workCategoryId"
+            value={form.workCategoryId}
+            onChange={(e) => set("workCategoryId", e.target.value)}
             className="input"
           >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+            {workCategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
-          {errors.category && <p className="text-red-600 text-xs mt-1">{errors.category}</p>}
+          {errors.workCategoryId && <p className="text-red-600 text-xs mt-1">{errors.workCategoryId}</p>}
         </div>
 
         <div>
