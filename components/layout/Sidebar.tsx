@@ -6,7 +6,7 @@ import { signOut, useSession } from "@/lib/auth/client";
 import {
   LayoutDashboard, FileText, Users, Download,
   LogOut, ShieldCheck, Menu, X,
-  Triangle,
+  Triangle, Layers,
 } from "lucide-react";
 import { useState } from "react";
 import { clsx } from "clsx";
@@ -18,8 +18,9 @@ const userNavItems = [
 
 const adminNavItems = [
   { href: "/admin/submissions", label: "Submissions", icon: FileText },
-  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/work-categories", label: "Categories", icon: Layers },
   { href: "/admin/exports", label: "Exports", icon: Download },
+  { href: "/admin/users", label: "Users", icon: Users },
 ];
 
 const roleRank: Record<string, number> = { user: 1, editor: 2, admin: 3 };
