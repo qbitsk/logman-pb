@@ -4,7 +4,7 @@ import { submissions, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
-import { SubmissionDetailForm } from "@/components/forms/SubmissionDetailForm";
+import { SubmissionForm } from "@/components/forms/SubmissionForm";
 
 export default async function AdminSubmissionDetailPage({
   params,
@@ -40,7 +40,7 @@ export default async function AdminSubmissionDetailPage({
         <h1 className="text-2xl font-bold text-brand-950">Submission Detail</h1>
         <p className="text-sm text-gray-500 mt-1">#{row.id}</p>
       </div>
-      <SubmissionDetailForm submission={row} />
+      <SubmissionForm submission={row} />
     </div>
   );
 }
