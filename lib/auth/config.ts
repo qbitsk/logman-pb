@@ -16,6 +16,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    disableSignUp: true,
     requireEmailVerification: false, // Set true in production with Resend
   },
 
