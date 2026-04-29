@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { users, accounts, workCategories, workStations, workComponents, workComponentDefects } from "./schema";
+import { users, accounts, workCategories, workStations, workComponents, workComponentDefectCategories } from "./schema";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { eq } from "drizzle-orm";
 
@@ -65,12 +65,12 @@ async function seed() {
       .insert(workComponents)
       .values({ name: "Komponent 1", workCategoryId, createdAt: now, updatedAt: now })
       .returning();
-    await db.insert(workComponentDefects).values([
+    await db.insert(workComponentDefectCategories).values([
       { name: "Vada 1", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
       { name: "Vada 2", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
       { name: "Vada 3", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
     ]);
-    console.log("WorkComponents and WorkComponentDefects seeded.");
+    console.log("WorkComponents and WorkComponentDefectCategories seeded.");
   }
 
   // Seed WorkStations linked to the first WorkCategory

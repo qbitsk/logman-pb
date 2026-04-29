@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1777447520807,
-      "tag": "0000_mature_guardian",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1777448241206,
-      "tag": "0001_nostalgic_the_hood",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1777452212358,
-      "tag": "0002_clean_sleepwalker",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1777452517259,
-      "tag": "0003_common_sasquatch",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1777454195308,
-      "tag": "0004_concerned_harry_osborn",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1777454680382,
-      "tag": "0005_chemical_deathbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1777459644213,
-      "tag": "0006_sticky_the_leader",
+      "when": 1777460887736,
+      "tag": "0000_blushing_captain_midlands",
       "breakpoints": true
     }
   ]

@@ -1,5 +1,5 @@
 {
-  "id": "0ecb0bbd-4836-4a3c-bf25-07e84069126c",
+  "id": "80e3a1c0-ab36-4534-a0d7-91a061c22dc5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -320,6 +320,229 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.work_categories": {
+      "name": "work_categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "work_category_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.work_stations": {
+      "name": "work_stations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "work_category_id": {
+          "name": "work_category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "work_stations_work_category_id_work_categories_id_fk": {
+          "name": "work_stations_work_category_id_work_categories_id_fk",
+          "tableFrom": "work_stations",
+          "tableTo": "work_categories",
+          "columnsFrom": [
+            "work_category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.work_components": {
+      "name": "work_components",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "work_category_id": {
+          "name": "work_category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "work_components_work_category_id_work_categories_id_fk": {
+          "name": "work_components_work_category_id_work_categories_id_fk",
+          "tableFrom": "work_components",
+          "tableTo": "work_categories",
+          "columnsFrom": [
+            "work_category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.work_component_defect_categories": {
+      "name": "work_component_defect_categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "work_component_id": {
+          "name": "work_component_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "work_component_defect_categories_work_component_id_work_components_id_fk": {
+          "name": "work_component_defect_categories_work_component_id_work_components_id_fk",
+          "tableFrom": "work_component_defect_categories",
+          "tableTo": "work_components",
+          "columnsFrom": [
+            "work_component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.submissions": {
       "name": "submissions",
       "schema": "",
@@ -336,23 +559,23 @@
           "primaryKey": false,
           "notNull": true
         },
-        "title": {
-          "name": "title",
+        "work_category_id": {
+          "name": "work_category_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "description": {
-          "name": "description",
+        "work_station_id": {
+          "name": "work_station_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "category": {
-          "name": "category",
-          "type": "text",
+        "units": {
+          "name": "units",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "notes": {
           "name": "notes",
@@ -397,6 +620,32 @@
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
+        },
+        "submissions_work_category_id_work_categories_id_fk": {
+          "name": "submissions_work_category_id_work_categories_id_fk",
+          "tableFrom": "submissions",
+          "tableTo": "work_categories",
+          "columnsFrom": [
+            "work_category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "submissions_work_station_id_work_stations_id_fk": {
+          "name": "submissions_work_station_id_work_stations_id_fk",
+          "tableFrom": "submissions",
+          "tableTo": "work_stations",
+          "columnsFrom": [
+            "work_station_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -407,6 +656,14 @@
     }
   },
   "enums": {
+    "public.work_category_type": {
+      "name": "work_category_type",
+      "schema": "public",
+      "values": [
+        "assembly",
+        "other"
+      ]
+    },
     "public.submission_status": {
       "name": "submission_status",
       "schema": "public",

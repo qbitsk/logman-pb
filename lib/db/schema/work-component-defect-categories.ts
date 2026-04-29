@@ -1,7 +1,7 @@
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { workComponents } from "./work-components";
 
-export const workComponentDefects = pgTable("work_component_defects", {
+export const workComponentDefectCategories = pgTable("work_component_defect_categories", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   workComponentId: text("work_component_id")
@@ -11,5 +11,5 @@ export const workComponentDefects = pgTable("work_component_defects", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export type WorkComponentDefect = typeof workComponentDefects.$inferSelect;
-export type NewWorkComponentDefect = typeof workComponentDefects.$inferInsert;
+export type WorkComponentDefectCategory = typeof workComponentDefectCategories.$inferSelect;
+export type NewWorkComponentDefectCategory = typeof workComponentDefectCategories.$inferInsert;
