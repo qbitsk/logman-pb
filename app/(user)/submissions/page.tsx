@@ -4,7 +4,7 @@ import { submissions, workCategories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { clsx } from "clsx";
 
 const statusStyles: Record<string, string> = {
@@ -22,6 +22,7 @@ export default async function SubmissionsPage() {
     .select({
       id: submissions.id,
       status: submissions.status,
+      units: submissions.units,
       createdAt: submissions.createdAt,
       categoryName: workCategories.name,
     })
@@ -54,7 +55,9 @@ export default async function SubmissionsPage() {
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Date</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Category</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600">Units</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Status</th>
+                <th className="px-5 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -68,10 +71,17 @@ export default async function SubmissionsPage() {
                   <td className="px-5 py-3 text-gray-500 capitalize">
                     {s.categoryName}
                   </td>
+                  <td className="px-5 py-3 text-gray-500">{s.units ?? <span className="text-gray-300">—</span>}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>
                       {s.status}
                     </span>
+                  </td>
+                  <td className="px-5 py-3">
+                    <Link href={`/submissions/${s.id}/edit`} className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-brand-600 border border-brand-200 rounded-lg hover:bg-brand-50 transition-colors">
+                      <Pencil className="w-3 h-3" />
+                      Edit
+                    </Link>
                   </td>
                 </tr>
               ))}

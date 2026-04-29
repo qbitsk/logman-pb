@@ -67,11 +67,14 @@ type Props = {
   workComponents: WorkComponent[];
   workComponentDefectCategories: WorkComponentDefectCategory[];
   existingDefects?: { workComponentId: string; workComponentDefectCategoryId: string; units: number }[];
+  editUrl?: string;
+  backUrl?: string;
 };
 
-export function SubmissionForm({ submission, workCategories, workStations, workComponents, workComponentDefectCategories, existingDefects }: Props) {
+export function SubmissionForm({ submission, workCategories, workStations, workComponents, workComponentDefectCategories, existingDefects, editUrl, backUrl }: Props) {
   const router = useRouter();
   const isEdit = !!submission;
+  const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/submissions" : "/submissions");
 
   const [form, setForm] = useState({
     workCategoryId: submission?.workCategoryId ?? (workCategories[0]?.id ?? ""),
@@ -164,7 +167,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
 
     setLoading(true);
     try {
-      const url = isEdit ? `/api/admin/submissions/${submission!.id}` : "/api/submissions";
+      const url = isEdit ? (editUrl ?? `/api/admin/submissions/${submission!.id}`) : "/api/submissions";
       const method = isEdit ? "PATCH" : "POST";
       const parsedDefects = defects
         .filter((d) => d.workComponentId && d.workComponentDefectCategoryId && d.units)
@@ -192,7 +195,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
 
       if (isEdit) {
         setSuccess(true);
-        router.push("/admin/submissions");
+        router.push(resolvedBackUrl);
       } else {
         router.push("/submissions");
       }
@@ -389,7 +392,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
         <div className={clsx("flex gap-3 pt-2", isEdit && "justify-end")}>
           {isEdit ? (
             <>
-              <button type="button" onClick={() => router.push("/admin/submissions")} className="btn-secondary">
+              <button type="button" onClick={() => router.push(resolvedBackUrl)} className="btn-secondary">
                 Back
               </button>
               <button type="submit" className="btn-primary" disabled={loading}>
