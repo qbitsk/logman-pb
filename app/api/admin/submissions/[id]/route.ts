@@ -12,7 +12,7 @@ const patchSchema = z.object({
   workStationId: z.string().optional().nullable(),
   units: z.number().int().positive().optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
-  status: z.enum(["draft", "submitted", "reviewed", "approved", "rejected"]).optional(),
+  status: z.enum(["draft", "submitted", "approved", "rejected"]).optional(),
   workComponentDefects: z.array(workComponentDefectSchema).optional(),
 });
 

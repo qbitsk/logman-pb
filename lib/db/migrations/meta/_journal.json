@@ -15,6 +15,13 @@
       "when": 1777461910213,
       "tag": "0001_chubby_brood",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777465843526,
+      "tag": "0002_robust_tarot",
+      "breakpoints": true
     }
   ]
 }

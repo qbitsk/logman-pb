@@ -6,12 +6,11 @@ import { clsx } from "clsx";
 import { submissionSchema, type SubmissionInput } from "@/lib/validations/submission";
 import { Trash2, Plus } from "lucide-react";
 
-const STATUSES = ["draft", "submitted", "reviewed", "approved", "rejected"] as const;
+const STATUSES = ["draft", "submitted", "approved", "rejected"] as const;
 
 const statusStyles: Record<string, string> = {
   draft:     "bg-gray-100 text-gray-600",
   submitted: "bg-amber-100 text-amber-700",
-  reviewed:  "bg-blue-100 text-blue-700",
   approved:  "bg-emerald-100 text-emerald-700",
   rejected:  "bg-red-100 text-red-600",
 };

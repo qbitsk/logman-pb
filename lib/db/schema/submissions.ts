@@ -6,7 +6,6 @@ import { workStations } from "./work-stations";
 export const statusEnum = pgEnum("submission_status", [
   "draft",
   "submitted",
-  "reviewed",
   "approved",
   "rejected",
 ]);
