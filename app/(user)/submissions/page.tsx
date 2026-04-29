@@ -36,7 +36,7 @@ export default async function SubmissionsPage() {
         <h1 className="text-2xl font-bold text-brand-950">My Submissions</h1>
         <Link href="/submissions/new" className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          New
+          Submission
         </Link>
       </div>
 
