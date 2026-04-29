@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { users, accounts, workCategories } from "./schema";
+import { users, accounts, workCategories, workStations } from "./schema";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { eq } from "drizzle-orm";
 
@@ -52,6 +52,21 @@ async function seed() {
       updatedAt: now,
     });
     console.log("Default WorkCategory seeded.");
+  }
+
+  // Seed WorkStations linked to the first WorkCategory
+  const firstCategory = await db.select().from(workCategories).limit(1);
+  const existingStations = await db.select().from(workStations).limit(1);
+  if (existingStations.length > 0) {
+    console.log("WorkStations already exist. Skipping.");
+  } else if (firstCategory.length > 0) {
+    const workCategoryId = firstCategory[0].id;
+    await db.insert(workStations).values([
+      { name: "Stroj 1", workCategoryId, createdAt: now, updatedAt: now },
+      { name: "Stroj 2", workCategoryId, createdAt: now, updatedAt: now },
+      { name: "Stroj 3", workCategoryId, createdAt: now, updatedAt: now },
+    ]);
+    console.log("WorkStations seeded.");
   }
 
   console.log(`Seeding admin user: ${ADMIN_EMAIL}`);
