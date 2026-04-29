@@ -84,8 +84,8 @@ export function Sidebar() {
 
       {/* User + logout */}
       <div className="border-t border-brand-100 p-4">
-        <div className="flex items-center gap-3 px-2 mb-3">
-          <div className="w-8 h-8 rounded-full bg-brand-200 flex items-center justify-center text-brand-700 font-bold text-sm">
+        <Link href="/profile" onClick={() => setOpen(false)} className="flex items-center gap-3 px-2 mb-3 rounded-lg hover:bg-brand-50 transition-colors py-1">
+          <div className="w-8 h-8 rounded-full bg-brand-200 flex items-center justify-center text-brand-700 font-bold text-sm shrink-0">
             {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
           </div>
           <div className="min-w-0">
@@ -94,7 +94,7 @@ export function Sidebar() {
             </p>
             <p className="text-xs text-gray-500 capitalize">{userRole}</p>
           </div>
-        </div>
+        </Link>
         <button
           onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/login") } })}
           className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
