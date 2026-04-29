@@ -63,6 +63,18 @@ export async function PATCH(
 
   const { workComponentDefects: defectsPayload, ...submissionData } = result.data;
 
+  // Only allow edits when submission is in draft or submitted state
+  const [existing] = await db
+    .select({ status: submissions.status })
+    .from(submissions)
+    .where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)))
+    .limit(1);
+
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.status !== "draft" && existing.status !== "submitted") {
+    return NextResponse.json({ error: "Submission cannot be edited in its current status" }, { status: 403 });
+  }
+
   const [updated] = await db
     .update(submissions)
     .set({ ...submissionData, updatedAt: new Date() })

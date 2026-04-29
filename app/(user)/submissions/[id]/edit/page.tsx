@@ -60,6 +60,7 @@ export default async function EditSubmissionPage({
     ]);
 
   if (!row) notFound();
+  if (row.status !== "draft" && row.status !== "submitted") redirect(`/submissions/${id}`);
 
   return (
     <div>
