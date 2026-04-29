@@ -63,22 +63,29 @@ export async function generateSubmissionsExcel(
   return Buffer.from(buffer);
 }
 
-export async function generateSubmissionsCSV(
-  submissions: (Omit<Submission, "workStationId" | "units" | "shift"> & { workStationId: string | null; units: number | null; shift: number | null; userName: string; userEmail: string })[]
-): Promise<string> {
-  const headers = [
-    "ID",
-    "Work Category",
-    "Work Station",
-    "Units",
-    "Shift",
-    "Status",
-    "Submitted By",
-    "Email",
-    "Notes",
-    "Created At",
-  ];
+type DefectRow = {
+  submissionId: string;
+  componentName: string;
+  defectCategoryName: string;
+  units: number;
+};
 
+type SubmissionCSVRow = {
+  id: string;
+  workCategoryName: string;
+  workStationName: string;
+  units: number | null;
+  shift: number | null;
+  notes: string | null;
+  status: string;
+  createdAt: Date;
+  userName: string;
+};
+
+export async function generateSubmissionsCSV(
+  submissions: SubmissionCSVRow[],
+  defects: DefectRow[] = []
+): Promise<string> {
   const escape = (val: string | number | null | undefined) => {
     if (val === null || val === undefined) return "";
     const str = String(val);
@@ -88,22 +95,53 @@ export async function generateSubmissionsCSV(
     return str;
   };
 
-  const rows = submissions.map((s) =>
-    [
+  // Build pivot: submissionId -> { columnKey -> units }
+  const defectPivot = new Map<string, Map<string, number>>();
+  const defectColumns = new Set<string>();
+
+  for (const d of defects) {
+    const colKey = `${d.componentName} - ${d.defectCategoryName}`;
+    defectColumns.add(colKey);
+    if (!defectPivot.has(d.submissionId)) {
+      defectPivot.set(d.submissionId, new Map());
+    }
+    defectPivot.get(d.submissionId)!.set(colKey, d.units);
+  }
+
+  const sortedDefectCols = [...defectColumns].sort();
+
+  const baseHeaders = [
+    "ID",
+    "Work Category",
+    "Work Station",
+    "Units",
+    "Shift",
+    "Status",
+    "User",
+    "Notes",
+    "Created At",
+  ];
+
+  const allHeaders = [...baseHeaders, ...sortedDefectCols];
+
+  const rows = submissions.map((s) => {
+    const submissionDefects = defectPivot.get(s.id) ?? new Map<string, number>();
+    const defectValues = sortedDefectCols.map((col) => submissionDefects.get(col) ?? "");
+    return [
       s.id,
-      s.workCategoryId,
-      s.workStationId ?? "",
+      s.workCategoryName,
+      s.workStationName,
       s.units ?? "",
       s.shift ?? "",
       s.status,
       s.userName,
-      s.userEmail,
       s.notes ?? "",
       s.createdAt?.toISOString() ?? "",
+      ...defectValues,
     ]
       .map(escape)
-      .join(",")
-  );
+      .join(",");
+  });
 
-  return [headers.join(","), ...rows].join("\n");
+  return [allHeaders.join(","), ...rows].join("\n");
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users } from "@/lib/db/schema";
+import { submissions, users, workCategories, workStations, workComponentDefects, workComponents, workComponentDefectCategories } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -13,12 +13,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Join submissions with user data
+  // Join submissions with user, category and station data
   const rows = await db
     .select({
       id: submissions.id,
-      workCategoryId: submissions.workCategoryId,
-      workStationId: submissions.workStationId,
+      workCategoryName: workCategories.name,
+      workStationName: workStations.name,
       units: submissions.units,
       shift: submissions.shift,
       notes: submissions.notes,
@@ -27,19 +27,40 @@ export async function GET(request: NextRequest) {
       updatedAt: submissions.updatedAt,
       userId: submissions.userId,
       userName: users.name,
-      userEmail: users.email,
     })
     .from(submissions)
     .leftJoin(users, eq(submissions.userId, users.id))
+    .leftJoin(workCategories, eq(submissions.workCategoryId, workCategories.id))
+    .leftJoin(workStations, eq(submissions.workStationId, workStations.id))
     .orderBy(submissions.createdAt);
 
   const typedRows = rows.map((r) => ({
     ...r,
+    workCategoryName: r.workCategoryName ?? "Unknown",
+    workStationName: r.workStationName ?? "",
     userName: r.userName ?? "Unknown",
-    userEmail: r.userEmail ?? "Unknown",
   }));
 
-  const csv = await generateSubmissionsCSV(typedRows);
+  // Fetch all defects with component and defect category names
+  const defectRows = await db
+    .select({
+      submissionId: workComponentDefects.submissionId,
+      componentName: workComponents.name,
+      defectCategoryName: workComponentDefectCategories.name,
+      units: workComponentDefects.units,
+    })
+    .from(workComponentDefects)
+    .leftJoin(workComponents, eq(workComponentDefects.workComponentId, workComponents.id))
+    .leftJoin(workComponentDefectCategories, eq(workComponentDefects.workComponentDefectCategoryId, workComponentDefectCategories.id));
+
+  const typedDefectRows = defectRows.map((d) => ({
+    submissionId: d.submissionId,
+    componentName: d.componentName ?? "Unknown",
+    defectCategoryName: d.defectCategoryName ?? "Unknown",
+    units: d.units,
+  }));
+
+  const csv = await generateSubmissionsCSV(typedRows, typedDefectRows);
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv",
