@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workStations } from "@/lib/db/schema";
+import { submissions, workCategories, workStations } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -37,14 +37,24 @@ export default async function UserSubmissionDetailPage({
 
   if (!submission) notFound();
 
-  const workStation = submission.workStationId
-    ? await db
-        .select({ name: workStations.name })
-        .from(workStations)
-        .where(eq(workStations.id, submission.workStationId))
-        .limit(1)
-        .then((r) => r[0] ?? null)
-    : null;
+  const [workStation, workCategory] = await Promise.all([
+    submission.workStationId
+      ? db
+          .select({ name: workStations.name })
+          .from(workStations)
+          .where(eq(workStations.id, submission.workStationId))
+          .limit(1)
+          .then((r) => r[0] ?? null)
+      : Promise.resolve(null),
+    submission.workCategoryId
+      ? db
+          .select({ name: workCategories.name })
+          .from(workCategories)
+          .where(eq(workCategories.id, submission.workCategoryId))
+          .limit(1)
+          .then((r) => r[0] ?? null)
+      : Promise.resolve(null),
+  ]);
 
   return (
     <div className="max-w-2xl">
@@ -81,7 +91,7 @@ export default async function UserSubmissionDetailPage({
       <div className="card space-y-5">
         <div>
           <p className="label">Category</p>
-          <p className="text-sm text-gray-800 capitalize">{submission.workCategoryId}</p>
+          <p className="text-sm text-gray-800">{workCategory?.name ?? submission.workCategoryId}</p>
         </div>
 
         {workStation && (
