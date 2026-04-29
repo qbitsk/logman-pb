@@ -34,6 +34,7 @@ export default async function EditSubmissionPage({
           workCategoryId: submissions.workCategoryId,
           workStationId: submissions.workStationId,
           units: submissions.units,
+          shift: submissions.shift,
           notes: submissions.notes,
           status: submissions.status,
           createdAt: submissions.createdAt,
