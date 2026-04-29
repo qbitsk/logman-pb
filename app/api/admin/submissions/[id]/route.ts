@@ -102,3 +102,27 @@ export async function PATCH(
 
   return NextResponse.json(updated);
 }
+
+// DELETE /api/admin/submissions/[id]
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  const [existing] = await db
+    .select({ id: submissions.id })
+    .from(submissions)
+    .where(eq(submissions.id, id))
+    .limit(1);
+
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  await db.delete(submissions).where(eq(submissions.id, id));
+
+  return new NextResponse(null, { status: 204 });
+}

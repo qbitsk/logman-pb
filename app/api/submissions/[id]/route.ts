@@ -97,3 +97,31 @@ export async function PATCH(
 
   return NextResponse.json(updated);
 }
+
+// DELETE /api/submissions/[id] — delete a submission owned by the current user (draft or submitted only)
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const [existing] = await db
+    .select({ status: submissions.status })
+    .from(submissions)
+    .where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)))
+    .limit(1);
+
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.status !== "draft" && existing.status !== "submitted") {
+    return NextResponse.json({ error: "Submission cannot be deleted in its current status" }, { status: 403 });
+  }
+
+  await db.delete(submissions).where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)));
+
+  return new NextResponse(null, { status: 204 });
+}

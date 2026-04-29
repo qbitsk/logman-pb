@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Plus, Pencil } from "lucide-react";
+import { DeleteSubmissionButton } from "@/components/DeleteSubmissionButton";
 import { clsx } from "clsx";
 
 const statusStyles: Record<string, string> = {
@@ -77,12 +78,16 @@ export default async function SubmissionsPage() {
                     </span>
                   </td>
                   <td className="px-5 py-3 text-end">
-                    {(s.status === "draft" || s.status === "submitted") && (
-                      <Link href={`/submissions/${s.id}/edit`} className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-brand-600 border border-brand-200 rounded-lg hover:bg-brand-50 transition-colors">
-                        <Pencil className="w-3 h-3" />
-                        Edit
-                      </Link>
-                    )}
+                    <div className="flex items-center justify-end gap-1">
+                      {(s.status === "draft" || s.status === "submitted") && (
+                        <Link href={`/submissions/${s.id}/edit`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" aria-label="Edit submission">
+                          <Pencil className="w-4 h-4" />
+                        </Link>
+                      )}
+                      {(s.status === "draft" || s.status === "submitted") && (
+                        <DeleteSubmissionButton id={s.id} apiPath="/api/submissions" />
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
