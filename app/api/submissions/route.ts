@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
       workCategoryId: result.data.workCategoryId,
       workStationId: result.data.workStationId ?? null,
       units: result.data.units ?? null,
+      shift: result.data.shift ?? null,
       notes: result.data.notes,
       userId: session.user.id,
       status: "submitted",

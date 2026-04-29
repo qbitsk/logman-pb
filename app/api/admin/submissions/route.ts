@@ -18,6 +18,7 @@ export async function GET() {
       workCategoryId: submissions.workCategoryId,
       workStationId: submissions.workStationId,
       units: submissions.units,
+      shift: submissions.shift,
       status: submissions.status,
       notes: submissions.notes,
       createdAt: submissions.createdAt,

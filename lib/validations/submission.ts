@@ -10,6 +10,7 @@ export const submissionSchema = z.object({
   workCategoryId: z.string().min(1, "Please select a category"),
   workStationId: z.string().optional().nullable(),
   units: z.number().int().positive("Units must be a positive number").optional().nullable(),
+  shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500, "Notes must be under 500 characters").optional(),
   workComponentDefects: z.array(workComponentDefectSchema).optional(),
 });

@@ -11,6 +11,7 @@ const patchSchema = z.object({
   workCategoryId: z.string().min(1).optional(),
   workStationId: z.string().optional().nullable(),
   units: z.number().int().positive().optional().nullable(),
+  shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   workComponentDefects: z.array(workComponentDefectSchema).optional(),
 });

@@ -22,6 +22,7 @@ export const submissions = pgTable("submissions", {
   workStationId: text("work_station_id")
     .references(() => workStations.id),
   units: integer("units"),
+  shift: integer("shift"),
   notes: text("notes"),
 
   status: statusEnum("status").notNull().default("draft"),

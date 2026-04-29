@@ -20,6 +20,7 @@ type Submission = {
   workCategoryId: string;
   workStationId: string | null;
   units: number | null;
+  shift: number | null;
   notes: string | null;
   status: string;
   createdAt: Date;
@@ -79,6 +80,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
     workCategoryId: submission?.workCategoryId ?? (workCategories[0]?.id ?? ""),
     workStationId: submission?.workStationId ?? "",
     units: submission?.units?.toString() ?? "",
+    shift: submission?.shift?.toString() ?? "",
     notes: submission?.notes ?? "",
     status: submission?.status ?? "draft",
   });
@@ -99,7 +101,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
     (ws) => ws.workCategoryId === form.workCategoryId
   );
 
-  function set(key: "workCategoryId" | "workStationId" | "units" | "notes" | "status", value: string) {
+  function set(key: "workCategoryId" | "workStationId" | "units" | "shift" | "notes" | "status", value: string) {
     setForm((prev) => {
       const next = { ...prev, [key]: value };
       // Reset station when category changes
@@ -151,6 +153,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
         workCategoryId: form.workCategoryId,
         workStationId: form.workStationId || null,
         units: form.units ? parseInt(form.units, 10) : null,
+        shift: form.shift ? (parseInt(form.shift, 10) as 1 | 2 | 3) : null,
         notes: form.notes,
       });
       if (!result.success) {
@@ -177,8 +180,8 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
         }));
 
       const body = isEdit
-        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, notes: form.notes || null, workComponentDefects: parsedDefects })
-        : JSON.stringify({ workCategoryId: form.workCategoryId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, notes: form.notes, workComponentDefects: parsedDefects });
+        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workComponentDefects: parsedDefects })
+        : JSON.stringify({ workCategoryId: form.workCategoryId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workComponentDefects: parsedDefects });
 
       const res = await fetch(url, {
         method,
@@ -268,6 +271,29 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
             ))}
           </select>
           {errors.workCategoryId && <p className="text-red-600 text-xs mt-1">{errors.workCategoryId}</p>}
+        </div>
+
+        <div>
+          <label className="label">
+            Shift <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <div className="flex gap-2 mt-1">
+            {([1, 2, 3] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => set("shift", form.shift === s.toString() ? "" : s.toString())}
+                className={clsx(
+                  "px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors",
+                  form.shift === s.toString()
+                    ? "bg-brand-600 text-white border-transparent"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-brand-300"
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>
