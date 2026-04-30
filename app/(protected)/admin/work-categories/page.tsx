@@ -26,6 +26,7 @@ type WorkDefect = {
   name: string;
   workComponentId: string | null;
   componentName: string | null;
+  categoryName: string | null;
   createdAt: string;
 };
 
@@ -258,7 +259,10 @@ export default function WorkCategoriesPage() {
     if (res.ok) {
       const saved = await res.json();
       const compName = components.find((c) => c.id === saved.workComponentId)?.name ?? null;
-      const enriched: WorkDefect = { ...saved, componentName: compName };
+      const catName = components.find((c) => c.id === saved.workComponentId)
+        ? categories.find((cat) => cat.id === components.find((c) => c.id === saved.workComponentId)?.workCategoryId)?.name ?? null
+        : null;
+      const enriched: WorkDefect = { ...saved, componentName: compName, categoryName: catName };
       setDefects((prev) =>
         isEdit ? prev.map((d) => (d.id === enriched.id ? enriched : d)) : [...prev, enriched]
       );
@@ -429,7 +433,11 @@ export default function WorkCategoriesPage() {
                   {defects.map((def) => (
                     <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.componentName ?? "—"}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">
+                        {def.categoryName && def.componentName
+                          ? `${def.categoryName} → ${def.componentName}`
+                          : def.componentName ?? "—"}
+                      </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -549,7 +557,9 @@ export default function WorkCategoriesPage() {
               >
                 <option value="">— Select Component —</option>
                 {components.map((comp) => (
-                  <option key={comp.id} value={comp.id}>{comp.name}</option>
+                  <option key={comp.id} value={comp.id}>
+                    {comp.categoryName ? `${comp.categoryName} → ${comp.name}` : comp.name}
+                  </option>
                 ))}
               </select>
             </div>

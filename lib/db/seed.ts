@@ -107,7 +107,7 @@ async function seed() {
     const workCategoryId = firstCategory[0].id;
     await db.insert(workDefects).values([
       { name: "Defekt 1", type: "component", workCategoryId, createdAt: now, updatedAt: now },
-      { name: "Defekt 2", type: "unit", workCategoryId, createdAt: now, updatedAt: now },
+      { name: "Defekt 2", type: "component", workCategoryId, createdAt: now, updatedAt: now },
     ]);
     console.log("WorkDefects seeded.");
   }
