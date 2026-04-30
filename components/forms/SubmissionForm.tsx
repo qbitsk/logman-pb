@@ -381,7 +381,8 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
                 if (defect.type === "component") {
                   return wd.workComponentId === (defect.workComponentId || null);
                 }
-                return true;
+                // unit defects must have no associated component
+                return wd.workComponentId === null;
               });
               return (
                 <div key={defect._key} className="flex flex-wrap gap-2 items-center">

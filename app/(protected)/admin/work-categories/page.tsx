@@ -21,9 +21,11 @@ type WorkComponent = {
   createdAt: string;
 };
 
-type DefectCategory = {
+type WorkDefect = {
   id: string;
   name: string;
+  workComponentId: string | null;
+  componentName: string | null;
   createdAt: string;
 };
 
@@ -32,7 +34,7 @@ type Tab = "categories" | "components" | "defects";
 const TABS: { id: Tab; label: string }[] = [
   { id: "categories", label: "Categories" },
   { id: "components", label: "Components" },
-  { id: "defects", label: "Defect Categories" },
+  { id: "defects", label: "Component Defects" },
 ];
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -83,10 +85,10 @@ export default function WorkCategoriesPage() {
   const [compSaving, setCompSaving] = useState(false);
 
   // ── Defects state ──
-  const [defects, setDefects] = useState<DefectCategory[]>([]);
+  const [defects, setDefects] = useState<WorkDefect[]>([]);
   const [defLoading, setDefLoading] = useState(true);
-  const [defModal, setDefModal] = useState<{ open: boolean; editing: DefectCategory | null }>({ open: false, editing: null });
-  const [defForm, setDefForm] = useState({ name: "" });
+  const [defModal, setDefModal] = useState<{ open: boolean; editing: WorkDefect | null }>({ open: false, editing: null });
+  const [defForm, setDefForm] = useState({ name: "", workComponentId: "" });
   const [defError, setDefError] = useState<string | null>(null);
   const [defSaving, setDefSaving] = useState(false);
 
@@ -106,7 +108,7 @@ export default function WorkCategoriesPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/categories?type=defect")
+    fetch("/api/admin/work-defects")
       .then((r) => r.json())
       .then(setDefects)
       .finally(() => setDefLoading(false));
@@ -226,13 +228,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openDefCreate() {
-    setDefForm({ name: "" });
+    setDefForm({ name: "", workComponentId: components[0]?.id ?? "" });
     setDefError(null);
     setDefModal({ open: true, editing: null });
   }
 
-  function openDefEdit(def: DefectCategory) {
-    setDefForm({ name: def.name });
+  function openDefEdit(def: WorkDefect) {
+    setDefForm({ name: def.name, workComponentId: def.workComponentId ?? "" });
     setDefError(null);
     setDefModal({ open: true, editing: def });
   }
@@ -244,23 +246,21 @@ export default function WorkCategoriesPage() {
 
     const isEdit = !!defModal.editing;
     const url = isEdit
-      ? `/api/admin/categories/${defModal.editing!.id}`
-      : "/api/admin/categories";
-
-    const payload = isEdit
-      ? { name: defForm.name }
-      : { name: defForm.name, type: "defect" };
+      ? `/api/admin/work-defects/${defModal.editing!.id}`
+      : "/api/admin/work-defects";
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(defForm),
     });
 
     if (res.ok) {
       const saved = await res.json();
+      const compName = components.find((c) => c.id === saved.workComponentId)?.name ?? null;
+      const enriched: WorkDefect = { ...saved, componentName: compName };
       setDefects((prev) =>
-        isEdit ? prev.map((d) => (d.id === saved.id ? saved : d)) : [...prev, saved]
+        isEdit ? prev.map((d) => (d.id === enriched.id ? enriched : d)) : [...prev, enriched]
       );
       setDefModal({ open: false, editing: null });
     } else {
@@ -271,8 +271,8 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteDef(id: string) {
-    if (!confirm("Delete this defect category?")) return;
-    const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
+    if (!confirm("Delete this component defect?")) return;
+    const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setDefects((prev) => prev.filter((d) => d.id !== id));
     }
@@ -405,22 +405,23 @@ export default function WorkCategoriesPage() {
       {activeTab === "defects" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{defects.length} defect categories</span>
-            <button onClick={openDefCreate} className="btn-primary flex items-center gap-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400">{defects.length} component defects</span>
+            <button onClick={openDefCreate} className="btn-primary flex items-center gap-2" disabled={components.length === 0}>
               <Plus className="w-4 h-4" />
-              Defect Category
+              Component Defect
             </button>
           </div>
           {defLoading ? (
             <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
           ) : defects.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No defect categories yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">No component defects yet.</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Component</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -428,6 +429,7 @@ export default function WorkCategoriesPage() {
                   {defects.map((def) => (
                     <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.componentName ?? "—"}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -523,7 +525,7 @@ export default function WorkCategoriesPage() {
       {/* ── Defect Category Modal ── */}
       {defModal.open && (
         <Modal
-          title={defModal.editing ? "Edit Defect Category" : "New Defect Category"}
+          title={defModal.editing ? "Edit Component Defect" : "New Component Defect"}
           onClose={() => setDefModal({ open: false, editing: null })}
         >
           <form onSubmit={submitDef} className="space-y-4">
@@ -536,6 +538,20 @@ export default function WorkCategoriesPage() {
                 required
                 autoFocus
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Component</label>
+              <select
+                className="input w-full"
+                value={defForm.workComponentId}
+                onChange={(e) => setDefForm((f) => ({ ...f, workComponentId: e.target.value }))}
+                required
+              >
+                <option value="">— Select Component —</option>
+                {components.map((comp) => (
+                  <option key={comp.id} value={comp.id}>{comp.name}</option>
+                ))}
+              </select>
             </div>
             {defError && <p className="text-sm text-red-600">{defError}</p>}
             <div className="flex justify-end gap-3 pt-1">
