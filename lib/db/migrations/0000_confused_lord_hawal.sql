@@ -1,7 +1,6 @@
 CREATE TYPE "public"."category_type" AS ENUM('work', 'defect');--> statement-breakpoint
 CREATE TYPE "public"."work_defect_type" AS ENUM('unit', 'component');--> statement-breakpoint
 CREATE TYPE "public"."submission_status" AS ENUM('draft', 'submitted', 'approved', 'rejected');--> statement-breakpoint
-CREATE TYPE "public"."work_submission_defect_type" AS ENUM('component', 'unit');--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -101,9 +100,7 @@ CREATE TABLE "submissions" (
 CREATE TABLE "work_submission_defects" (
 	"id" text PRIMARY KEY NOT NULL,
 	"submission_id" text NOT NULL,
-	"type" "work_submission_defect_type" NOT NULL,
-	"work_component_id" text,
-	"category_id" text,
+	"work_defect_id" text NOT NULL,
 	"units" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -119,5 +116,4 @@ ALTER TABLE "submissions" ADD CONSTRAINT "submissions_user_id_users_id_fk" FOREI
 ALTER TABLE "submissions" ADD CONSTRAINT "submissions_work_category_id_categories_id_fk" FOREIGN KEY ("work_category_id") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "submissions" ADD CONSTRAINT "submissions_work_station_id_work_stations_id_fk" FOREIGN KEY ("work_station_id") REFERENCES "public"."work_stations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "work_submission_defects" ADD CONSTRAINT "work_submission_defects_submission_id_submissions_id_fk" FOREIGN KEY ("submission_id") REFERENCES "public"."submissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "work_submission_defects" ADD CONSTRAINT "work_submission_defects_work_component_id_work_components_id_fk" FOREIGN KEY ("work_component_id") REFERENCES "public"."work_components"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "work_submission_defects" ADD CONSTRAINT "work_submission_defects_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "work_submission_defects" ADD CONSTRAINT "work_submission_defects_work_defect_id_work_defects_id_fk" FOREIGN KEY ("work_defect_id") REFERENCES "public"."work_defects"("id") ON DELETE no action ON UPDATE no action;

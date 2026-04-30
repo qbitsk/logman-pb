@@ -1,5 +1,5 @@
 {
-  "id": "f33cbcab-f4fa-4f0e-998c-e42a44c435a7",
+  "id": "c1d236e2-77eb-4676-8e19-9b734c332e11",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -702,24 +702,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "type": {
-          "name": "type",
-          "type": "work_submission_defect_type",
-          "typeSchema": "public",
+        "work_defect_id": {
+          "name": "work_defect_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "work_component_id": {
-          "name": "work_component_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "category_id": {
-          "name": "category_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "units": {
           "name": "units",
@@ -757,25 +744,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "work_submission_defects_work_component_id_work_components_id_fk": {
-          "name": "work_submission_defects_work_component_id_work_components_id_fk",
+        "work_submission_defects_work_defect_id_work_defects_id_fk": {
+          "name": "work_submission_defects_work_defect_id_work_defects_id_fk",
           "tableFrom": "work_submission_defects",
-          "tableTo": "work_components",
+          "tableTo": "work_defects",
           "columnsFrom": [
-            "work_component_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "work_submission_defects_category_id_categories_id_fk": {
-          "name": "work_submission_defects_category_id_categories_id_fk",
-          "tableFrom": "work_submission_defects",
-          "tableTo": "categories",
-          "columnsFrom": [
-            "category_id"
+            "work_defect_id"
           ],
           "columnsTo": [
             "id"
@@ -816,14 +790,6 @@
         "submitted",
         "approved",
         "rejected"
-      ]
-    },
-    "public.work_submission_defect_type": {
-      "name": "work_submission_defect_type",
-      "schema": "public",
-      "values": [
-        "component",
-        "unit"
       ]
     }
   },
