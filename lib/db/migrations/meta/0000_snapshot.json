@@ -1,5 +1,5 @@
 {
-  "id": "d6d986bc-8ffa-4dcf-bf3c-7072d9ca77a8",
+  "id": "caebd05e-61d4-40ea-b80f-6bc06b7b7ac8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -484,6 +484,72 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.work_defects": {
+      "name": "work_defects",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "work_defect_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "work_category_id": {
+          "name": "work_category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "work_defects_work_category_id_categories_id_fk": {
+          "name": "work_defects_work_category_id_categories_id_fk",
+          "tableFrom": "work_defects",
+          "tableTo": "categories",
+          "columnsFrom": [
+            "work_category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.submissions": {
       "name": "submissions",
       "schema": "",
@@ -601,8 +667,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.work_defects": {
-      "name": "work_defects",
+    "public.work_submission_defects": {
+      "name": "work_submission_defects",
       "schema": "",
       "columns": {
         "id": {
@@ -619,7 +685,7 @@
         },
         "type": {
           "name": "type",
-          "type": "work_defect_type",
+          "type": "work_submission_defect_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
@@ -659,9 +725,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "work_defects_submission_id_submissions_id_fk": {
-          "name": "work_defects_submission_id_submissions_id_fk",
-          "tableFrom": "work_defects",
+        "work_submission_defects_submission_id_submissions_id_fk": {
+          "name": "work_submission_defects_submission_id_submissions_id_fk",
+          "tableFrom": "work_submission_defects",
           "tableTo": "submissions",
           "columnsFrom": [
             "submission_id"
@@ -672,9 +738,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "work_defects_work_component_id_work_components_id_fk": {
-          "name": "work_defects_work_component_id_work_components_id_fk",
-          "tableFrom": "work_defects",
+        "work_submission_defects_work_component_id_work_components_id_fk": {
+          "name": "work_submission_defects_work_component_id_work_components_id_fk",
+          "tableFrom": "work_submission_defects",
           "tableTo": "work_components",
           "columnsFrom": [
             "work_component_id"
@@ -685,9 +751,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "work_defects_category_id_categories_id_fk": {
-          "name": "work_defects_category_id_categories_id_fk",
-          "tableFrom": "work_defects",
+        "work_submission_defects_category_id_categories_id_fk": {
+          "name": "work_submission_defects_category_id_categories_id_fk",
+          "tableFrom": "work_submission_defects",
           "tableTo": "categories",
           "columnsFrom": [
             "category_id"
@@ -715,6 +781,14 @@
         "defect"
       ]
     },
+    "public.work_defect_type": {
+      "name": "work_defect_type",
+      "schema": "public",
+      "values": [
+        "unit",
+        "component"
+      ]
+    },
     "public.submission_status": {
       "name": "submission_status",
       "schema": "public",
@@ -725,8 +799,8 @@
         "rejected"
       ]
     },
-    "public.work_defect_type": {
-      "name": "work_defect_type",
+    "public.work_submission_defect_type": {
+      "name": "work_submission_defect_type",
       "schema": "public",
       "values": [
         "component",

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workDefects, categories } from "@/lib/db/schema";
+import { submissions, workSubmissionDefects, categories } from "@/lib/db/schema";
 import { submissionSchema } from "@/lib/validations/submission";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -60,9 +60,9 @@ export async function POST(request: NextRequest) {
     })
     .returning();
 
-  if (result.data.workDefects?.length) {
-    await db.insert(workDefects).values(
-      result.data.workDefects.map((d) => ({
+  if (result.data.workSubmissionDefects?.length) {
+    await db.insert(workSubmissionDefects).values(
+      result.data.workSubmissionDefects.map((d) => ({
         submissionId: submission.id,
         type: d.type,
         workComponentId: d.workComponentId ?? null,

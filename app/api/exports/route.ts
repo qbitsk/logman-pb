@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, categories, workStations, workDefects, workComponents } from "@/lib/db/schema";
+import { submissions, users, categories, workStations, workSubmissionDefects, workComponents } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -44,14 +44,14 @@ export async function GET(request: NextRequest) {
   // Fetch all defects with component and defect category names
   const defectRows = await db
     .select({
-      submissionId: workDefects.submissionId,
+      submissionId: workSubmissionDefects.submissionId,
       componentName: workComponents.name,
       defectCategoryName: categories.name,
-      units: workDefects.units,
+      units: workSubmissionDefects.units,
     })
-    .from(workDefects)
-    .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-    .leftJoin(categories, eq(workDefects.categoryId, categories.id));
+    .from(workSubmissionDefects)
+    .leftJoin(workComponents, eq(workSubmissionDefects.workComponentId, workComponents.id))
+    .leftJoin(categories, eq(workSubmissionDefects.categoryId, categories.id));
 
   const typedDefectRows = defectRows.map((d) => ({
     submissionId: d.submissionId,

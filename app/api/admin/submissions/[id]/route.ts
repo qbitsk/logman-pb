@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, workDefects } from "@/lib/db/schema";
+import { submissions, users, workSubmissionDefects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { workDefectSchema } from "@/lib/validations/submission";
+import { workSubmissionDefectSchema } from "@/lib/validations/submission";
 
 const patchSchema = z.object({
   workCategoryId: z.string().min(1).optional(),
@@ -14,7 +14,7 @@ const patchSchema = z.object({
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   status: z.enum(["draft", "submitted", "approved", "rejected"]).optional(),
-  workDefects: z.array(workDefectSchema).optional(),
+  workSubmissionDefects: z.array(workSubmissionDefectSchema).optional(),
 });
 
 async function requireAdmin() {
@@ -58,13 +58,13 @@ export async function GET(
 
   const existingDefects = await db
     .select({
-      workComponentId: workDefects.workComponentId,
-      categoryId: workDefects.categoryId,
-      type: workDefects.type,
-      units: workDefects.units,
+      workComponentId: workSubmissionDefects.workComponentId,
+      categoryId: workSubmissionDefects.categoryId,
+      type: workSubmissionDefects.type,
+      units: workSubmissionDefects.units,
     })
-    .from(workDefects)
-    .where(eq(workDefects.submissionId, id));
+    .from(workSubmissionDefects)
+    .where(eq(workSubmissionDefects.submissionId, id));
 
   return NextResponse.json({ ...row, existingDefects });
 }
@@ -89,7 +89,7 @@ export async function PATCH(
     );
   }
 
-  const { workDefects: defectsPayload, ...submissionData } = result.data;
+  const { workSubmissionDefects: defectsPayload, ...submissionData } = result.data;
 
   const [updated] = await db
     .update(submissions)
@@ -99,9 +99,9 @@ export async function PATCH(
 
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await db.delete(workDefects).where(eq(workDefects.submissionId, id));
+  await db.delete(workSubmissionDefects).where(eq(workSubmissionDefects.submissionId, id));
   if (defectsPayload?.length) {
-    await db.insert(workDefects).values(
+    await db.insert(workSubmissionDefects).values(
       defectsPayload.map((d) => ({
         submissionId: id,
         type: d.type,

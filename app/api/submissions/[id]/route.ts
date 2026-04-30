@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workDefects, workComponents, categories, workStations, users } from "@/lib/db/schema";
+import { submissions, workSubmissionDefects, workComponents, categories, workStations, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { workDefectSchema } from "@/lib/validations/submission";
+import { workSubmissionDefectSchema } from "@/lib/validations/submission";
 
 const patchSchema = z.object({
   workCategoryId: z.string().min(1).optional(),
@@ -13,7 +13,7 @@ const patchSchema = z.object({
   units: z.number().int().positive().optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
-  workDefects: z.array(workDefectSchema).optional(),
+  workSubmissionDefects: z.array(workSubmissionDefectSchema).optional(),
 });
 
 // GET /api/submissions/[id] — fetch a single submission owned by the current user
@@ -54,23 +54,23 @@ export async function GET(
   const [existingDefects, defectsDisplay, categoryRow, stationRow] = await Promise.all([
     db
       .select({
-        workComponentId: workDefects.workComponentId,
-        categoryId: workDefects.categoryId,
-        type: workDefects.type,
-        units: workDefects.units,
+        workComponentId: workSubmissionDefects.workComponentId,
+        categoryId: workSubmissionDefects.categoryId,
+        type: workSubmissionDefects.type,
+        units: workSubmissionDefects.units,
       })
-      .from(workDefects)
-      .where(eq(workDefects.submissionId, id)),
+      .from(workSubmissionDefects)
+      .where(eq(workSubmissionDefects.submissionId, id)),
     db
       .select({
         workComponentName: workComponents.name,
         defectCategoryName: categories.name,
-        units: workDefects.units,
+        units: workSubmissionDefects.units,
       })
-      .from(workDefects)
-      .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-      .leftJoin(categories, eq(workDefects.categoryId, categories.id))
-      .where(eq(workDefects.submissionId, id)),
+      .from(workSubmissionDefects)
+      .leftJoin(workComponents, eq(workSubmissionDefects.workComponentId, workComponents.id))
+      .leftJoin(categories, eq(workSubmissionDefects.categoryId, categories.id))
+      .where(eq(workSubmissionDefects.submissionId, id)),
     db.select({ name: categories.name }).from(categories).where(eq(categories.id, row.workCategoryId)).limit(1),
     row.workStationId
       ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
@@ -107,7 +107,7 @@ export async function PATCH(
     );
   }
 
-  const { workDefects: defectsPayload, ...submissionData } = result.data;
+  const { workSubmissionDefects: defectsPayload, ...submissionData } = result.data;
 
   // Only allow edits when submission is in draft or submitted state
   const [existing] = await db
@@ -129,9 +129,9 @@ export async function PATCH(
 
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await db.delete(workDefects).where(eq(workDefects.submissionId, id));
+  await db.delete(workSubmissionDefects).where(eq(workSubmissionDefects.submissionId, id));
   if (defectsPayload?.length) {
-    await db.insert(workDefects).values(
+    await db.insert(workSubmissionDefects).values(
       defectsPayload.map((d) => ({
         submissionId: id,
         type: d.type,

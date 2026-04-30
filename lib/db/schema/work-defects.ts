@@ -1,21 +1,15 @@
-import { pgTable, text, integer, timestamp, pgEnum } from "drizzle-orm/pg-core";
-import { submissions } from "./submissions";
-import { workComponents } from "./work-components";
+import { pgTable, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { categories } from "./categories";
 
-export const workDefectTypeEnum = pgEnum("work_defect_type", ["component", "unit"]);
+export const workDefectTypeEnum = pgEnum("work_defect_type", ["unit", "component"]);
 
 export const workDefects = pgTable("work_defects", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  submissionId: text("submission_id")
-    .notNull()
-    .references(() => submissions.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
   type: workDefectTypeEnum("type").notNull(),
-  workComponentId: text("work_component_id")
-    .references(() => workComponents.id),
-  categoryId: text("category_id")
+  workCategoryId: text("work_category_id")
+    .notNull()
     .references(() => categories.id),
-  units: integer("units").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
