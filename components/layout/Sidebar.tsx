@@ -27,35 +27,53 @@ const adminNavItems = [
 
 const roleRank: Record<string, number> = { user: 1, editor: 2, admin: 3 };
 
-export function Sidebar() {
-  const { data: session } = useSession();
-  const pathname = usePathname();
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const userRole = session?.user?.role ?? "user";
+function NavLink({
+  href,
+  label,
+  icon: Icon,
+  pathname,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  pathname: string;
+  onNavigate: () => void;
+}) {
+  const active = pathname.startsWith(href);
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className={clsx(
+        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+        active
+          ? "bg-brand-600 text-white"
+          : "text-gray-600 hover:bg-brand-50 hover:text-brand-700"
+      )}
+    >
+      <Icon className="w-4 h-4 shrink-0" />
+      {label}
+    </Link>
+  );
+}
 
-  const isAdmin = roleRank[userRole] >= roleRank["admin"];
-
-  const NavLink = ({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) => {
-    const active = pathname.startsWith(href);
-    return (
-      <Link
-        href={href}
-        onClick={() => setOpen(false)}
-        className={clsx(
-          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-          active
-            ? "bg-brand-600 text-white"
-            : "text-gray-600 hover:bg-brand-50 hover:text-brand-700"
-        )}
-      >
-        <Icon className="w-4 h-4 shrink-0" />
-        {label}
-      </Link>
-    );
-  };
-
-  const NavContent = () => (
+function NavContent({
+  pathname,
+  session,
+  userRole,
+  isAdmin,
+  onNavigate,
+  onSignOut,
+}: {
+  pathname: string;
+  session: ReturnType<typeof useSession>["data"];
+  userRole: string;
+  isAdmin: boolean;
+  onNavigate: () => void;
+  onSignOut: () => void;
+}) {
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-brand-100">
@@ -68,7 +86,7 @@ export function Sidebar() {
       {/* Nav links */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {userNavItems.map((item) => (
-          <NavLink key={item.href} {...item} />
+          <NavLink key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} />
         ))}
 
         {isAdmin && (
@@ -79,7 +97,7 @@ export function Sidebar() {
               </span>
             </div>
             {adminNavItems.map((item) => (
-              <NavLink key={item.href} {...item} />
+              <NavLink key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} />
             ))}
           </>
         )}
@@ -87,7 +105,7 @@ export function Sidebar() {
 
       {/* User + logout */}
       <div className="border-t border-brand-100 p-4">
-        <Link href="/profile" onClick={() => setOpen(false)} className="flex items-center gap-3 px-2 mb-3 rounded-lg hover:bg-brand-50 transition-colors py-1">
+        <Link href="/profile" onClick={onNavigate} className="flex items-center gap-3 px-2 mb-3 rounded-lg hover:bg-brand-50 transition-colors py-1">
           <div className="w-8 h-8 rounded-full bg-brand-200 flex items-center justify-center text-brand-700 font-bold text-sm shrink-0">
             {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
           </div>
@@ -99,7 +117,7 @@ export function Sidebar() {
           </div>
         </Link>
         <button
-          onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push("/login") } })}
+          onClick={onSignOut}
           className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
         >
           <LogOut className="w-4 h-4" />
@@ -108,12 +126,28 @@ export function Sidebar() {
       </div>
     </div>
   );
+}
+
+export function Sidebar() {
+  const { data: session } = useSession();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const userRole = session?.user?.role ?? "user";
+
+  const isAdmin = roleRank[userRole] >= roleRank["admin"];
+
+  const handleNavigate = () => setOpen(false);
+  const handleSignOut = () =>
+    signOut({ fetchOptions: { onSuccess: () => router.push("/login") } });
+
+  const navProps = { pathname, session, userRole, isAdmin, onNavigate: handleNavigate, onSignOut: handleSignOut };
 
   return (
     <>
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-60 shrink-0 flex-col bg-white border-r border-gray-100 min-h-screen">
-        <NavContent />
+        <NavContent {...navProps} />
       </aside>
 
       {/* Mobile toggle */}
@@ -128,7 +162,7 @@ export function Sidebar() {
       {open && (
         <div className="md:hidden fixed inset-0 z-40 flex">
           <div className="w-60 bg-white border-r border-gray-100 flex flex-col">
-            <NavContent />
+            <NavContent {...navProps} />
           </div>
           <div
             className="flex-1 bg-black/30"
