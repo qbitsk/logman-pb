@@ -41,22 +41,15 @@ type WorkStation = {
   workCategoryId: string;
 };
 
-type WorkComponent = {
+type WorkDefect = {
   id: string;
   name: string;
   workCategoryId: string;
 };
 
-type DefectCategory = {
-  id: string;
-  name: string;
-};
-
 type DefectEntry = {
   _key: string;
-  type: "component" | "unit";
-  workComponentId: string;
-  categoryId: string;
+  workDefectId: string;
   units: string;
 };
 
@@ -64,15 +57,14 @@ type Props = {
   submission?: Submission;
   workCategories: WorkCategory[];
   workStations: WorkStation[];
-  workComponents: WorkComponent[];
-  defectCategories: DefectCategory[];
-  existingDefects?: { type: string; workComponentId?: string | null; categoryId?: string | null; units: number }[];
+  workDefects: WorkDefect[];
+  existingDefects?: { workDefectId: string; units: number }[];
   editUrl?: string;
   backUrl?: string;
   allowStatusChange?: boolean;
 };
 
-export function SubmissionForm({ submission, workCategories, workStations, workComponents, defectCategories, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
+export function SubmissionForm({ submission, workCategories, workStations, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
   const router = useRouter();
   const isEdit = !!submission;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/submissions" : "/submissions");
@@ -88,9 +80,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
   const [defects, setDefects] = useState<DefectEntry[]>(() =>
     (existingDefects ?? []).map((d) => ({
       _key: crypto.randomUUID(),
-      type: (d.type as "component" | "unit") ?? "component",
-      workComponentId: d.workComponentId ?? "",
-      categoryId: d.categoryId ?? "",
+      workDefectId: d.workDefectId,
       units: d.units.toString(),
     }))
   );
@@ -112,7 +102,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
     });
     if (key === "workCategoryId") {
       setDefects((prev) =>
-        prev.map((d) => ({ ...d, workComponentId: "", categoryId: "" }))
+        prev.map((d) => ({ ...d, workDefectId: "" }))
       );
     }
     setErrors((prev) => ({ ...prev, [key]: undefined }));
@@ -122,7 +112,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
   function addDefect() {
     setDefects((prev) => [
       ...prev,
-      { _key: crypto.randomUUID(), type: "component", workComponentId: "", categoryId: "", units: "" },
+      { _key: crypto.randomUUID(), workDefectId: "", units: "" },
     ]);
   }
 
@@ -132,16 +122,11 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
 
   function setDefect(
     key: string,
-    field: "type" | "workComponentId" | "categoryId" | "units",
+    field: "workDefectId" | "units",
     value: string
   ) {
     setDefects((prev) =>
-      prev.map((d) => {
-        if (d._key !== key) return d;
-        const next = { ...d, [field]: value };
-        if (field === "workComponentId") next.categoryId = "";
-        return next;
-      })
+      prev.map((d) => (d._key !== key ? d : { ...d, [field]: value }))
     );
   }
 
@@ -174,11 +159,9 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
       const url = isEdit ? (editUrl ?? `/api/admin/submissions/${submission!.id}`) : "/api/submissions";
       const method = isEdit ? "PATCH" : "POST";
       const parsedDefects = defects
-        .filter((d) => d.units)
+        .filter((d) => d.workDefectId && d.units)
         .map((d) => ({
-          type: d.type,
-          workComponentId: d.workComponentId || undefined,
-          categoryId: d.categoryId || undefined,
+          workDefectId: d.workDefectId,
           units: parseInt(d.units, 10),
         }));
 
@@ -365,39 +348,19 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
           )}
           <div className="space-y-2">
             {defects.map((defect) => {
-              const filteredComponents = workComponents.filter(
-                (wc) => wc.workCategoryId === form.workCategoryId
+              const filteredDefects = workDefects.filter(
+                (wd) => wd.workCategoryId === form.workCategoryId
               );
               return (
                 <div key={defect._key} className="flex gap-2 items-center">
                   <select
-                    value={defect.type}
-                    onChange={(e) => setDefect(defect._key, "type", e.target.value)}
-                    className="input w-32"
-                  >
-                    <option value="component">Component</option>
-                    <option value="unit">Unit</option>
-                  </select>
-                  {defect.type === "component" && (
-                    <select
-                      value={defect.workComponentId}
-                      onChange={(e) => setDefect(defect._key, "workComponentId", e.target.value)}
-                      className="input flex-1"
-                    >
-                      <option value="">— Component —</option>
-                      {filteredComponents.map((wc) => (
-                        <option key={wc.id} value={wc.id}>{wc.name}</option>
-                      ))}
-                    </select>
-                  )}
-                  <select
-                    value={defect.categoryId}
-                    onChange={(e) => setDefect(defect._key, "categoryId", e.target.value)}
+                    value={defect.workDefectId}
+                    onChange={(e) => setDefect(defect._key, "workDefectId", e.target.value)}
                     className="input flex-1"
                   >
-                    <option value="">— Defect Category —</option>
-                    {defectCategories.map((dc) => (
-                      <option key={dc.id} value={dc.id}>{dc.name}</option>
+                    <option value="">— Select Defect —</option>
+                    {filteredDefects.map((wd) => (
+                      <option key={wd.id} value={wd.id}>{wd.name}</option>
                     ))}
                   </select>
                   <input

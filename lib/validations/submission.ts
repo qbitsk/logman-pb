@@ -1,9 +1,7 @@
 import { z } from "zod";
 
 export const workSubmissionDefectSchema = z.object({
-  type: z.enum(["component", "unit"]),
-  workComponentId: z.string().optional(),
-  categoryId: z.string().optional(),
+  workDefectId: z.string().min(1, "Please select a defect"),
   units: z.number().int().positive("Units must be a positive number"),
 });
 

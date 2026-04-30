@@ -64,9 +64,7 @@ export async function POST(request: NextRequest) {
     await db.insert(workSubmissionDefects).values(
       result.data.workSubmissionDefects.map((d) => ({
         submissionId: submission.id,
-        type: d.type,
-        workComponentId: d.workComponentId ?? null,
-        categoryId: d.categoryId ?? null,
+        workDefectId: d.workDefectId,
         units: d.units,
       }))
     );

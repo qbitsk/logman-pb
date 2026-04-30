@@ -22,9 +22,8 @@ type Submission = {
 
 type WorkCategory = { id: string; name: string; type: string | null };
 type WorkStation = { id: string; name: string; workCategoryId: string };
-type WorkComponent = { id: string; name: string; workCategoryId: string };
-type DefectCategory = { id: string; name: string };
-type ExistingDefect = { type: string; workComponentId?: string | null; categoryId?: string | null; units: number };
+type WorkDefect = { id: string; name: string; workCategoryId: string };
+type ExistingDefect = { workDefectId: string; units: number };
 
 export default function EditSubmissionPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,8 +33,7 @@ export default function EditSubmissionPage() {
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
   const [categories, setCategories] = useState<WorkCategory[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
-  const [components, setComponents] = useState<WorkComponent[]>([]);
-  const [defectCategories, setDefectCategories] = useState<DefectCategory[]>([]);
+  const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -66,18 +64,14 @@ export default function EditSubmissionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-components").then((r) => r.json()).then(setComponents);
+    fetch("/api/work-defects").then((r) => r.json()).then(setWorkDefects);
   }, []);
 
   useEffect(() => {
-    fetch("/api/categories?type=defect").then((r) => r.json()).then(setDefectCategories);
-  }, []);
-
-  useEffect(() => {
-    if (submission && categories.length && stations.length && components.length && defectCategories.length) {
+    if (submission && categories.length && stations.length && workDefects.length) {
       setLoading(false);
     }
-  }, [submission, categories, stations, components, defectCategories]);
+  }, [submission, categories, stations, workDefects]);
 
   if (notFound) {
     return (
@@ -107,8 +101,7 @@ export default function EditSubmissionPage() {
           submission={{ ...submission!, createdAt: new Date(submission!.createdAt), updatedAt: new Date(submission!.updatedAt) }}
           workCategories={categories}
           workStations={stations}
-          workComponents={components}
-          defectCategories={defectCategories}
+          workDefects={workDefects}
           existingDefects={existingDefects}
           editUrl={`/api/submissions/${id}`}
           backUrl="/submissions"

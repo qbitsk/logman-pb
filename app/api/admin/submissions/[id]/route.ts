@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, workSubmissionDefects } from "@/lib/db/schema";
+import { submissions, users, workSubmissionDefects, workDefects, workComponents, categories, workStations } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -56,17 +56,37 @@ export async function GET(
 
   if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const existingDefects = await db
-    .select({
-      workComponentId: workSubmissionDefects.workComponentId,
-      categoryId: workSubmissionDefects.categoryId,
-      type: workSubmissionDefects.type,
-      units: workSubmissionDefects.units,
-    })
-    .from(workSubmissionDefects)
-    .where(eq(workSubmissionDefects.submissionId, id));
+  const [existingDefects, defectsDisplay, categoryRow, stationRow] = await Promise.all([
+    db
+      .select({
+        workDefectId: workSubmissionDefects.workDefectId,
+        units: workSubmissionDefects.units,
+      })
+      .from(workSubmissionDefects)
+      .where(eq(workSubmissionDefects.submissionId, id)),
+    db
+      .select({
+        workDefectName: workDefects.name,
+        workComponentName: workComponents.name,
+        units: workSubmissionDefects.units,
+      })
+      .from(workSubmissionDefects)
+      .innerJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
+      .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
+      .where(eq(workSubmissionDefects.submissionId, id)),
+    db.select({ name: categories.name }).from(categories).where(eq(categories.id, row.workCategoryId)).limit(1),
+    row.workStationId
+      ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
+      : Promise.resolve([]),
+  ]);
 
-  return NextResponse.json({ ...row, existingDefects });
+  return NextResponse.json({
+    ...row,
+    categoryName: categoryRow[0]?.name ?? null,
+    stationName: (stationRow as { name: string }[])[0]?.name ?? null,
+    existingDefects,
+    defects: defectsDisplay,
+  });
 }
 
 // PATCH /api/admin/submissions/[id]
@@ -104,9 +124,7 @@ export async function PATCH(
     await db.insert(workSubmissionDefects).values(
       defectsPayload.map((d) => ({
         submissionId: id,
-        type: d.type,
-        workComponentId: d.workComponentId ?? null,
-        categoryId: d.categoryId ?? null,
+        workDefectId: d.workDefectId,
         units: d.units,
       }))
     );

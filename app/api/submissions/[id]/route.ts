@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workSubmissionDefects, workComponents, categories, workStations, users } from "@/lib/db/schema";
+import { submissions, workSubmissionDefects, workDefects, workComponents, categories, workStations, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -54,22 +54,20 @@ export async function GET(
   const [existingDefects, defectsDisplay, categoryRow, stationRow] = await Promise.all([
     db
       .select({
-        workComponentId: workSubmissionDefects.workComponentId,
-        categoryId: workSubmissionDefects.categoryId,
-        type: workSubmissionDefects.type,
+        workDefectId: workSubmissionDefects.workDefectId,
         units: workSubmissionDefects.units,
       })
       .from(workSubmissionDefects)
       .where(eq(workSubmissionDefects.submissionId, id)),
     db
       .select({
+        workDefectName: workDefects.name,
         workComponentName: workComponents.name,
-        defectCategoryName: categories.name,
         units: workSubmissionDefects.units,
       })
       .from(workSubmissionDefects)
-      .leftJoin(workComponents, eq(workSubmissionDefects.workComponentId, workComponents.id))
-      .leftJoin(categories, eq(workSubmissionDefects.categoryId, categories.id))
+      .innerJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
+      .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
       .where(eq(workSubmissionDefects.submissionId, id)),
     db.select({ name: categories.name }).from(categories).where(eq(categories.id, row.workCategoryId)).limit(1),
     row.workStationId
@@ -134,9 +132,7 @@ export async function PATCH(
     await db.insert(workSubmissionDefects).values(
       defectsPayload.map((d) => ({
         submissionId: id,
-        type: d.type,
-        workComponentId: d.workComponentId ?? null,
-        categoryId: d.categoryId ?? null,
+        workDefectId: d.workDefectId,
         units: d.units,
       }))
     );

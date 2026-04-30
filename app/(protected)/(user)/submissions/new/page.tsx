@@ -7,16 +7,14 @@ import Link from "next/link";
 
 type WorkCategory = { id: string; name: string; type: string | null };
 type WorkStation = { id: string; name: string; workCategoryId: string };
-type WorkComponent = { id: string; name: string; workCategoryId: string };
-type DefectCategory = { id: string; name: string };
+type WorkDefect = { id: string; name: string; workCategoryId: string };
 
 export default function NewSubmissionPage() {
   const [categories, setCategories] = useState<WorkCategory[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
-  const [components, setComponents] = useState<WorkComponent[]>([]);
-  const [defectCategories, setDefectCategories] = useState<DefectCategory[]>([]);
+  const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
   const [loaded, setLoaded] = useState(0);
-  const loading = loaded < 4;
+  const loading = loaded < 3;
 
   function done() { setLoaded((n) => n + 1); }
 
@@ -29,11 +27,7 @@ export default function NewSubmissionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-components").then((r) => r.json()).then(setComponents).finally(done);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/categories?type=defect").then((r) => r.json()).then(setDefectCategories).finally(done);
+    fetch("/api/work-defects").then((r) => r.json()).then(setWorkDefects).finally(done);
   }, []);
 
   return (
@@ -57,8 +51,7 @@ export default function NewSubmissionPage() {
           <SubmissionForm
             workCategories={categories}
             workStations={stations}
-            workComponents={components}
-            defectCategories={defectCategories}
+            workDefects={workDefects}
           />
         </div>
       )}
