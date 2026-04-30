@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, categories, workStations, workSubmissionDefects, workComponents } from "@/lib/db/schema";
+import { submissions, users, categories, workStations, workSubmissionDefects, workComponents, workDefects } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -50,8 +50,9 @@ export async function GET(request: NextRequest) {
       units: workSubmissionDefects.units,
     })
     .from(workSubmissionDefects)
-    .leftJoin(workComponents, eq(workSubmissionDefects.workComponentId, workComponents.id))
-    .leftJoin(categories, eq(workSubmissionDefects.categoryId, categories.id));
+    .leftJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
+    .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
+    .leftJoin(categories, eq(workDefects.workCategoryId, categories.id));
 
   const typedDefectRows = defectRows.map((d) => ({
     submissionId: d.submissionId,

@@ -8,7 +8,7 @@ import Link from "next/link";
 type WorkCategory = { id: string; name: string; type: string | null };
 type WorkStation = { id: string; name: string; workCategoryId: string };
 type WorkComponent = { id: string; name: string; workCategoryId: string };
-type WorkDefect = { id: string; name: string; workCategoryId: string };
+type WorkDefect = { id: string; name: string; type: "unit" | "component"; workCategoryId: string; workComponentId: string | null };
 
 export default function NewSubmissionPage() {
   const [categories, setCategories] = useState<WorkCategory[]>([]);
