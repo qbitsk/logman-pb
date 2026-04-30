@@ -90,7 +90,7 @@ export default function EditSubmissionPage() {
   return (
     <div>
       <Link
-        href={`/submissions/${id}`}
+        href="/submissions"
         className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 mb-6"
       >
         <ArrowLeft className="w-4 h-4" />

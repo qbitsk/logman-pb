@@ -70,21 +70,12 @@ export default function UserSubmissionDetailPage() {
     <div className="max-w-2xl">
       <div className="mb-6 flex items-center justify-between">
         <Link
-          href={isAdmin ? "/admin/submissions" : "/submissions"}
+          href="/submissions"
           className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
         </Link>
-        {isAdmin && (
-          <Link
-            href={`/admin/submissions/${submission.id}`}
-            className="btn-primary inline-flex items-center gap-1.5"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            Edit
-          </Link>
-        )}
       </div>
 
       <div className="mb-6">
