@@ -62,6 +62,7 @@ export async function GET(
     db
       .select({
         workDefectName: workDefects.name,
+        workDefectType: workDefects.type,
         workComponentName: workComponents.name,
         units: workSubmissionDefects.units,
       })

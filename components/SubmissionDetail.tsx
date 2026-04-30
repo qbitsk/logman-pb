@@ -13,7 +13,7 @@ export type SubmissionDetailData = {
   updatedAt: string;
   categoryName: string | null;
   stationName: string | null;
-  defects: { workDefectName?: string | null; workComponentName?: string | null; units: number }[];
+  defects: { workDefectName?: string | null; workDefectType?: string | null; workComponentName?: string | null; units: number }[];
   userName?: string;
   userEmail?: string;
 };
@@ -32,8 +32,8 @@ const statusStyles: Record<string, string> = {
 };
 
 export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
-  const defectedUnits = submission.defects.reduce((sum, d) => sum + d.units, 0);
-  const goodUnits = submission.units != null ? submission.units - defectedUnits : null;
+  const defectedComponents = submission.defects.filter((d) => d.workDefectType === "component").reduce((sum, d) => sum + d.units, 0);
+  const defectedUnits = submission.defects.filter((d) => d.workDefectType === "unit").reduce((sum, d) => sum + d.units, 0);
   const wasUpdated = new Date(submission.updatedAt) > new Date(submission.createdAt);
 
   return (
@@ -95,7 +95,7 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
           <>
             <div>
               <p className="label">Units</p>
-              <p className="text-sm text-gray-800 dark:text-gray-200">{submission.units}</p>
+              <p className="text-sm text-emerald-600">{submission.units}</p>
             </div>
             {submission.defects.length > 0 && (
               <>
@@ -104,8 +104,8 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
                   <p className="text-sm text-red-600 font-medium">{defectedUnits}</p>
                 </div>
                 <div>
-                  <p className="label">Produced Units</p>
-                  <p className="text-sm text-emerald-600 font-medium">{goodUnits}</p>
+                  <p className="label">Defected Components</p>
+                  <p className="text-sm text-red-500 font-medium">{defectedComponents}</p>
                 </div>
               </>
             )}
