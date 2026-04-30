@@ -90,7 +90,7 @@ export default function SubmissionsPage() {
                         </Link>
                       )}
                       {(s.status === "draft" || s.status === "submitted") && (
-                        <DeleteSubmissionButton id={s.id} apiPath="/api/submissions" />
+                        <DeleteSubmissionButton id={s.id} apiPath="/api/submissions" onDeleted={(id) => setUserSubmissions((prev) => prev.filter((x) => x.id !== id))} />
                       )}
                     </div>
                   </td>

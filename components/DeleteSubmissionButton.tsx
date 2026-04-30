@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 export function DeleteSubmissionButton({
   id,
   apiPath,
+  onDeleted,
 }: {
   id: string;
   apiPath: string;
+  onDeleted?: (id: string) => void;
 }) {
   const router = useRouter();
 
@@ -16,7 +18,11 @@ export function DeleteSubmissionButton({
     if (!confirm("Delete this submission? This action cannot be undone.")) return;
     const res = await fetch(`${apiPath}/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
-      router.refresh();
+      if (onDeleted) {
+        onDeleted(id);
+      } else {
+        router.refresh();
+      }
     }
   }
 

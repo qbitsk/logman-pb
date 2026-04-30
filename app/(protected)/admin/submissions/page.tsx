@@ -85,7 +85,7 @@ export default function AdminSubmissionsPage() {
                       <Link href={`/admin/submissions/${s.id}/edit`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors" aria-label="Edit submission">
                         <Pencil className="w-4 h-4" />
                       </Link>
-                      <DeleteSubmissionButton id={s.id} apiPath="/api/admin/submissions" />
+                      <DeleteSubmissionButton id={s.id} apiPath="/api/admin/submissions" onDeleted={(id) => setRows((prev) => prev.filter((x) => x.id !== id))} />
                     </div>
                   </td>
                 </tr>
