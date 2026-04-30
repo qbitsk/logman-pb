@@ -388,8 +388,8 @@ export default function WorkCategoriesPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-950  dark:text-white">Categories</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage categories, components and defect categories.</p>
+        <h1 className="text-2xl font-bold text-brand-950  dark:text-white">Definitions</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage categories, components and defects.</p>
       </div>
 
       {/* Tabs */}
