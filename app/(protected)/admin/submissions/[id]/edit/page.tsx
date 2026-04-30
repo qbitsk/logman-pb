@@ -20,6 +20,7 @@ type Submission = {
 
 type WorkCategory = { id: string; name: string; type: string | null };
 type WorkStation = { id: string; name: string; workCategoryId: string };
+type WorkComponent = { id: string; name: string; workCategoryId: string };
 type WorkDefect = { id: string; name: string; workCategoryId: string };
 type ExistingDefect = { workDefectId: string; units: number };
 
@@ -31,6 +32,7 @@ export default function AdminSubmissionEditPage() {
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
   const [categories, setCategories] = useState<WorkCategory[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
+  const [components, setComponents] = useState<WorkComponent[]>([]);
   const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -58,14 +60,18 @@ export default function AdminSubmissionEditPage() {
   }, []);
 
   useEffect(() => {
+    fetch("/api/work-components").then((r) => r.json()).then(setComponents);
+  }, []);
+
+  useEffect(() => {
     fetch("/api/work-defects").then((r) => r.json()).then(setWorkDefects);
   }, []);
 
   useEffect(() => {
-    if (submission && categories.length && stations.length && workDefects.length) {
+    if (submission && categories.length && stations.length && components.length && workDefects.length) {
       setLoading(false);
     }
-  }, [submission, categories, stations, workDefects]);
+  }, [submission, categories, stations, components, workDefects]);
 
   if (notFound) {
     return (
@@ -91,6 +97,7 @@ export default function AdminSubmissionEditPage() {
           submission={{ ...submission!, createdAt: new Date(submission!.createdAt), updatedAt: new Date(submission!.updatedAt) }}
           workCategories={categories}
           workStations={stations}
+          workComponents={components}
           workDefects={workDefects}
           existingDefects={existingDefects}
           backUrl="/admin/submissions"

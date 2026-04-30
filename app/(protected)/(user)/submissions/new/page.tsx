@@ -7,14 +7,16 @@ import Link from "next/link";
 
 type WorkCategory = { id: string; name: string; type: string | null };
 type WorkStation = { id: string; name: string; workCategoryId: string };
+type WorkComponent = { id: string; name: string; workCategoryId: string };
 type WorkDefect = { id: string; name: string; workCategoryId: string };
 
 export default function NewSubmissionPage() {
   const [categories, setCategories] = useState<WorkCategory[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
+  const [components, setComponents] = useState<WorkComponent[]>([]);
   const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
   const [loaded, setLoaded] = useState(0);
-  const loading = loaded < 3;
+  const loading = loaded < 4;
 
   function done() { setLoaded((n) => n + 1); }
 
@@ -24,6 +26,10 @@ export default function NewSubmissionPage() {
 
   useEffect(() => {
     fetch("/api/work-stations").then((r) => r.json()).then(setStations).finally(done);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/work-components").then((r) => r.json()).then(setComponents).finally(done);
   }, []);
 
   useEffect(() => {
@@ -51,6 +57,7 @@ export default function NewSubmissionPage() {
           <SubmissionForm
             workCategories={categories}
             workStations={stations}
+            workComponents={components}
             workDefects={workDefects}
           />
         </div>

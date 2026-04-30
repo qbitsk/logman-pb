@@ -41,14 +41,26 @@ type WorkStation = {
   workCategoryId: string;
 };
 
-type WorkDefect = {
+type WorkComponent = {
   id: string;
   name: string;
   workCategoryId: string;
 };
 
+type WorkDefect = {
+  id: string;
+  name: string;
+  type: "unit" | "component";
+  workCategoryId: string;
+  workComponentId: string | null;
+};
+
 type DefectEntry = {
   _key: string;
+  /** UI-only: drives cascading filters */
+  type: "unit" | "component";
+  /** UI-only: drives cascading filter for component-type defects */
+  workComponentId: string;
   workDefectId: string;
   units: string;
 };
@@ -57,6 +69,7 @@ type Props = {
   submission?: Submission;
   workCategories: WorkCategory[];
   workStations: WorkStation[];
+  workComponents: WorkComponent[];
   workDefects: WorkDefect[];
   existingDefects?: { workDefectId: string; units: number }[];
   editUrl?: string;
@@ -64,7 +77,7 @@ type Props = {
   allowStatusChange?: boolean;
 };
 
-export function SubmissionForm({ submission, workCategories, workStations, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
+export function SubmissionForm({ submission, workCategories, workStations, workComponents, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
   const router = useRouter();
   const isEdit = !!submission;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/submissions" : "/submissions");
@@ -78,11 +91,16 @@ export function SubmissionForm({ submission, workCategories, workStations, workD
     status: submission?.status ?? "draft",
   });
   const [defects, setDefects] = useState<DefectEntry[]>(() =>
-    (existingDefects ?? []).map((d) => ({
-      _key: crypto.randomUUID(),
-      workDefectId: d.workDefectId,
-      units: d.units.toString(),
-    }))
+    (existingDefects ?? []).map((d) => {
+      const wd = workDefects.find((w) => w.id === d.workDefectId);
+      return {
+        _key: crypto.randomUUID(),
+        type: wd?.type ?? "component",
+        workComponentId: wd?.workComponentId ?? "",
+        workDefectId: d.workDefectId,
+        units: d.units.toString(),
+      };
+    })
   );
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof SubmissionInput, string>>>({});
@@ -102,7 +120,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workD
     });
     if (key === "workCategoryId") {
       setDefects((prev) =>
-        prev.map((d) => ({ ...d, workDefectId: "" }))
+        prev.map((d) => ({ ...d, workComponentId: "", workDefectId: "" }))
       );
     }
     setErrors((prev) => ({ ...prev, [key]: undefined }));
@@ -112,7 +130,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workD
   function addDefect() {
     setDefects((prev) => [
       ...prev,
-      { _key: crypto.randomUUID(), workDefectId: "", units: "" },
+      { _key: crypto.randomUUID(), type: "component", workComponentId: "", workDefectId: "", units: "" },
     ]);
   }
 
@@ -122,11 +140,17 @@ export function SubmissionForm({ submission, workCategories, workStations, workD
 
   function setDefect(
     key: string,
-    field: "workDefectId" | "units",
+    field: "type" | "workComponentId" | "workDefectId" | "units",
     value: string
   ) {
     setDefects((prev) =>
-      prev.map((d) => (d._key !== key ? d : { ...d, [field]: value }))
+      prev.map((d) => {
+        if (d._key !== key) return d;
+        const next = { ...d, [field]: value };
+        if (field === "type") { next.workComponentId = ""; next.workDefectId = ""; }
+        if (field === "workComponentId") next.workDefectId = "";
+        return next;
+      })
     );
   }
 
@@ -348,17 +372,45 @@ export function SubmissionForm({ submission, workCategories, workStations, workD
           )}
           <div className="space-y-2">
             {defects.map((defect) => {
-              const filteredDefects = workDefects.filter(
-                (wd) => wd.workCategoryId === form.workCategoryId
+              const filteredComponents = workComponents.filter(
+                (wc) => wc.workCategoryId === form.workCategoryId
               );
+              const filteredDefects = workDefects.filter((wd) => {
+                if (wd.workCategoryId !== form.workCategoryId) return false;
+                if (wd.type !== defect.type) return false;
+                if (defect.type === "component") {
+                  return wd.workComponentId === (defect.workComponentId || null);
+                }
+                return true;
+              });
               return (
-                <div key={defect._key} className="flex gap-2 items-center">
+                <div key={defect._key} className="flex flex-wrap gap-2 items-center">
+                  <select
+                    value={defect.type}
+                    onChange={(e) => setDefect(defect._key, "type", e.target.value)}
+                    className="input w-36"
+                  >
+                    <option value="component">Component</option>
+                    <option value="unit">Unit</option>
+                  </select>
+                  {defect.type === "component" && (
+                    <select
+                      value={defect.workComponentId}
+                      onChange={(e) => setDefect(defect._key, "workComponentId", e.target.value)}
+                      className="input flex-1 min-w-[140px]"
+                    >
+                      <option value="">— Component —</option>
+                      {filteredComponents.map((wc) => (
+                        <option key={wc.id} value={wc.id}>{wc.name}</option>
+                      ))}
+                    </select>
+                  )}
                   <select
                     value={defect.workDefectId}
                     onChange={(e) => setDefect(defect._key, "workDefectId", e.target.value)}
-                    className="input flex-1"
+                    className="input flex-1 min-w-[140px]"
                   >
-                    <option value="">— Select Defect —</option>
+                    <option value="">— Defect —</option>
                     {filteredDefects.map((wd) => (
                       <option key={wd.id} value={wd.id}>{wd.name}</option>
                     ))}
