@@ -127,10 +127,10 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
     setSuccess(false);
   }
 
-  function addDefect() {
+  function addDefect(type: "unit" | "component") {
     setDefects((prev) => [
       ...prev,
-      { _key: crypto.randomUUID(), type: "component", workComponentId: "", workDefectId: "", units: "" },
+      { _key: crypto.randomUUID(), type, workComponentId: "", workDefectId: "", units: "" },
     ]);
   }
 
@@ -363,9 +363,14 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="label">Defects</label>
-            <button type="button" onClick={addDefect} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
-              <Plus className="w-3 h-3" /> Add Defect
-            </button>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => addDefect("unit")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
+                <Plus className="w-3 h-3" /> Add Unit Defect
+              </button>
+              <button type="button" onClick={() => addDefect("component")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
+                <Plus className="w-3 h-3" /> Add Component Defect
+              </button>
+            </div>
           </div>
           {defects.length === 0 && (
             <p className="text-sm text-gray-400 dark:text-gray-500 italic">No defects added.</p>
@@ -386,14 +391,6 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
               });
               return (
                 <div key={defect._key} className="flex flex-wrap gap-2 items-center">
-                  <select
-                    value={defect.type}
-                    onChange={(e) => setDefect(defect._key, "type", e.target.value)}
-                    className="input w-36"
-                  >
-                    <option value="component">Component</option>
-                    <option value="unit">Unit</option>
-                  </select>
                   {defect.type === "component" && (
                     <select
                       value={defect.workComponentId}
