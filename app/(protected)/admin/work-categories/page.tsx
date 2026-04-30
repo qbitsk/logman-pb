@@ -30,12 +30,21 @@ type WorkDefect = {
   createdAt: string;
 };
 
-type Tab = "categories" | "components" | "defects";
+type UnitDefect = {
+  id: string;
+  name: string;
+  workCategoryId: string;
+  categoryName: string | null;
+  createdAt: string;
+};
+
+type Tab = "categories" | "components" | "defects" | "unitdefects";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "categories", label: "Categories" },
   { id: "components", label: "Components" },
   { id: "defects", label: "Component Defects" },
+  { id: "unitdefects", label: "Unit Defects" },
 ];
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -93,6 +102,14 @@ export default function WorkCategoriesPage() {
   const [defError, setDefError] = useState<string | null>(null);
   const [defSaving, setDefSaving] = useState(false);
 
+  // ── Unit Defects state ──
+  const [unitDefects, setUnitDefects] = useState<UnitDefect[]>([]);
+  const [unitDefLoading, setUnitDefLoading] = useState(true);
+  const [unitDefModal, setUnitDefModal] = useState<{ open: boolean; editing: UnitDefect | null }>({ open: false, editing: null });
+  const [unitDefForm, setUnitDefForm] = useState({ name: "", workCategoryId: "" });
+  const [unitDefError, setUnitDefError] = useState<string | null>(null);
+  const [unitDefSaving, setUnitDefSaving] = useState(false);
+
   // ── Fetch ──
   useEffect(() => {
     fetch("/api/admin/categories?type=work")
@@ -109,10 +126,27 @@ export default function WorkCategoriesPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/work-defects")
+    fetch("/api/admin/work-defects?type=component")
       .then((r) => r.json())
       .then(setDefects)
       .finally(() => setDefLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/work-defects?type=unit")
+      .then((r) => r.json())
+      .then((rows) =>
+        setUnitDefects(
+          rows.map((r: WorkDefect & { workCategoryId: string }) => ({
+            id: r.id,
+            name: r.name,
+            workCategoryId: r.workCategoryId,
+            categoryName: r.categoryName,
+            createdAt: r.createdAt,
+          }))
+        )
+      )
+      .finally(() => setUnitDefLoading(false));
   }, []);
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -279,6 +313,71 @@ export default function WorkCategoriesPage() {
     const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setDefects((prev) => prev.filter((d) => d.id !== id));
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Unit Defects handlers
+  // ───────────────────────────────────────────────────────────────────────────
+
+  function openUnitDefCreate() {
+    setUnitDefForm({ name: "", workCategoryId: categories[0]?.id ?? "" });
+    setUnitDefError(null);
+    setUnitDefModal({ open: true, editing: null });
+  }
+
+  function openUnitDefEdit(def: UnitDefect) {
+    setUnitDefForm({ name: def.name, workCategoryId: def.workCategoryId });
+    setUnitDefError(null);
+    setUnitDefModal({ open: true, editing: def });
+  }
+
+  async function submitUnitDef(e: React.FormEvent) {
+    e.preventDefault();
+    setUnitDefError(null);
+    setUnitDefSaving(true);
+
+    const isEdit = !!unitDefModal.editing;
+    const url = isEdit
+      ? `/api/admin/work-defects/${unitDefModal.editing!.id}`
+      : "/api/admin/work-defects";
+
+    const payload = isEdit
+      ? { name: unitDefForm.name, workCategoryId: unitDefForm.workCategoryId }
+      : { name: unitDefForm.name, workCategoryId: unitDefForm.workCategoryId, type: "unit" };
+
+    const res = await fetch(url, {
+      method: isEdit ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      const saved = await res.json();
+      const catName = categories.find((c) => c.id === saved.workCategoryId)?.name ?? null;
+      const enriched: UnitDefect = {
+        id: saved.id,
+        name: saved.name,
+        workCategoryId: saved.workCategoryId,
+        categoryName: catName,
+        createdAt: saved.createdAt,
+      };
+      setUnitDefects((prev) =>
+        isEdit ? prev.map((d) => (d.id === enriched.id ? enriched : d)) : [...prev, enriched]
+      );
+      setUnitDefModal({ open: false, editing: null });
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setUnitDefError(err?.error ?? "Failed to save");
+    }
+    setUnitDefSaving(false);
+  }
+
+  async function deleteUnitDef(id: string) {
+    if (!confirm("Delete this unit defect?")) return;
+    const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
+    if (res.ok || res.status === 204) {
+      setUnitDefects((prev) => prev.filter((d) => d.id !== id));
     }
   }
 
@@ -457,6 +556,54 @@ export default function WorkCategoriesPage() {
         </div>
       )}
 
+      {/* ── Unit Defects tab ── */}
+      {activeTab === "unitdefects" && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} unit defects</span>
+            <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={categories.length === 0}>
+              <Plus className="w-4 h-4" />
+              Unit Defect
+            </button>
+          </div>
+          {unitDefLoading ? (
+            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+          ) : unitDefects.length === 0 ? (
+            <div className="card text-center py-12 text-gray-400 text-sm">No unit defects yet.</div>
+          ) : (
+            <div className="card p-0 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                    <th className="px-5 py-3" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {unitDefects.map((def) => (
+                    <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.categoryName ?? "—"}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => openUnitDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => deleteUnitDef(def.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Category Modal ── */}
       {catModal.open && (
         <Modal
@@ -570,6 +717,50 @@ export default function WorkCategoriesPage() {
               </button>
               <button type="submit" disabled={defSaving} className="btn-primary">
                 {defSaving ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* ── Unit Defect Modal ── */}
+      {unitDefModal.open && (
+        <Modal
+          title={unitDefModal.editing ? "Edit Unit Defect" : "New Unit Defect"}
+          onClose={() => setUnitDefModal({ open: false, editing: null })}
+        >
+          <form onSubmit={submitUnitDef} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <input
+                className="input w-full"
+                value={unitDefForm.name}
+                onChange={(e) => setUnitDefForm((f) => ({ ...f, name: e.target.value }))}
+                required
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Category</label>
+              <select
+                className="input w-full"
+                value={unitDefForm.workCategoryId}
+                onChange={(e) => setUnitDefForm((f) => ({ ...f, workCategoryId: e.target.value }))}
+                required
+              >
+                <option value="">— Select Category —</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+            {unitDefError && <p className="text-sm text-red-600">{unitDefError}</p>}
+            <div className="flex justify-end gap-3 pt-1">
+              <button type="button" onClick={() => setUnitDefModal({ open: false, editing: null })} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" disabled={unitDefSaving} className="btn-primary">
+                {unitDefSaving ? "Saving…" : "Save"}
               </button>
             </div>
           </form>

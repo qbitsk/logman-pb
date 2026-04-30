@@ -15,6 +15,7 @@ async function requireAdmin() {
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
   workComponentId: z.string().min(1).optional(),
+  workCategoryId: z.string().min(1).optional(),
 });
 
 export async function PATCH(
@@ -34,6 +35,7 @@ export async function PATCH(
 
   const update: Record<string, unknown> = { updatedAt: new Date() };
   if (result.data.name) update.name = result.data.name;
+  if (result.data.workCategoryId) update.workCategoryId = result.data.workCategoryId;
 
   if (result.data.workComponentId) {
     const component = await db

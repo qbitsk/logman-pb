@@ -12,17 +12,24 @@ async function requireAdmin() {
   return session;
 }
 
-const bodySchema = z.object({
+const componentBodySchema = z.object({
   name: z.string().min(1),
   workComponentId: z.string().min(1),
 });
 
-export async function GET() {
+const unitBodySchema = z.object({
+  name: z.string().min(1),
+  workCategoryId: z.string().min(1),
+});
+
+export async function GET(request: NextRequest) {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const rows = await db
+  const type = request.nextUrl.searchParams.get("type") as "component" | "unit" | null;
+
+  const componentRows = await db
     .select({
       id: workDefects.id,
       name: workDefects.name,
@@ -36,10 +43,11 @@ export async function GET() {
     })
     .from(workDefects)
     .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-    .leftJoin(categories, eq(workComponents.workCategoryId, categories.id))
-    .orderBy(workComponents.name, categories.name, workDefects.name);
+    .leftJoin(categories, eq(workDefects.workCategoryId, categories.id))
+    .where(type ? eq(workDefects.type, type) : undefined)
+    .orderBy(categories.name, workComponents.name, workDefects.name);
 
-  return NextResponse.json(rows);
+  return NextResponse.json(componentRows);
 }
 
 export async function POST(request: NextRequest) {
@@ -48,7 +56,27 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const result = bodySchema.safeParse(body);
+  const { type } = body;
+
+  if (type === "unit") {
+    const result = unitBodySchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+    const [created] = await db
+      .insert(workDefects)
+      .values({
+        name: result.data.name,
+        type: "unit",
+        workCategoryId: result.data.workCategoryId,
+        workComponentId: null,
+      })
+      .returning();
+    return NextResponse.json(created, { status: 201 });
+  }
+
+  // default: component
+  const result = componentBodySchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
