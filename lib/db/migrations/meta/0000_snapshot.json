@@ -1,5 +1,5 @@
 {
-  "id": "caebd05e-61d4-40ea-b80f-6bc06b7b7ac8",
+  "id": "f33cbcab-f4fa-4f0e-998c-e42a44c435a7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -513,6 +513,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "work_component_id": {
+          "name": "work_component_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -536,6 +542,19 @@
           "tableTo": "categories",
           "columnsFrom": [
             "work_category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "work_defects_work_component_id_work_components_id_fk": {
+          "name": "work_defects_work_component_id_work_components_id_fk",
+          "tableFrom": "work_defects",
+          "tableTo": "work_components",
+          "columnsFrom": [
+            "work_component_id"
           ],
           "columnsTo": [
             "id"
