@@ -61,7 +61,7 @@ export function Sidebar() {
       <div className="px-6 py-5 border-b border-brand-100">
         <div className="flex items-center gap-2 pl-10 md:pl-0">
           <Triangle className="w-6 h-6 text-brand-600" />
-          <Image src="/images/logo-brand.png" alt="Logman PB" width={100} height={24} />
+          <Image src="/images/logo-brand.png" alt="Logman PB" width={100} height={24} style={{ height: "auto" }} />
         </div>
       </div>
 

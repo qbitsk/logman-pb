@@ -36,7 +36,7 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600">
               <Triangle className="w-6 h-6 text-white" />
             </div>
-            <Image src="/images/logo-brand.png" alt="Logman PB" width={140} height={32} />
+            <Image src="/images/logo-brand.png" alt="Logman PB" width={140} height={32} style={{ height: "auto" }} loading="eager" />
           </div>
         </div>
 
