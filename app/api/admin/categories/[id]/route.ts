@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workCategories } from "@/lib/db/schema";
+import { categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,7 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
-  type: z.enum(["assembly", "other"]).nullable().optional(),
+  type: z.enum(["work", "defect"]).optional(),
 });
 
 export async function PATCH(
@@ -33,9 +33,9 @@ export async function PATCH(
   }
 
   const [updated] = await db
-    .update(workCategories)
+    .update(categories)
     .set({ ...result.data, updatedAt: new Date() })
-    .where(eq(workCategories.id, id))
+    .where(eq(categories.id, id))
     .returning();
 
   if (!updated) {
@@ -56,9 +56,9 @@ export async function DELETE(
   const { id } = await params;
 
   const [deleted] = await db
-    .delete(workCategories)
-    .where(eq(workCategories.id, id))
-    .returning({ id: workCategories.id });
+    .delete(categories)
+    .where(eq(categories.id, id))
+    .returning({ id: categories.id });
 
   if (!deleted) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

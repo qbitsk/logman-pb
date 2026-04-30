@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workComponents, workCategories } from "@/lib/db/schema";
+import { workComponents, categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -27,13 +27,13 @@ export async function GET() {
       id: workComponents.id,
       name: workComponents.name,
       workCategoryId: workComponents.workCategoryId,
-      categoryName: workCategories.name,
+      categoryName: categories.name,
       createdAt: workComponents.createdAt,
       updatedAt: workComponents.updatedAt,
     })
     .from(workComponents)
-    .innerJoin(workCategories, eq(workComponents.workCategoryId, workCategories.id))
-    .orderBy(workCategories.name, workComponents.name);
+    .innerJoin(categories, eq(workComponents.workCategoryId, categories.id))
+    .orderBy(categories.name, workComponents.name);
 
   return NextResponse.json(rows);
 }

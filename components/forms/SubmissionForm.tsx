@@ -47,16 +47,16 @@ type WorkComponent = {
   workCategoryId: string;
 };
 
-type WorkComponentDefectCategory = {
+type DefectCategory = {
   id: string;
   name: string;
-  workComponentId: string;
 };
 
 type DefectEntry = {
   _key: string;
+  type: "component" | "unit";
   workComponentId: string;
-  workComponentDefectCategoryId: string;
+  categoryId: string;
   units: string;
 };
 
@@ -65,13 +65,14 @@ type Props = {
   workCategories: WorkCategory[];
   workStations: WorkStation[];
   workComponents: WorkComponent[];
-  workComponentDefectCategories: WorkComponentDefectCategory[];
-  existingDefects?: { workComponentId: string; workComponentDefectCategoryId: string; units: number }[];
+  defectCategories: DefectCategory[];
+  existingDefects?: { type: string; workComponentId?: string | null; categoryId?: string | null; units: number }[];
   editUrl?: string;
   backUrl?: string;
+  allowStatusChange?: boolean;
 };
 
-export function SubmissionForm({ submission, workCategories, workStations, workComponents, workComponentDefectCategories, existingDefects, editUrl, backUrl }: Props) {
+export function SubmissionForm({ submission, workCategories, workStations, workComponents, defectCategories, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
   const router = useRouter();
   const isEdit = !!submission;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/submissions" : "/submissions");
@@ -87,8 +88,9 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
   const [defects, setDefects] = useState<DefectEntry[]>(() =>
     (existingDefects ?? []).map((d) => ({
       _key: crypto.randomUUID(),
-      workComponentId: d.workComponentId,
-      workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+      type: (d.type as "component" | "unit") ?? "component",
+      workComponentId: d.workComponentId ?? "",
+      categoryId: d.categoryId ?? "",
       units: d.units.toString(),
     }))
   );
@@ -110,7 +112,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
     });
     if (key === "workCategoryId") {
       setDefects((prev) =>
-        prev.map((d) => ({ ...d, workComponentId: "", workComponentDefectCategoryId: "" }))
+        prev.map((d) => ({ ...d, workComponentId: "", categoryId: "" }))
       );
     }
     setErrors((prev) => ({ ...prev, [key]: undefined }));
@@ -120,7 +122,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
   function addDefect() {
     setDefects((prev) => [
       ...prev,
-      { _key: crypto.randomUUID(), workComponentId: "", workComponentDefectCategoryId: "", units: "" },
+      { _key: crypto.randomUUID(), type: "component", workComponentId: "", categoryId: "", units: "" },
     ]);
   }
 
@@ -130,14 +132,14 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
 
   function setDefect(
     key: string,
-    field: "workComponentId" | "workComponentDefectCategoryId" | "units",
+    field: "type" | "workComponentId" | "categoryId" | "units",
     value: string
   ) {
     setDefects((prev) =>
       prev.map((d) => {
         if (d._key !== key) return d;
         const next = { ...d, [field]: value };
-        if (field === "workComponentId") next.workComponentDefectCategoryId = "";
+        if (field === "workComponentId") next.categoryId = "";
         return next;
       })
     );
@@ -172,16 +174,17 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
       const url = isEdit ? (editUrl ?? `/api/admin/submissions/${submission!.id}`) : "/api/submissions";
       const method = isEdit ? "PATCH" : "POST";
       const parsedDefects = defects
-        .filter((d) => d.workComponentId && d.workComponentDefectCategoryId && d.units)
+        .filter((d) => d.units)
         .map((d) => ({
-          workComponentId: d.workComponentId,
-          workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+          type: d.type,
+          workComponentId: d.workComponentId || undefined,
+          categoryId: d.categoryId || undefined,
           units: parseInt(d.units, 10),
         }));
 
       const body = isEdit
-        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workComponentDefects: parsedDefects })
-        : JSON.stringify({ workCategoryId: form.workCategoryId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workComponentDefects: parsedDefects });
+        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workDefects: parsedDefects })
+        : JSON.stringify({ workCategoryId: form.workCategoryId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workDefects: parsedDefects });
 
       const res = await fetch(url, {
         method,
@@ -232,7 +235,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
           </div>
         )}
 
-        {isEdit && (
+        {isEdit && allowStatusChange && (
           <div>
             <label className="label" htmlFor="status">Status</label>
             <div className="flex flex-wrap gap-2 mt-1">
@@ -365,29 +368,35 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
               const filteredComponents = workComponents.filter(
                 (wc) => wc.workCategoryId === form.workCategoryId
               );
-              const filteredDefectCategories = workComponentDefectCategories.filter(
-                (dc) => dc.workComponentId === defect.workComponentId
-              );
               return (
                 <div key={defect._key} className="flex gap-2 items-center">
                   <select
-                    value={defect.workComponentId}
-                    onChange={(e) => setDefect(defect._key, "workComponentId", e.target.value)}
-                    className="input flex-1"
+                    value={defect.type}
+                    onChange={(e) => setDefect(defect._key, "type", e.target.value)}
+                    className="input w-32"
                   >
-                    <option value="">— Component —</option>
-                    {filteredComponents.map((wc) => (
-                      <option key={wc.id} value={wc.id}>{wc.name}</option>
-                    ))}
+                    <option value="component">Component</option>
+                    <option value="unit">Unit</option>
                   </select>
+                  {defect.type === "component" && (
+                    <select
+                      value={defect.workComponentId}
+                      onChange={(e) => setDefect(defect._key, "workComponentId", e.target.value)}
+                      className="input flex-1"
+                    >
+                      <option value="">— Component —</option>
+                      {filteredComponents.map((wc) => (
+                        <option key={wc.id} value={wc.id}>{wc.name}</option>
+                      ))}
+                    </select>
+                  )}
                   <select
-                    value={defect.workComponentDefectCategoryId}
-                    onChange={(e) => setDefect(defect._key, "workComponentDefectCategoryId", e.target.value)}
+                    value={defect.categoryId}
+                    onChange={(e) => setDefect(defect._key, "categoryId", e.target.value)}
                     className="input flex-1"
-                    disabled={!defect.workComponentId}
                   >
                     <option value="">— Defect Category —</option>
-                    {filteredDefectCategories.map((dc) => (
+                    {defectCategories.map((dc) => (
                       <option key={dc.id} value={dc.id}>{dc.name}</option>
                     ))}
                   </select>

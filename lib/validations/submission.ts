@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-export const workComponentDefectSchema = z.object({
-  workComponentId: z.string().min(1, "Please select a component"),
-  workComponentDefectCategoryId: z.string().min(1, "Please select a defect category"),
+export const workDefectSchema = z.object({
+  type: z.enum(["component", "unit"]),
+  workComponentId: z.string().optional(),
+  categoryId: z.string().optional(),
   units: z.number().int().positive("Units must be a positive number"),
 });
 
@@ -12,8 +13,8 @@ export const submissionSchema = z.object({
   units: z.number().int().positive("Units must be a positive number").optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500, "Notes must be under 500 characters").optional(),
-  workComponentDefects: z.array(workComponentDefectSchema).optional(),
+  workDefects: z.array(workDefectSchema).optional(),
 });
 
 export type SubmissionInput = z.infer<typeof submissionSchema>;
-export type WorkComponentDefectInput = z.infer<typeof workComponentDefectSchema>;
+export type WorkDefectInput = z.infer<typeof workDefectSchema>;

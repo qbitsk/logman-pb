@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workComponentDefects, workCategories } from "@/lib/db/schema";
+import { submissions, workDefects, categories } from "@/lib/db/schema";
 import { submissionSchema } from "@/lib/validations/submission";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -20,10 +20,10 @@ export async function GET() {
       status: submissions.status,
       units: submissions.units,
       createdAt: submissions.createdAt,
-      categoryName: workCategories.name,
+      categoryName: categories.name,
     })
     .from(submissions)
-    .innerJoin(workCategories, eq(submissions.workCategoryId, workCategories.id))
+    .innerJoin(categories, eq(submissions.workCategoryId, categories.id))
     .where(eq(submissions.userId, session.user.id))
     .orderBy(submissions.createdAt);
 
@@ -60,12 +60,13 @@ export async function POST(request: NextRequest) {
     })
     .returning();
 
-  if (result.data.workComponentDefects?.length) {
-    await db.insert(workComponentDefects).values(
-      result.data.workComponentDefects.map((d) => ({
+  if (result.data.workDefects?.length) {
+    await db.insert(workDefects).values(
+      result.data.workDefects.map((d) => ({
         submissionId: submission.id,
-        workComponentId: d.workComponentId,
-        workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+        type: d.type,
+        workComponentId: d.workComponentId ?? null,
+        categoryId: d.categoryId ?? null,
         units: d.units,
       }))
     );

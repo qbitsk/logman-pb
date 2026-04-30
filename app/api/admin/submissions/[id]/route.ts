@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, workComponentDefects } from "@/lib/db/schema";
+import { submissions, users, workDefects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { workComponentDefectSchema } from "@/lib/validations/submission";
+import { workDefectSchema } from "@/lib/validations/submission";
 
 const patchSchema = z.object({
   workCategoryId: z.string().min(1).optional(),
@@ -14,7 +14,7 @@ const patchSchema = z.object({
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   status: z.enum(["draft", "submitted", "approved", "rejected"]).optional(),
-  workComponentDefects: z.array(workComponentDefectSchema).optional(),
+  workDefects: z.array(workDefectSchema).optional(),
 });
 
 async function requireAdmin() {
@@ -58,12 +58,13 @@ export async function GET(
 
   const existingDefects = await db
     .select({
-      workComponentId: workComponentDefects.workComponentId,
-      workComponentDefectCategoryId: workComponentDefects.workComponentDefectCategoryId,
-      units: workComponentDefects.units,
+      workComponentId: workDefects.workComponentId,
+      categoryId: workDefects.categoryId,
+      type: workDefects.type,
+      units: workDefects.units,
     })
-    .from(workComponentDefects)
-    .where(eq(workComponentDefects.submissionId, id));
+    .from(workDefects)
+    .where(eq(workDefects.submissionId, id));
 
   return NextResponse.json({ ...row, existingDefects });
 }
@@ -88,7 +89,7 @@ export async function PATCH(
     );
   }
 
-  const { workComponentDefects: defectsPayload, ...submissionData } = result.data;
+  const { workDefects: defectsPayload, ...submissionData } = result.data;
 
   const [updated] = await db
     .update(submissions)
@@ -98,14 +99,14 @@ export async function PATCH(
 
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  // Replace defects: delete existing, insert new
-  await db.delete(workComponentDefects).where(eq(workComponentDefects.submissionId, id));
+  await db.delete(workDefects).where(eq(workDefects.submissionId, id));
   if (defectsPayload?.length) {
-    await db.insert(workComponentDefects).values(
+    await db.insert(workDefects).values(
       defectsPayload.map((d) => ({
         submissionId: id,
-        workComponentId: d.workComponentId,
-        workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+        type: d.type,
+        workComponentId: d.workComponentId ?? null,
+        categoryId: d.categoryId ?? null,
         units: d.units,
       }))
     );

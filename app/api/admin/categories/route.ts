@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workComponentDefectCategories, workComponents, workCategories } from "@/lib/db/schema";
+import { categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,28 +14,19 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1),
-  workComponentId: z.string().min(1),
+  type: z.enum(["work", "defect"]),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const rows = await db
-    .select({
-      id: workComponentDefectCategories.id,
-      name: workComponentDefectCategories.name,
-      workComponentId: workComponentDefectCategories.workComponentId,
-      componentName: workComponents.name,
-      categoryName: workCategories.name,
-      createdAt: workComponentDefectCategories.createdAt,
-      updatedAt: workComponentDefectCategories.updatedAt,
-    })
-    .from(workComponentDefectCategories)
-    .innerJoin(workComponents, eq(workComponentDefectCategories.workComponentId, workComponents.id))
-    .innerJoin(workCategories, eq(workComponents.workCategoryId, workCategories.id))
-    .orderBy(workCategories.name, workComponents.name, workComponentDefectCategories.name);
+  const type = request.nextUrl.searchParams.get("type") as "work" | "defect" | null;
+
+  const rows = type
+    ? await db.select().from(categories).where(eq(categories.type, type)).orderBy(categories.name)
+    : await db.select().from(categories).orderBy(categories.name);
 
   return NextResponse.json(rows);
 }
@@ -52,8 +43,8 @@ export async function POST(request: NextRequest) {
   }
 
   const [created] = await db
-    .insert(workComponentDefectCategories)
-    .values({ name: result.data.name, workComponentId: result.data.workComponentId })
+    .insert(categories)
+    .values({ name: result.data.name, type: result.data.type })
     .returning();
 
   return NextResponse.json(created, { status: 201 });

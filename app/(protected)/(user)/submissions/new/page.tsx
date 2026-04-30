@@ -8,7 +8,7 @@ import Link from "next/link";
 type WorkCategory = { id: string; name: string; type: string | null };
 type WorkStation = { id: string; name: string; workCategoryId: string };
 type WorkComponent = { id: string; name: string; workCategoryId: string };
-type DefectCategory = { id: string; name: string; workComponentId: string };
+type DefectCategory = { id: string; name: string };
 
 export default function NewSubmissionPage() {
   const [categories, setCategories] = useState<WorkCategory[]>([]);
@@ -21,7 +21,7 @@ export default function NewSubmissionPage() {
   function done() { setLoaded((n) => n + 1); }
 
   useEffect(() => {
-    fetch("/api/work-categories").then((r) => r.json()).then(setCategories).finally(done);
+    fetch("/api/categories?type=work").then((r) => r.json()).then(setCategories).finally(done);
   }, []);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function NewSubmissionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-component-defect-categories").then((r) => r.json()).then(setDefectCategories).finally(done);
+    fetch("/api/categories?type=defect").then((r) => r.json()).then(setDefectCategories).finally(done);
   }, []);
 
   return (
@@ -58,7 +58,7 @@ export default function NewSubmissionPage() {
             workCategories={categories}
             workStations={stations}
             workComponents={components}
-            workComponentDefectCategories={defectCategories}
+            defectCategories={defectCategories}
           />
         </div>
       )}

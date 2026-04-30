@@ -1,12 +1,12 @@
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { workCategories } from "./work-categories";
+import { categories } from "./categories";
 
 export const workComponents = pgTable("work_components", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   workCategoryId: text("work_category_id")
     .notNull()
-    .references(() => workCategories.id),
+    .references(() => categories.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

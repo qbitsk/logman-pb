@@ -13,7 +13,7 @@ export type SubmissionDetailData = {
   updatedAt: string;
   categoryName: string | null;
   stationName: string | null;
-  defects: { workComponentName: string; defectCategoryName: string; units: number }[];
+  defects: { workComponentName?: string | null; defectCategoryName?: string | null; units: number; type?: string }[];
   userName?: string;
   userEmail?: string;
 };
@@ -142,8 +142,8 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
               </div>
               {submission.defects.map((d, i) => (
                 <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-x-4 px-3 py-2 text-sm text-gray-800 dark:text-gray-200">
-                  <span>{d.workComponentName}</span>
-                  <span>{d.defectCategoryName}</span>
+                  <span>{d.workComponentName ?? "—"}</span>
+                  <span>{d.defectCategoryName ?? "—"}</span>
                   <span className="text-right font-medium">{d.units}</span>
                 </div>
               ))}

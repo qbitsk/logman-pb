@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { users, accounts, workCategories, workStations, workComponents, workComponentDefectCategories } from "./schema";
+import { users, accounts, categories, workStations, workComponents } from "./schema";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { eq } from "drizzle-orm";
 
@@ -30,32 +30,48 @@ async function hashPassword(password: string): Promise<string> {
 async function seed() {
   const now = new Date();
 
-  // Seed a default WorkCategory
-  const existingCategory = await db.select().from(workCategories).limit(1);
+  // Seed default work Categories
+  const existingCategory = await db.select().from(categories).limit(1);
   if (existingCategory.length > 0) {
-    console.log("WorkCategory already exists. Skipping.");
+    console.log("Category already exists. Skipping.");
   } else {
     
-    await db.insert(workCategories).values({
+    await db.insert(categories).values({
       id: crypto.randomUUID(),
       name: "Výklopný hák",
-      type: "assembly",
+      type: "work",
       createdAt: now,
       updatedAt: now,
     });
 
-    await db.insert(workCategories).values({
+    await db.insert(categories).values({
       id: crypto.randomUUID(),
       name: "Alu Had",
-      type: "assembly",
+      type: "work",
       createdAt: now,
       updatedAt: now,
     });
-    console.log("Default WorkCategory seeded.");
+
+    await db.insert(categories).values({
+      id: crypto.randomUUID(),
+      name: "Vada 1",
+      type: "defect",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    await db.insert(categories).values({
+      id: crypto.randomUUID(),
+      name: "Vada 2",
+      type: "defect",
+      createdAt: now,
+      updatedAt: now,
+    });
+    console.log("Default categories seeded.");
   }
 
-  // Seed WorkComponents linked to the first WorkCategory
-  const firstCategory = await db.select().from(workCategories).limit(1);
+  // Seed WorkComponents linked to the first work Category
+  const firstCategory = await db.select().from(categories).where(eq(categories.type, "work" as const)).limit(1);
   const existingComponents = await db.select().from(workComponents).limit(1);
   if (existingComponents.length > 0) {
     console.log("WorkComponents already exist. Skipping.");
@@ -65,15 +81,11 @@ async function seed() {
       .insert(workComponents)
       .values({ name: "Komponent 1", workCategoryId, createdAt: now, updatedAt: now })
       .returning();
-    await db.insert(workComponentDefectCategories).values([
-      { name: "Vada 1", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
-      { name: "Vada 2", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
-      { name: "Vada 3", workComponentId: firstComponent.id, createdAt: now, updatedAt: now },
-    ]);
-    console.log("WorkComponents and WorkComponentDefectCategories seeded.");
+    void firstComponent;
+    console.log("WorkComponents seeded.");
   }
 
-  // Seed WorkStations linked to the first WorkCategory
+  // Seed WorkStations linked to the first work Category
   const existingStations = await db.select().from(workStations).limit(1);
   if (existingStations.length > 0) {
     console.log("WorkStations already exist. Skipping.");

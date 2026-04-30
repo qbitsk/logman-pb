@@ -22,10 +22,10 @@ export default function AdminSubmissionDetailPage() {
         if (r.status === 404) { setNotFound(true); return null; }
         return r.json();
       }),
-      fetch("/api/work-categories").then((r) => r.json()) as Promise<WorkCategory[]>,
+      fetch("/api/categories?type=work").then((r) => r.json()) as Promise<WorkCategory[]>,
       fetch("/api/work-stations").then((r) => r.json()) as Promise<WorkStation[]>,
       fetch("/api/work-components").then((r) => r.json()) as Promise<WorkComponent[]>,
-      fetch("/api/work-component-defect-categories").then((r) => r.json()) as Promise<DefectCategory[]>,
+      fetch("/api/categories?type=defect").then((r) => r.json()) as Promise<DefectCategory[]>,
     ]).then(([data, cats, stations, components, defCats]) => {
       if (!data) return;
       const catMap = Object.fromEntries((cats as WorkCategory[]).map((c) => [c.id, c.name]));
@@ -38,10 +38,11 @@ export default function AdminSubmissionDetailPage() {
         ...rest,
         categoryName: catMap[workCategoryId] ?? null,
         stationName: workStationId ? (stationMap[workStationId] ?? null) : null,
-        defects: (existingDefects ?? []).map((d: { workComponentId: string; workComponentDefectCategoryId: string; units: number }) => ({
-          workComponentName: compMap[d.workComponentId] ?? d.workComponentId,
-          defectCategoryName: defCatMap[d.workComponentDefectCategoryId] ?? d.workComponentDefectCategoryId,
+        defects: (existingDefects ?? []).map((d: { workComponentId?: string | null; categoryId?: string | null; units: number; type: string }) => ({
+          workComponentName: d.workComponentId ? (compMap[d.workComponentId] ?? d.workComponentId) : null,
+          defectCategoryName: d.categoryId ? (defCatMap[d.categoryId] ?? d.categoryId) : null,
           units: d.units,
+          type: d.type,
         })),
       });
     }).finally(() => setLoading(false));

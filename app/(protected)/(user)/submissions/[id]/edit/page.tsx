@@ -23,8 +23,8 @@ type Submission = {
 type WorkCategory = { id: string; name: string; type: string | null };
 type WorkStation = { id: string; name: string; workCategoryId: string };
 type WorkComponent = { id: string; name: string; workCategoryId: string };
-type DefectCategory = { id: string; name: string; workComponentId: string };
-type ExistingDefect = { workComponentId: string; workComponentDefectCategoryId: string; units: number };
+type DefectCategory = { id: string; name: string };
+type ExistingDefect = { type: string; workComponentId?: string | null; categoryId?: string | null; units: number };
 
 export default function EditSubmissionPage() {
   const { id } = useParams<{ id: string }>();
@@ -58,7 +58,7 @@ export default function EditSubmissionPage() {
   }, [id, router]);
 
   useEffect(() => {
-    fetch("/api/work-categories").then((r) => r.json()).then(setCategories);
+    fetch("/api/categories?type=work").then((r) => r.json()).then(setCategories);
   }, []);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function EditSubmissionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-component-defect-categories").then((r) => r.json()).then(setDefectCategories);
+    fetch("/api/categories?type=defect").then((r) => r.json()).then(setDefectCategories);
   }, []);
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function EditSubmissionPage() {
           workCategories={categories}
           workStations={stations}
           workComponents={components}
-          workComponentDefectCategories={defectCategories}
+          defectCategories={defectCategories}
           existingDefects={existingDefects}
           editUrl={`/api/submissions/${id}`}
           backUrl="/submissions"

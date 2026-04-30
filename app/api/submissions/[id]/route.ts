@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workComponentDefects, workComponents, workComponentDefectCategories, workCategories, workStations, users } from "@/lib/db/schema";
+import { submissions, workDefects, workComponents, categories, workStations, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { workComponentDefectSchema } from "@/lib/validations/submission";
+import { workDefectSchema } from "@/lib/validations/submission";
 
 const patchSchema = z.object({
   workCategoryId: z.string().min(1).optional(),
@@ -13,7 +13,7 @@ const patchSchema = z.object({
   units: z.number().int().positive().optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
-  workComponentDefects: z.array(workComponentDefectSchema).optional(),
+  workDefects: z.array(workDefectSchema).optional(),
 });
 
 // GET /api/submissions/[id] — fetch a single submission owned by the current user
@@ -54,23 +54,24 @@ export async function GET(
   const [existingDefects, defectsDisplay, categoryRow, stationRow] = await Promise.all([
     db
       .select({
-        workComponentId: workComponentDefects.workComponentId,
-        workComponentDefectCategoryId: workComponentDefects.workComponentDefectCategoryId,
-        units: workComponentDefects.units,
+        workComponentId: workDefects.workComponentId,
+        categoryId: workDefects.categoryId,
+        type: workDefects.type,
+        units: workDefects.units,
       })
-      .from(workComponentDefects)
-      .where(eq(workComponentDefects.submissionId, id)),
+      .from(workDefects)
+      .where(eq(workDefects.submissionId, id)),
     db
       .select({
         workComponentName: workComponents.name,
-        defectCategoryName: workComponentDefectCategories.name,
-        units: workComponentDefects.units,
+        defectCategoryName: categories.name,
+        units: workDefects.units,
       })
-      .from(workComponentDefects)
-      .innerJoin(workComponents, eq(workComponentDefects.workComponentId, workComponents.id))
-      .innerJoin(workComponentDefectCategories, eq(workComponentDefects.workComponentDefectCategoryId, workComponentDefectCategories.id))
-      .where(eq(workComponentDefects.submissionId, id)),
-    db.select({ name: workCategories.name }).from(workCategories).where(eq(workCategories.id, row.workCategoryId)).limit(1),
+      .from(workDefects)
+      .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
+      .leftJoin(categories, eq(workDefects.categoryId, categories.id))
+      .where(eq(workDefects.submissionId, id)),
+    db.select({ name: categories.name }).from(categories).where(eq(categories.id, row.workCategoryId)).limit(1),
     row.workStationId
       ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
       : Promise.resolve([]),
@@ -106,7 +107,7 @@ export async function PATCH(
     );
   }
 
-  const { workComponentDefects: defectsPayload, ...submissionData } = result.data;
+  const { workDefects: defectsPayload, ...submissionData } = result.data;
 
   // Only allow edits when submission is in draft or submitted state
   const [existing] = await db
@@ -128,13 +129,14 @@ export async function PATCH(
 
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await db.delete(workComponentDefects).where(eq(workComponentDefects.submissionId, id));
+  await db.delete(workDefects).where(eq(workDefects.submissionId, id));
   if (defectsPayload?.length) {
-    await db.insert(workComponentDefects).values(
+    await db.insert(workDefects).values(
       defectsPayload.map((d) => ({
         submissionId: id,
-        workComponentId: d.workComponentId,
-        workComponentDefectCategoryId: d.workComponentDefectCategoryId,
+        type: d.type,
+        workComponentId: d.workComponentId ?? null,
+        categoryId: d.categoryId ?? null,
         units: d.units,
       }))
     );

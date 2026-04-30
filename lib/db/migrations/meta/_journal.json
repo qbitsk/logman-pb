@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1777460887736,
-      "tag": "0000_blushing_captain_midlands",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1777461910213,
-      "tag": "0001_chubby_brood",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1777465843526,
-      "tag": "0002_robust_tarot",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1777473043380,
-      "tag": "0003_abandoned_rictor",
+      "when": 1777560321145,
+      "tag": "0000_youthful_spiral",
       "breakpoints": true
     }
   ]

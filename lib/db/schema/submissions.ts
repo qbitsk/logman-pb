@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { workCategories } from "./work-categories";
+import { categories } from "./categories";
 import { workStations } from "./work-stations";
 
 export const statusEnum = pgEnum("submission_status", [
@@ -18,7 +18,7 @@ export const submissions = pgTable("submissions", {
 
   workCategoryId: text("work_category_id")
     .notNull()
-    .references(() => workCategories.id),
+    .references(() => categories.id),
   workStationId: text("work_station_id")
     .references(() => workStations.id),
   units: integer("units"),
