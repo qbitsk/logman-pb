@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workComponentDefects } from "@/lib/db/schema";
+import { submissions, workComponentDefects, workCategories } from "@/lib/db/schema";
 import { submissionSchema } from "@/lib/validations/submission";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -14,10 +14,18 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userSubmissions = await db.query.submissions.findMany({
-    where: eq(submissions.userId, session.user.id),
-    orderBy: (s, { desc }) => [desc(s.createdAt)],
-  });
+  const userSubmissions = await db
+    .select({
+      id: submissions.id,
+      status: submissions.status,
+      units: submissions.units,
+      createdAt: submissions.createdAt,
+      categoryName: workCategories.name,
+    })
+    .from(submissions)
+    .innerJoin(workCategories, eq(submissions.workCategoryId, workCategories.id))
+    .where(eq(submissions.userId, session.user.id))
+    .orderBy(submissions.createdAt);
 
   return NextResponse.json(userSubmissions);
 }

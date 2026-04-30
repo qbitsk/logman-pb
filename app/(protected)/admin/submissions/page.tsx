@@ -1,13 +1,20 @@
-import { auth } from "@/lib/auth/config";
-import { db } from "@/lib/db";
-import { submissions, users, workCategories } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { DeleteSubmissionButton } from "@/components/DeleteSubmissionButton";
 import { clsx } from "clsx";
+
+type Submission = {
+  id: string;
+  categoryName: string;
+  status: string;
+  units: number | null;
+  createdAt: string;
+  userName: string;
+  userEmail: string;
+};
 
 const statusStyles: Record<string, string> = {
   draft:     "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
@@ -16,33 +23,29 @@ const statusStyles: Record<string, string> = {
   rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-export default async function AdminSubmissionsPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") redirect("/unauthorized");
+export default function AdminSubmissionsPage() {
+  const [rows, setRows] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const rows = await db
-    .select({
-      id: submissions.id,
-      categoryName: workCategories.name,
-      status: submissions.status,
-      units: submissions.units,
-      createdAt: submissions.createdAt,
-      userName: users.name,
-      userEmail: users.email,
-    })
-    .from(submissions)
-    .innerJoin(users, eq(submissions.userId, users.id))
-    .innerJoin(workCategories, eq(submissions.workCategoryId, workCategories.id))
-    .orderBy(submissions.createdAt);
+  useEffect(() => {
+    fetch("/api/admin/submissions")
+      .then((r) => r.json())
+      .then(setRows)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-brand-950 dark:text-white">All Submissions</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{rows.length} total</p>
+        {!loading && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{rows.length} total</p>}
       </div>
 
-      {rows.length === 0 ? (
+      {loading ? (
+        <div className="card text-center py-16">
+          <p className="text-gray-400">Loading…</p>
+        </div>
+      ) : rows.length === 0 ? (
         <div className="card text-center py-16">
           <p className="text-gray-400">No submissions yet.</p>
         </div>
@@ -64,7 +67,7 @@ export default async function AdminSubmissionsPage() {
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 dark:border-gray-700/50 dark:hover:bg-brand-900/10 transition-colors">
                   <td className="px-5 py-3 text-gray-400 dark:text-gray-500">
                     <Link href={`/admin/submissions/${s.id}`} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                      {s.createdAt.toLocaleDateString()}
+                      {new Date(s.createdAt).toLocaleDateString()}
                     </Link>
                   </td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.categoryName}</td>
@@ -94,3 +97,4 @@ export default async function AdminSubmissionsPage() {
     </div>
   );
 }
+

@@ -1,16 +1,40 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { db } from "@/lib/db";
-import { workCategories, workStations, workComponents, workComponentDefectCategories } from "@/lib/db/schema";
 
-export default async function NewSubmissionPage() {
-  const [categories, stations, components, defectCategories] = await Promise.all([
-    db.select().from(workCategories),
-    db.select().from(workStations),
-    db.select().from(workComponents),
-    db.select().from(workComponentDefectCategories),
-  ]);
+type WorkCategory = { id: string; name: string; type: string | null };
+type WorkStation = { id: string; name: string; workCategoryId: string };
+type WorkComponent = { id: string; name: string; workCategoryId: string };
+type DefectCategory = { id: string; name: string; workComponentId: string };
+
+export default function NewSubmissionPage() {
+  const [categories, setCategories] = useState<WorkCategory[]>([]);
+  const [stations, setStations] = useState<WorkStation[]>([]);
+  const [components, setComponents] = useState<WorkComponent[]>([]);
+  const [defectCategories, setDefectCategories] = useState<DefectCategory[]>([]);
+  const [loaded, setLoaded] = useState(0);
+  const loading = loaded < 4;
+
+  function done() { setLoaded((n) => n + 1); }
+
+  useEffect(() => {
+    fetch("/api/work-categories").then((r) => r.json()).then(setCategories).finally(done);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/work-stations").then((r) => r.json()).then(setStations).finally(done);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/work-components").then((r) => r.json()).then(setComponents).finally(done);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/work-component-defect-categories").then((r) => r.json()).then(setDefectCategories).finally(done);
+  }, []);
 
   return (
     <div>
@@ -24,14 +48,21 @@ export default async function NewSubmissionPage() {
       <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-1">New Submission</h1>
       <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Fill in the form below and submit your data.</p>
 
-      <div className="card max-w-2xl">
-        <SubmissionForm
-          workCategories={categories}
-          workStations={stations}
-          workComponents={components}
-          workComponentDefectCategories={defectCategories}
-        />
-      </div>
+      {loading ? (
+        <div className="card max-w-2xl text-center py-16">
+          <p className="text-gray-400">Loading…</p>
+        </div>
+      ) : (
+        <div className="card max-w-2xl">
+          <SubmissionForm
+            workCategories={categories}
+            workStations={stations}
+            workComponents={components}
+            workComponentDefectCategories={defectCategories}
+          />
+        </div>
+      )}
     </div>
   );
 }
+

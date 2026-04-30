@@ -1,12 +1,25 @@
-import { auth } from "@/lib/auth/config";
-import { db } from "@/lib/db";
-import { submissions, workCategories, workStations, workComponentDefects, workComponents, workComponentDefectCategories } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
-import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useSession } from "@/lib/auth/client";
 import Link from "next/link";
 import { clsx } from "clsx";
 import { ArrowLeft, Pencil } from "lucide-react";
+
+type Defect = { workComponentName: string; defectCategoryName: string; units: number };
+
+type Submission = {
+  id: string;
+  status: string;
+  units: number | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  categoryName: string | null;
+  stationName: string | null;
+  defects: Defect[];
+};
 
 const statusStyles: Record<string, string> = {
   draft:     "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
@@ -15,56 +28,43 @@ const statusStyles: Record<string, string> = {
   rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-export default async function UserSubmissionDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  const { id } = await params;
+export default function UserSubmissionDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
 
-  const [submission] = await db
-    .select()
-    .from(submissions)
-    .where(
-      isAdmin
-        ? eq(submissions.id, id)
-        : and(eq(submissions.id, id), eq(submissions.userId, session!.user.id))
-    )
-    .limit(1);
+  const [submission, setSubmission] = useState<Submission | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!submission) notFound();
-
-  const [defects, workStation, workCategory] = await Promise.all([
-    db
-      .select({
-        workComponentName: workComponents.name,
-        defectCategoryName: workComponentDefectCategories.name,
-        units: workComponentDefects.units,
+  useEffect(() => {
+    fetch(`/api/submissions/${id}`)
+      .then((r) => {
+        if (r.status === 404) { setNotFound(true); return null; }
+        return r.json();
       })
-      .from(workComponentDefects)
-      .innerJoin(workComponents, eq(workComponentDefects.workComponentId, workComponents.id))
-      .innerJoin(workComponentDefectCategories, eq(workComponentDefects.workComponentDefectCategoryId, workComponentDefectCategories.id))
-      .where(eq(workComponentDefects.submissionId, id)),
+      .then((data) => { if (data) setSubmission(data); })
+      .finally(() => setLoading(false));
+  }, [id]);
 
-    submission.workStationId
-      ? db
-          .select({ name: workStations.name })
-          .from(workStations)
-          .where(eq(workStations.id, submission.workStationId))
-          .limit(1)
-          .then((r) => r[0] ?? null)
-      : Promise.resolve(null),
-    submission.workCategoryId
-      ? db
-          .select({ name: workCategories.name })
-          .from(workCategories)
-          .where(eq(workCategories.id, submission.workCategoryId))
-          .limit(1)
-          .then((r) => r[0] ?? null)
-      : Promise.resolve(null),
-  ]);
+  if (loading) {
+    return (
+      <div className="max-w-2xl card text-center py-16">
+        <p className="text-gray-400">Loading…</p>
+      </div>
+    );
+  }
+
+  if (notFound || !submission) {
+    return (
+      <div className="max-w-2xl card text-center py-16">
+        <p className="text-gray-400">Submission not found.</p>
+      </div>
+    );
+  }
+
+  const defectedUnits = submission.defects.reduce((sum, d) => sum + d.units, 0);
+  const goodUnits = submission.units != null ? submission.units - defectedUnits : null;
 
   return (
     <div className="max-w-2xl">
@@ -93,7 +93,7 @@ export default async function UserSubmissionDetailPage({
             {submission.status}
           </span>
           <span className="text-sm text-gray-400 dark:text-gray-500">
-            {submission.createdAt.toLocaleDateString()}
+            {new Date(submission.createdAt).toLocaleDateString()}
           </span>
         </div>
       </div>
@@ -101,40 +101,36 @@ export default async function UserSubmissionDetailPage({
       <div className="card space-y-5">
         <div>
           <p className="label">Work Category</p>
-          <p className="text-sm text-gray-800 dark:text-gray-200">{workCategory?.name ?? submission.workCategoryId}</p>
+          <p className="text-sm text-gray-800 dark:text-gray-200">{submission.categoryName}</p>
         </div>
 
-        {workStation && (
+        {submission.stationName && (
           <div>
             <p className="label">Work Station</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{workStation.name}</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{submission.stationName}</p>
           </div>
         )}
 
-        {submission.units != null && (() => {
-          const defectedUnits = defects.reduce((sum, d) => sum + d.units, 0);
-          const goodUnits = submission.units - defectedUnits;
-          return (
-            <>
-              <div>
-                <p className="label">Units</p>
-                <p className="text-sm text-gray-800 dark:text-gray-200">{submission.units}</p>
-              </div>
-              {defects.length > 0 && (
-                <>
-                  <div>
-                    <p className="label">Defected Units</p>
-                    <p className="text-sm text-red-600 font-medium">{defectedUnits}</p>
-                  </div>
-                  <div>
-                    <p className="label">Produced Units</p>
-                    <p className="text-sm text-emerald-600 font-medium">{goodUnits}</p>
-                  </div>
-                </>
-              )}
-            </>
-          );
-        })()}
+        {submission.units != null && (
+          <>
+            <div>
+              <p className="label">Units</p>
+              <p className="text-sm text-gray-800 dark:text-gray-200">{submission.units}</p>
+            </div>
+            {submission.defects.length > 0 && (
+              <>
+                <div>
+                  <p className="label">Defected Units</p>
+                  <p className="text-sm text-red-600 font-medium">{defectedUnits}</p>
+                </div>
+                <div>
+                  <p className="label">Produced Units</p>
+                  <p className="text-sm text-emerald-600 font-medium">{goodUnits}</p>
+                </div>
+              </>
+            )}
+          </>
+        )}
 
         {submission.notes && (
           <div>
@@ -145,10 +141,10 @@ export default async function UserSubmissionDetailPage({
 
         <div>
           <p className="label">Submitted</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{submission.createdAt.toLocaleString()}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(submission.createdAt).toLocaleString()}</p>
         </div>
 
-        {defects.length > 0 && (
+        {submission.defects.length > 0 && (
           <div>
             <p className="label">Defects</p>
             <div className="mt-1 divide-y divide-gray-100 dark:divide-gray-700 border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden">
@@ -157,7 +153,7 @@ export default async function UserSubmissionDetailPage({
                 <span>Defect Category</span>
                 <span className="text-right">Units</span>
               </div>
-              {defects.map((d, i) => (
+              {submission.defects.map((d, i) => (
                 <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-x-4 px-3 py-2 text-sm text-gray-800 dark:text-gray-200">
                   <span>{d.workComponentName}</span>
                   <span>{d.defectCategoryName}</span>
@@ -168,13 +164,14 @@ export default async function UserSubmissionDetailPage({
           </div>
         )}
 
-        {submission.updatedAt > submission.createdAt && (
+        {new Date(submission.updatedAt) > new Date(submission.createdAt) && (
           <div>
             <p className="label">Last updated</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{submission.updatedAt.toLocaleString()}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(submission.updatedAt).toLocaleString()}</p>
           </div>
         )}
       </div>
     </div>
   );
 }
+

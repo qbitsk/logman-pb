@@ -56,7 +56,16 @@ export async function GET(
 
   if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  return NextResponse.json(row);
+  const existingDefects = await db
+    .select({
+      workComponentId: workComponentDefects.workComponentId,
+      workComponentDefectCategoryId: workComponentDefects.workComponentDefectCategoryId,
+      units: workComponentDefects.units,
+    })
+    .from(workComponentDefects)
+    .where(eq(workComponentDefects.submissionId, id));
+
+  return NextResponse.json({ ...row, existingDefects });
 }
 
 // PATCH /api/admin/submissions/[id]

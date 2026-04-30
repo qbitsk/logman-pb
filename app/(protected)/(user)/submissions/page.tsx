@@ -1,12 +1,18 @@
-import { auth } from "@/lib/auth/config";
-import { db } from "@/lib/db";
-import { submissions, workCategories } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Pencil } from "lucide-react";
 import { DeleteSubmissionButton } from "@/components/DeleteSubmissionButton";
 import { clsx } from "clsx";
+
+type Submission = {
+  id: string;
+  status: string;
+  units: number | null;
+  createdAt: string;
+  categoryName: string;
+};
 
 const statusStyles: Record<string, string> = {
   draft:     "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
@@ -15,21 +21,16 @@ const statusStyles: Record<string, string> = {
   rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-export default async function SubmissionsPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+export default function SubmissionsPage() {
+  const [userSubmissions, setUserSubmissions] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const userSubmissions = await db
-    .select({
-      id: submissions.id,
-      status: submissions.status,
-      units: submissions.units,
-      createdAt: submissions.createdAt,
-      categoryName: workCategories.name,
-    })
-    .from(submissions)
-    .innerJoin(workCategories, eq(submissions.workCategoryId, workCategories.id))
-    .where(eq(submissions.userId, session!.user.id))
-    .orderBy(submissions.createdAt);
+  useEffect(() => {
+    fetch("/api/submissions")
+      .then((r) => r.json())
+      .then(setUserSubmissions)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div>
@@ -41,7 +42,11 @@ export default async function SubmissionsPage() {
         </Link>
       </div>
 
-      {userSubmissions.length === 0 ? (
+      {loading ? (
+        <div className="card text-center py-16">
+          <p className="text-gray-400">Loading…</p>
+        </div>
+      ) : userSubmissions.length === 0 ? (
         <div className="card text-center py-16">
           <p className="text-gray-400 mb-4">No submissions yet.</p>
           <Link href="/submissions/new" className="btn-primary inline-flex">
@@ -65,7 +70,7 @@ export default async function SubmissionsPage() {
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 dark:border-gray-700/50 dark:hover:bg-brand-900/10 transition-colors">
                   <td className="px-5 py-3 text-gray-400 dark:text-gray-500">
                     <Link href={`/submissions/${s.id}`} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                      {s.createdAt.toLocaleDateString()}
+                      {new Date(s.createdAt).toLocaleDateString()}
                     </Link>
                   </td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">

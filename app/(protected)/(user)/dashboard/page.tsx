@@ -1,27 +1,26 @@
-import { auth } from "@/lib/auth/config";
-import { db } from "@/lib/db";
-import { submissions } from "@/lib/db/schema";
-import { eq, count, and } from "drizzle-orm";
-import { headers } from "next/headers";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth/client";
 import Link from "next/link";
 import { Plus, FileText, CheckCircle, Clock } from "lucide-react";
 
-export default async function DashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+type Stats = { total: number; submitted: number; approved: number };
 
-  const [totalResult, submittedResult, approvedResult] = await Promise.all([
-    db.select({ count: count() }).from(submissions)
-      .where(eq(submissions.userId, session!.user.id)),
-    db.select({ count: count() }).from(submissions)
-      .where(and(eq(submissions.userId, session!.user.id), eq(submissions.status, "submitted"))),
-    db.select({ count: count() }).from(submissions)
-      .where(and(eq(submissions.userId, session!.user.id), eq(submissions.status, "approved"))),
-  ]);
+export default function DashboardPage() {
+  const { data: session } = useSession();
+  const [stats, setStats] = useState<Stats | null>(null);
 
-  const stats = [
-    { label: "Total Submissions", value: totalResult[0].count, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
-    { label: "Submitted", value: submittedResult[0].count, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
-    { label: "Approved", value: approvedResult[0].count, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then(setStats);
+  }, []);
+
+  const statCards = [
+    { label: "Total Submissions", value: stats?.total, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
+    { label: "Submitted", value: stats?.submitted, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
+    { label: "Approved", value: stats?.approved, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
   ];
 
   return (
@@ -41,7 +40,7 @@ export default async function DashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {stats.map((stat) => {
+        {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <div key={stat.label} className="card flex items-center gap-4">
@@ -49,7 +48,9 @@ export default async function DashboardPage() {
                 <Icon className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-brand-950 dark:text-white">{stat.value}</p>
+                <p className="text-2xl font-bold text-brand-950 dark:text-white">
+                  {stat.value ?? <span className="text-gray-300 dark:text-gray-600">—</span>}
+                </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
               </div>
             </div>
@@ -72,3 +73,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+

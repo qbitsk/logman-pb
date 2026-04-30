@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users } from "@/lib/db/schema";
+import { submissions, users, workCategories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
@@ -15,20 +15,16 @@ export async function GET() {
   const rows = await db
     .select({
       id: submissions.id,
-      workCategoryId: submissions.workCategoryId,
-      workStationId: submissions.workStationId,
       units: submissions.units,
-      shift: submissions.shift,
       status: submissions.status,
-      notes: submissions.notes,
       createdAt: submissions.createdAt,
-      updatedAt: submissions.updatedAt,
-      userId: submissions.userId,
+      categoryName: workCategories.name,
       userName: users.name,
       userEmail: users.email,
     })
     .from(submissions)
     .innerJoin(users, eq(submissions.userId, users.id))
+    .innerJoin(workCategories, eq(submissions.workCategoryId, workCategories.id))
     .orderBy(submissions.createdAt);
 
   return NextResponse.json(rows);

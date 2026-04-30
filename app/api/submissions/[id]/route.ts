@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workComponentDefects } from "@/lib/db/schema";
+import { submissions, workComponentDefects, workComponents, workComponentDefectCategories, workCategories, workStations, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -28,17 +28,61 @@ export async function GET(
 
   const { id } = await params;
 
-  const [submission] = await db
-    .select()
+  const [row] = await db
+    .select({
+      id: submissions.id,
+      workCategoryId: submissions.workCategoryId,
+      workStationId: submissions.workStationId,
+      units: submissions.units,
+      shift: submissions.shift,
+      notes: submissions.notes,
+      status: submissions.status,
+      createdAt: submissions.createdAt,
+      updatedAt: submissions.updatedAt,
+      userName: users.name,
+      userEmail: users.email,
+    })
     .from(submissions)
+    .innerJoin(users, eq(submissions.userId, users.id))
     .where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)))
     .limit(1);
 
-  if (!submission) {
+  if (!row) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json(submission);
+  const [existingDefects, defectsDisplay, categoryRow, stationRow] = await Promise.all([
+    db
+      .select({
+        workComponentId: workComponentDefects.workComponentId,
+        workComponentDefectCategoryId: workComponentDefects.workComponentDefectCategoryId,
+        units: workComponentDefects.units,
+      })
+      .from(workComponentDefects)
+      .where(eq(workComponentDefects.submissionId, id)),
+    db
+      .select({
+        workComponentName: workComponents.name,
+        defectCategoryName: workComponentDefectCategories.name,
+        units: workComponentDefects.units,
+      })
+      .from(workComponentDefects)
+      .innerJoin(workComponents, eq(workComponentDefects.workComponentId, workComponents.id))
+      .innerJoin(workComponentDefectCategories, eq(workComponentDefects.workComponentDefectCategoryId, workComponentDefectCategories.id))
+      .where(eq(workComponentDefects.submissionId, id)),
+    db.select({ name: workCategories.name }).from(workCategories).where(eq(workCategories.id, row.workCategoryId)).limit(1),
+    row.workStationId
+      ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
+      : Promise.resolve([]),
+  ]);
+
+  return NextResponse.json({
+    ...row,
+    categoryName: categoryRow[0]?.name ?? null,
+    stationName: stationRow[0]?.name ?? null,
+    existingDefects,
+    defects: defectsDisplay,
+  });
 }
 
 // PATCH /api/submissions/[id] — update a submission owned by the current user

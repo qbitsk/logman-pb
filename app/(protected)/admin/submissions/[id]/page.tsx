@@ -1,71 +1,108 @@
-import { auth } from "@/lib/auth/config";
-import { db } from "@/lib/db";
-import { submissions, users, workCategories, workStations, workComponents, workComponentDefectCategories, workComponentDefects } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
-import { redirect, notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { SubmissionForm } from "@/components/forms/SubmissionForm";
 
-export default async function AdminSubmissionDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") redirect("/unauthorized");
+type Submission = {
+  id: string;
+  workCategoryId: string;
+  workStationId: string | null;
+  units: number | null;
+  shift: number | null;
+  notes: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  userName: string;
+  userEmail: string;
+};
 
-  const { id } = await params;
+type WorkCategory = { id: string; name: string; type: string | null };
+type WorkStation = { id: string; name: string; workCategoryId: string };
+type WorkComponent = { id: string; name: string; workCategoryId: string };
+type DefectCategory = { id: string; name: string; workComponentId: string };
+type ExistingDefect = { workComponentId: string; workComponentDefectCategoryId: string; units: number };
 
-  const [[row], categories, stations, components, defectCategories] = await Promise.all([
-    db
-      .select({
-        id: submissions.id,
-        workCategoryId: submissions.workCategoryId,
-        workStationId: submissions.workStationId,
-        units: submissions.units,
-        shift: submissions.shift,
-        notes: submissions.notes,
-        status: submissions.status,
-        createdAt: submissions.createdAt,
-        updatedAt: submissions.updatedAt,
-        userName: users.name,
-        userEmail: users.email,
+export default function AdminSubmissionDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+
+  const [submission, setSubmission] = useState<Submission | null>(null);
+  const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
+  const [categories, setCategories] = useState<WorkCategory[]>([]);
+  const [stations, setStations] = useState<WorkStation[]>([]);
+  const [components, setComponents] = useState<WorkComponent[]>([]);
+  const [defectCategories, setDefectCategories] = useState<DefectCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/admin/submissions/${id}`)
+      .then((r) => {
+        if (r.status === 404) { setNotFound(true); return null; }
+        return r.json();
       })
-      .from(submissions)
-      .innerJoin(users, eq(submissions.userId, users.id))
-      .where(eq(submissions.id, id))
-      .limit(1),
-    db.select().from(workCategories),
-    db.select().from(workStations),
-    db.select().from(workComponents),
-    db.select().from(workComponentDefectCategories),
-  ]);
+      .then((data) => {
+        if (!data) return;
+        const { existingDefects: defects, ...sub } = data;
+        setSubmission(sub);
+        setExistingDefects(defects ?? []);
+      });
+  }, [id]);
 
-  const existingDefects = await db
-    .select({
-      workComponentId: workComponentDefects.workComponentId,
-      workComponentDefectCategoryId: workComponentDefects.workComponentDefectCategoryId,
-      units: workComponentDefects.units,
-    })
-    .from(workComponentDefects)
-    .where(eq(workComponentDefects.submissionId, id));
+  useEffect(() => {
+    fetch("/api/work-categories").then((r) => r.json()).then(setCategories);
+  }, []);
 
-  if (!row) notFound();
+  useEffect(() => {
+    fetch("/api/work-stations").then((r) => r.json()).then(setStations);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/work-components").then((r) => r.json()).then(setComponents);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/work-component-defect-categories").then((r) => r.json()).then(setDefectCategories);
+  }, []);
+
+  useEffect(() => {
+    if (submission && categories.length && stations.length && components.length && defectCategories.length) {
+      setLoading(false);
+    }
+  }, [submission, categories, stations, components, defectCategories]);
+
+  if (notFound) {
+    return (
+      <div className="card text-center py-16">
+        <p className="text-gray-400">Submission not found.</p>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-brand-950 dark:text-white">Submission Detail</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">#{row.id}</p>
+        {submission && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">#{submission.id}</p>}
       </div>
-      <SubmissionForm
-        submission={row}
-        workCategories={categories}
-        workStations={stations}
-        workComponents={components}
-        workComponentDefectCategories={defectCategories}
-        existingDefects={existingDefects}
-      />
+
+      {loading ? (
+        <div className="card text-center py-16">
+          <p className="text-gray-400">Loading…</p>
+        </div>
+      ) : (
+        <SubmissionForm
+          submission={{ ...submission!, createdAt: new Date(submission!.createdAt), updatedAt: new Date(submission!.updatedAt) }}
+          workCategories={categories}
+          workStations={stations}
+          workComponents={components}
+          workComponentDefectCategories={defectCategories}
+          existingDefects={existingDefects}
+        />
+      )}
     </div>
   );
 }
+
