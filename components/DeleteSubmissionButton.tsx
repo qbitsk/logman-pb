@@ -23,7 +23,7 @@ export function DeleteSubmissionButton({
   return (
     <button
       onClick={handleDelete}
-      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
       aria-label="Delete submission"
     >
       <Trash2 className="w-4 h-4" />

@@ -13,9 +13,9 @@ type User = {
 };
 
 const roleStyles: Record<string, string> = {
-  user:   "bg-gray-100 text-gray-600",
-  editor: "bg-blue-100 text-blue-700",
-  admin:  "bg-brand-100 text-brand-700",
+  user:   "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+  editor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  admin:  "bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400",
 };
 
 const emptyForm = { name: "", email: "", password: "", role: "user" as User["role"] };
@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-brand-950">User Management</h1>
+        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">User Management</h1>
         <button onClick={() => { setShowModal(true); setFormError(null); setForm(emptyForm); }} className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />
           User
@@ -83,29 +83,29 @@ export default function AdminUsersPage() {
 
       <div className="card p-0 overflow-x-auto">
         {loading ? (
-          <div className="p-8 text-center text-gray-400">Loading…</div>
+          <div className="p-8 text-center text-gray-400 dark:text-gray-500">Loading…</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Name</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Email</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Role</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Joined</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Change Role</th>
+              <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Email</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Role</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Joined</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Change Role</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-b border-gray-50 hover:bg-brand-50/40">
-                  <td className="px-5 py-3 font-medium text-gray-900">{user.name}</td>
-                  <td className="px-5 py-3 text-gray-500">{user.email}</td>
+                <tr key={user.id} className="border-b border-gray-50 dark:border-gray-700/50 hover:bg-brand-50/40 dark:hover:bg-brand-900/10">
+                  <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{user.name}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{user.email}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", roleStyles[user.role])}>
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-gray-400">
+                  <td className="px-5 py-3 text-gray-400 dark:text-gray-500">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-5 py-3">
@@ -129,8 +129,8 @@ export default function AdminUsersPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
-            <h2 className="text-lg font-semibold text-brand-950 mb-5">New User</h2>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+            <h2 className="text-lg font-semibold text-brand-950 dark:text-white mb-5">New User</h2>
             <form onSubmit={createUser} className="space-y-4">
               <div>
                 <label className="label">Name</label>

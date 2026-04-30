@@ -44,28 +44,28 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-950 mb-6">Profile</h1>
+      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-6">Profile</h1>
 
       <div className="card max-w-lg space-y-6">
         {/* Account info */}
         <div className="space-y-1">
-          <p className="text-sm font-medium text-gray-500">Name</p>
-          <p className="text-gray-900 font-medium">{session?.user.name}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</p>
+          <p className="text-gray-900 dark:text-gray-100 font-medium">{session?.user.name}</p>
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-gray-500">Email</p>
-          <p className="text-gray-900">{session?.user.email}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</p>
+          <p className="text-gray-900 dark:text-gray-100">{session?.user.email}</p>
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-gray-500">Role</p>
-          <p className="text-gray-900 capitalize">{session?.user.role as string}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Role</p>
+          <p className="text-gray-900 dark:text-gray-100 capitalize">{session?.user.role as string}</p>
         </div>
 
-        <hr className="border-gray-100" />
+        <hr className="border-gray-100 dark:border-gray-700" />
 
         {/* Change password */}
         <div>
-          <h2 className="text-base font-semibold text-brand-950 mb-4">Change Password</h2>
+          <h2 className="text-base font-semibold text-brand-950 dark:text-white mb-4">Change Password</h2>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
               <label className="label">Current Password</label>

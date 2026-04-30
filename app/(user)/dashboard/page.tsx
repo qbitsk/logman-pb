@@ -19,19 +19,19 @@ export default async function DashboardPage() {
   ]);
 
   const stats = [
-    { label: "Total Submissions", value: totalResult[0].count, icon: FileText, color: "text-brand-600 bg-brand-50" },
-    { label: "Submitted", value: submittedResult[0].count, icon: Clock, color: "text-amber-600 bg-amber-50" },
-    { label: "Approved", value: approvedResult[0].count, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50" },
+    { label: "Total Submissions", value: totalResult[0].count, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
+    { label: "Submitted", value: submittedResult[0].count, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
+    { label: "Approved", value: approvedResult[0].count, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
   ];
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-brand-950">
+          <h1 className="text-2xl font-bold text-brand-950 dark:text-white">
             Hello, {session?.user.name?.split(" ")[0]} 👋
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Here&apos;s an overview of your activity</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Here&apos;s an overview of your activity</p>
         </div>
         <Link href="/submissions/new" className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />
@@ -49,8 +49,8 @@ export default async function DashboardPage() {
                 <Icon className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-brand-950">{stat.value}</p>
-                <p className="text-sm text-gray-500">{stat.label}</p>
+                <p className="text-2xl font-bold text-brand-950 dark:text-white">{stat.value}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
               </div>
             </div>
           );
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
 
       {/* Quick actions */}
       <div className="card">
-        <h2 className="font-semibold text-gray-800 mb-4">Quick actions</h2>
+        <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Quick actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link href="/submissions/new" className="btn-primary">
             Submit new data

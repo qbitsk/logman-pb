@@ -9,10 +9,10 @@ import { Trash2, Plus } from "lucide-react";
 const STATUSES = ["draft", "submitted", "approved", "rejected"] as const;
 
 const statusStyles: Record<string, string> = {
-  draft:     "bg-gray-100 text-gray-600",
-  submitted: "bg-amber-100 text-amber-700",
-  approved:  "bg-emerald-100 text-emerald-700",
-  rejected:  "bg-red-100 text-red-600",
+  draft:     "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+  submitted: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  approved:  "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
 type Submission = {
@@ -215,11 +215,11 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
           <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[form.status])}>
             {form.status}
           </span>
-          <span className="text-sm text-gray-500">
-            by <span className="font-medium text-gray-700">{submission!.userName}</span>{" "}
-            <span className="text-gray-400">({submission!.userEmail})</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            by <span className="font-medium text-gray-700 dark:text-gray-300">{submission!.userName}</span>{" "}
+            <span className="text-gray-400 dark:text-gray-500">({submission!.userEmail})</span>
           </span>
-          <span className="text-sm text-gray-400 ml-auto">
+          <span className="text-sm text-gray-400 dark:text-gray-500 ml-auto">
             Updated {new Date(submission!.updatedAt).toLocaleString()}
           </span>
         </div>
@@ -227,7 +227,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
 
       <form onSubmit={handleSubmit} className={isEdit ? "card space-y-5" : "space-y-5"}>
         {serverError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3">
             {serverError}
           </div>
         )}
@@ -244,8 +244,8 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
                   className={clsx(
                     "px-3 py-1.5 rounded-full text-xs font-semibold capitalize border transition-colors",
                     form.status === s
-                      ? statusStyles[s] + " border-transparent ring-2 ring-offset-1 ring-brand-400"
-                      : "bg-white text-gray-500 border-gray-200 hover:border-brand-300"
+                      ? statusStyles[s] + " border-transparent ring-2 ring-offset-1 ring-brand-400 dark:ring-offset-gray-900"
+                      : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-brand-300"
                   )}
                 >
                   {s}
@@ -287,7 +287,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
                   "px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors",
                   form.shift === s.toString()
                     ? "bg-brand-600 text-white border-transparent"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-brand-300"
+                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-brand-300"
                 )}
               >
                 {s}
@@ -358,7 +358,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
             </button>
           </div>
           {defects.length === 0 && (
-            <p className="text-sm text-gray-400 italic">No defects added.</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 italic">No defects added.</p>
           )}
           <div className="space-y-2">
             {defects.map((defect) => {

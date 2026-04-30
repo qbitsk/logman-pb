@@ -10,8 +10,8 @@ export default function RegisterPage() {
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600 mb-4">
           <ShieldCheck className="w-6 h-6 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-brand-950 mb-2">Registration disabled</h1>
-        <p className="text-gray-500 text-sm mb-6">
+        <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-2">Registration disabled</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
           New accounts can only be created by an administrator.
         </p>
         <Link href="/login" className="btn-primary inline-block">

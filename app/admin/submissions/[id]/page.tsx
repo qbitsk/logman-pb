@@ -55,8 +55,8 @@ export default async function AdminSubmissionDetailPage({
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-950">Submission Detail</h1>
-        <p className="text-sm text-gray-500 mt-1">#{row.id}</p>
+        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">Submission Detail</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">#{row.id}</p>
       </div>
       <SubmissionForm
         submission={row}

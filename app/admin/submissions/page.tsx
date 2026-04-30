@@ -10,10 +10,10 @@ import { DeleteSubmissionButton } from "@/components/DeleteSubmissionButton";
 import { clsx } from "clsx";
 
 const statusStyles: Record<string, string> = {
-  draft:     "bg-gray-100 text-gray-600",
-  submitted: "bg-amber-100 text-amber-700",
-  approved:  "bg-emerald-100 text-emerald-700",
-  rejected:  "bg-red-100 text-red-600",
+  draft:     "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+  submitted: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  approved:  "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
 export default async function AdminSubmissionsPage() {
@@ -38,8 +38,8 @@ export default async function AdminSubmissionsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-950">All Submissions</h1>
-        <p className="text-sm text-gray-500 mt-1">{rows.length} total</p>
+        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">All Submissions</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{rows.length} total</p>
       </div>
 
       {rows.length === 0 ? (
@@ -50,36 +50,36 @@ export default async function AdminSubmissionsPage() {
         <div className="card p-0 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Date</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Category</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Units</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">Status</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600">User</th>
+              <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Date</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Units</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Status</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">User</th>
                 <th className="px-2 py-3"></th>
               </tr>
             </thead>
             <tbody>
               {rows.map((s) => (
-                <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 transition-colors">
-                  <td className="px-5 py-3 text-gray-400">
-                    <Link href={`/admin/submissions/${s.id}`} className="hover:text-brand-600 transition-colors">
+                <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 dark:border-gray-700/50 dark:hover:bg-brand-900/10 transition-colors">
+                  <td className="px-5 py-3 text-gray-400 dark:text-gray-500">
+                    <Link href={`/admin/submissions/${s.id}`} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
                       {s.createdAt.toLocaleDateString()}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-gray-500 capitalize">{s.categoryName}</td>
-                  <td className="px-5 py-3 text-gray-500">{s.units ?? <span className="text-gray-300">—</span>}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.categoryName}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{s.units ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>
                       {s.status}
                     </span>
                   </td>
                   <td className="px-5 py-3">
-                    <span className="text-gray-900">{s.userName}</span>
+                    <span className="text-gray-900 dark:text-gray-100">{s.userName}</span>
                   </td>
                   <td className="px-5 py-3 text-end">
                     <div className="flex items-center justify-end gap-1">
-                      <Link href={`/admin/submissions/${s.id}`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors" aria-label="Edit submission">
+                      <Link href={`/admin/submissions/${s.id}`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors" aria-label="Edit submission">
                         <Pencil className="w-4 h-4" />
                       </Link>
                       <DeleteSubmissionButton id={s.id} apiPath="/api/admin/submissions" />

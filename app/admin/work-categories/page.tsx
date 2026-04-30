@@ -51,10 +51,10 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-brand-950">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+          <h2 className="text-lg font-semibold text-brand-950 dark:text-white">{title}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -290,12 +290,12 @@ export default function WorkCategoriesPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-950">Categories</h1>
-        <p className="text-sm text-gray-500 mt-1">Manage categories, components and defect categories.</p>
+        <h1 className="text-2xl font-bold text-brand-950  dark:text-white">Categories</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage categories, components and defect categories.</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-200">
+      <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-700">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -303,8 +303,8 @@ export default function WorkCategoriesPage() {
             className={clsx(
               "px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors",
               activeTab === tab.id
-                ? "border-brand-600 text-brand-700"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "border-brand-600 text-brand-700 dark:text-brand-400"
+                : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             )}
           >
             {tab.label}
@@ -316,7 +316,7 @@ export default function WorkCategoriesPage() {
       {activeTab === "categories" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500">{categories.length} categories</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{categories.length} categories</span>
             <button onClick={openCatCreate} className="btn-primary flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Category
@@ -330,23 +330,23 @@ export default function WorkCategoriesPage() {
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Type</th>
+                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Type</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {categories.map((cat) => (
-                    <tr key={cat.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                      <td className="px-5 py-3 font-medium text-gray-900">{cat.name}</td>
-                      <td className="px-5 py-3 text-gray-500 capitalize">{cat.type ?? "—"}</td>
+                    <tr key={cat.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{cat.name}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{cat.type ?? "—"}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openCatEdit(cat)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors">
+                          <button onClick={() => openCatEdit(cat)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteCat(cat.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                          <button onClick={() => deleteCat(cat.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -364,7 +364,7 @@ export default function WorkCategoriesPage() {
       {activeTab === "components" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500">{components.length} components</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{components.length} components</span>
             <button onClick={openCompCreate} className="btn-primary flex items-center gap-2" disabled={categories.length === 0}>
               <Plus className="w-4 h-4" />
               Component
@@ -378,23 +378,23 @@ export default function WorkCategoriesPage() {
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Category</th>
+                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {components.map((comp) => (
-                    <tr key={comp.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                      <td className="px-5 py-3 font-medium text-gray-900">{comp.name}</td>
-                      <td className="px-5 py-3 text-gray-500">{comp.categoryName}</td>
+                    <tr key={comp.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{comp.name}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{comp.categoryName}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors">
+                          <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteComp(comp.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                          <button onClick={() => deleteComp(comp.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -412,7 +412,7 @@ export default function WorkCategoriesPage() {
       {activeTab === "defects" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500">{defects.length} defect categories</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{defects.length} defect categories</span>
             <button onClick={openDefCreate} className="btn-primary flex items-center gap-2" disabled={components.length === 0}>
               <Plus className="w-4 h-4" />
               Defect Category
@@ -426,25 +426,25 @@ export default function WorkCategoriesPage() {
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Component</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Category</th>
+                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Component</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {defects.map((def) => (
-                    <tr key={def.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                      <td className="px-5 py-3 font-medium text-gray-900">{def.name}</td>
-                      <td className="px-5 py-3 text-gray-500">{def.componentName}</td>
-                      <td className="px-5 py-3 text-gray-500">{def.categoryName}</td>
+                    <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.componentName}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.categoryName}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors">
+                          <button onClick={() => openDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteDef(def.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                          <button onClick={() => deleteDef(def.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -466,7 +466,7 @@ export default function WorkCategoriesPage() {
         >
           <form onSubmit={submitCat} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
               <input
                 className="input w-full"
                 value={catForm.name}
@@ -476,7 +476,7 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Type</label>
               <select
                 className="input w-full"
                 value={catForm.type}
@@ -508,7 +508,7 @@ export default function WorkCategoriesPage() {
         >
           <form onSubmit={submitComp} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
               <input
                 className="input w-full"
                 value={compForm.name}
@@ -518,7 +518,7 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Work Category</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Work Category</label>
               <select
                 className="input w-full"
                 value={compForm.workCategoryId}
@@ -551,7 +551,7 @@ export default function WorkCategoriesPage() {
         >
           <form onSubmit={submitDef} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
               <input
                 className="input w-full"
                 value={defForm.name}
@@ -561,7 +561,7 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Work Component</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Work Component</label>
               <select
                 className="input w-full"
                 value={defForm.workComponentId}

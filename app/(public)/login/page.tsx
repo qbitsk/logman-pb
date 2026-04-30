@@ -36,14 +36,15 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600">
               <Triangle className="w-6 h-6 text-white" />
             </div>
-            <Image src="/images/logo-brand.png" alt="Logman PB" width={140} height={32} style={{ height: "auto" }} loading="eager" />
+            <Image src="/images/logo-brand.webp" alt="Logman PB" width={130} height={50} style={{ width: "auto", height: "50px" }} loading="eager" className="dark:hidden" />
+            <Image src="/images/logo-white.webp" alt="Logman PB" width={130} height={50} style={{ width: "auto", height: "50px" }} loading="eager" className="hidden dark:block" />
           </div>
         </div>
 
         <div className="card">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3">
                 {error}
               </div>
             )}
@@ -69,7 +70,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
           Don&apos;t have an account?{" "}
           <Link href="/register" className="text-brand-600 font-medium hover:underline">
             Register
