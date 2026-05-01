@@ -13,7 +13,7 @@ const patchSchema = z.object({
   units: z.number().int().positive().optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
-  status: z.enum(["draft", "submitted", "approved", "rejected"]).optional(),
+  status: z.enum(["new", "approved", "rejected"]).optional(),
   workerProductionDefects: z.array(workerProductionDefectSchema).optional(),
 });
 
