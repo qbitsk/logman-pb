@@ -12,18 +12,18 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [totalResult, submittedResult, approvedResult] = await Promise.all([
+  const [totalResult, newResult, approvedResult] = await Promise.all([
     db.select({ count: count() }).from(workerProductions)
       .where(eq(workerProductions.userId, session.user.id)),
     db.select({ count: count() }).from(workerProductions)
-      .where(and(eq(workerProductions.userId, session.user.id), eq(workerProductions.status, "submitted"))),
+      .where(and(eq(workerProductions.userId, session.user.id), eq(workerProductions.status, "new"))),
     db.select({ count: count() }).from(workerProductions)
       .where(and(eq(workerProductions.userId, session.user.id), eq(workerProductions.status, "approved"))),
   ]);
 
   return NextResponse.json({
     total: totalResult[0].count,
-    submitted: submittedResult[0].count,
+    new: newResult[0].count,
     approved: approvedResult[0].count,
   });
 }

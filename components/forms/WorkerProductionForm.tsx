@@ -6,13 +6,12 @@ import { clsx } from "clsx";
 import { workerProductionSchema, type WorkerProductionInput } from "@/lib/validations/worker-production";
 import { Trash2, Plus } from "lucide-react";
 
-const STATUSES = ["draft", "submitted", "approved", "rejected"] as const;
+const STATUSES = ["new", "approved", "denied"] as const;
 
 const statusStyles: Record<string, string> = {
-  draft:     "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-  submitted: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  approved:  "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+  new:      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+  approved: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  denied:   "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
 type WorkerProduction = {
@@ -102,7 +101,7 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
     units: production?.units?.toString() ?? "",
     shift: production?.shift?.toString() ?? "",
     notes: production?.notes ?? "",
-    status: production?.status ?? "draft",
+    status: production?.status ?? "new",
   });
   const [defects, setDefects] = useState<DefectEntry[]>(() =>
     (existingDefects ?? []).map((d) => {

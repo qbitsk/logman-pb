@@ -5,7 +5,7 @@ import { useSession } from "@/lib/auth/client";
 import Link from "next/link";
 import { Plus, FileText, CheckCircle, Clock } from "lucide-react";
 
-type Stats = { total: number; submitted: number; approved: number };
+type Stats = { total: number; new: number; approved: number };
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -19,7 +19,7 @@ export default function DashboardPage() {
 
   const statCards = [
     { label: "Total Productions", value: stats?.total, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
-    { label: "Submitted", value: stats?.submitted, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
+    { label: "New", value: stats?.new, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
     { label: "Approved", value: stats?.approved, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
   ];
 

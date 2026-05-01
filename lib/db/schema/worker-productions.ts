@@ -3,11 +3,10 @@ import { users } from "./users";
 import { workStations } from "./work-stations";
 import { workProducts } from "./work-products";
 
-export const statusEnum = pgEnum("submission_status", [
-  "draft",
-  "submitted",
+export const statusEnum = pgEnum("worker_production_status", [
+  "new",
   "approved",
-  "rejected",
+  "denied",
 ]);
 
 export const workerProductions = pgTable("worker_productions", {
@@ -25,7 +24,7 @@ export const workerProductions = pgTable("worker_productions", {
   shift: integer("shift"),
   notes: text("notes"),
 
-  status: statusEnum("status").notNull().default("draft"),
+  status: statusEnum("status").notNull().default("new"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

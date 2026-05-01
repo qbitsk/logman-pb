@@ -50,7 +50,7 @@ export default function EditWorkerProductionPage() {
       .then((data) => {
         if (!data) return;
         const { existingDefects: defects, ...prod } = data;
-        if (prod.status !== "draft" && prod.status !== "submitted") {
+        if (prod.status !== "new") {
           router.replace(`/worker-productions/${id}`);
           return;
         }

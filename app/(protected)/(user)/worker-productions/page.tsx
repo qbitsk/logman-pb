@@ -16,10 +16,9 @@ type WorkerProduction = {
 };
 
 const statusStyles: Record<string, string> = {
-  draft:     "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-  submitted: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  approved:  "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+  new:      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+  approved: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  denied:   "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
 export default function WorkerProductionsPage() {
@@ -85,12 +84,12 @@ export default function WorkerProductionsPage() {
                   </td>
                   <td className="px-5 py-3 text-end">
                     <div className="flex items-center justify-end gap-1">
-                      {(s.status === "draft" || s.status === "submitted") && (
+                      {s.status === "new" && (
                         <Link href={`/worker-productions/${s.id}/edit`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors" aria-label="Edit production">
                           <Pencil className="w-4 h-4" />
                         </Link>
                       )}
-                      {(s.status === "draft" || s.status === "submitted") && (
+                      {s.status === "new" && (
                         <DeleteWorkerProductionButton id={s.id} apiPath="/api/worker-productions" onDeleted={(id) => setProductions((prev) => prev.filter((x) => x.id !== id))} />
                       )}
                     </div>

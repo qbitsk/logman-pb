@@ -109,7 +109,7 @@ export async function PATCH(
 
   const { workerProductionDefects: defectsPayload, ...productionData } = result.data;
 
-  // Only allow edits when production is in draft or submitted state
+  // Only allow edits when production is in new state
   const [existing] = await db
     .select({ status: workerProductions.status })
     .from(workerProductions)
@@ -117,7 +117,7 @@ export async function PATCH(
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (existing.status !== "draft" && existing.status !== "submitted") {
+  if (existing.status !== "new") {
     return NextResponse.json({ error: "Worker production cannot be edited in its current status" }, { status: 403 });
   }
 
@@ -143,7 +143,7 @@ export async function PATCH(
   return NextResponse.json(updated);
 }
 
-// DELETE /api/worker-productions/[id] — delete a worker production owned by the current user (draft or submitted only)
+// DELETE /api/worker-productions/[id] — delete a worker production owned by the current user (new only)
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -162,7 +162,7 @@ export async function DELETE(
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (existing.status !== "draft" && existing.status !== "submitted") {
+  if (existing.status !== "new") {
     return NextResponse.json({ error: "Worker production cannot be deleted in its current status" }, { status: 403 });
   }
 

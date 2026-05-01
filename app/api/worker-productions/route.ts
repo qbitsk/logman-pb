@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       shift: result.data.shift ?? null,
       notes: result.data.notes,
       userId: session.user.id,
-      status: "submitted",
+      status: "new",
     })
     .returning();
 
