@@ -41,23 +41,24 @@ export async function GET(request: NextRequest) {
     userName: r.userName ?? "Unknown",
   }));
 
-  // Fetch all defects with component and defect category names
+  // Fetch all defects with component name, defect name and type
   const defectRows = await db
     .select({
       submissionId: workerProductionDefects.workerProductionId,
       componentName: workComponents.name,
-      defectCategoryName: workProducts.name,
+      defectName: workDefects.name,
+      defectType: workDefects.type,
       units: workerProductionDefects.units,
     })
     .from(workerProductionDefects)
     .leftJoin(workDefects, eq(workerProductionDefects.workDefectId, workDefects.id))
-    .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-    .leftJoin(workProducts, eq(workDefects.workProductId, workProducts.id));
+    .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id));
 
   const typedDefectRows = defectRows.map((d) => ({
     submissionId: d.submissionId,
     componentName: d.componentName ?? "Unknown",
-    defectCategoryName: d.defectCategoryName ?? "Unknown",
+    defectName: d.defectName ?? "Unknown",
+    defectType: d.defectType ?? "unit",
     units: d.units,
   }));
 

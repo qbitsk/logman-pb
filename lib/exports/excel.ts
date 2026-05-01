@@ -66,7 +66,8 @@ export async function generateSubmissionsExcel(
 type DefectRow = {
   submissionId: string;
   componentName: string;
-  defectCategoryName: string;
+  defectName: string;
+  defectType: string;
   units: number;
 };
 
@@ -100,7 +101,9 @@ export async function generateSubmissionsCSV(
   const defectColumns = new Set<string>();
 
   for (const d of defects) {
-    const colKey = `${d.componentName} - ${d.defectCategoryName}`;
+    const colKey = d.defectType === "component"
+      ? `${d.componentName} - ${d.defectName}`
+      : d.defectName;
     defectColumns.add(colKey);
     if (!defectPivot.has(d.submissionId)) {
       defectPivot.set(d.submissionId, new Map());
