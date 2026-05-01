@@ -12,6 +12,7 @@ export type SubmissionDetailData = {
   createdAt: string;
   updatedAt: string;
   workProductName: string | null;
+  categoryName: string | null;
   stationName: string | null;
   defects: { workDefectName?: string | null; workDefectType?: string | null; workComponentName?: string | null; units: number }[];
   userName?: string;
@@ -76,6 +77,13 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
             {submission.userEmail && (
               <p className="text-xs text-gray-400 dark:text-gray-500">{submission.userEmail}</p>
             )}
+          </div>
+        )}
+
+        {submission.categoryName && (
+          <div>
+            <p className="label">Category</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{submission.categoryName}</p>
           </div>
         )}
 

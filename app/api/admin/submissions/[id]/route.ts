@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, workSubmissionDefects, workDefects, workComponents, workProducts, workStations } from "@/lib/db/schema";
+import { submissions, users, workSubmissionDefects, workDefects, workComponents, workProducts, workStations, categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -75,7 +75,7 @@ export async function GET(
       .innerJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
       .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
       .where(eq(workSubmissionDefects.submissionId, id)),
-    db.select({ name: workProducts.name }).from(workProducts).where(eq(workProducts.id, row.workProductId)).limit(1),
+    db.select({ name: workProducts.name, categoryName: categories.name }).from(workProducts).innerJoin(categories, eq(workProducts.categoryId, categories.id)).where(eq(workProducts.id, row.workProductId)).limit(1),
     row.workStationId
       ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
       : Promise.resolve([]),
@@ -84,6 +84,7 @@ export async function GET(
   return NextResponse.json({
     ...row,
     workProductName: categoryRow[0]?.name ?? null,
+    categoryName: categoryRow[0]?.categoryName ?? null,
     stationName: (stationRow as { name: string }[])[0]?.name ?? null,
     existingDefects,
     defects: defectsDisplay,
