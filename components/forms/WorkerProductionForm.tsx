@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
-import { submissionSchema, type SubmissionInput } from "@/lib/validations/submission";
+import { workerProductionSchema, type WorkerProductionInput } from "@/lib/validations/worker-production";
 import { Trash2, Plus } from "lucide-react";
 
 const STATUSES = ["draft", "submitted", "approved", "rejected"] as const;
@@ -15,7 +15,7 @@ const statusStyles: Record<string, string> = {
   rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-type Submission = {
+type WorkerProduction = {
   id: string;
   workProductId: string;
   workStationId: string | null;
@@ -65,7 +65,7 @@ type DefectEntry = {
 };
 
 type Props = {
-  submission?: Submission;
+  production?: WorkerProduction;
   workProducts: WorkProduct[];
   workStations: WorkStation[];
   workComponents: WorkComponent[];
@@ -76,18 +76,18 @@ type Props = {
   allowStatusChange?: boolean;
 };
 
-export function SubmissionForm({ submission, workProducts, workStations, workComponents, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
+export function WorkerProductionForm({ production, workProducts, workStations, workComponents, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
   const router = useRouter();
-  const isEdit = !!submission;
-  const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/submissions" : "/submissions");
+  const isEdit = !!production;
+  const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/worker-productions" : "/worker-productions");
 
   const [form, setForm] = useState({
-    workProductId: submission?.workProductId ?? (workProducts[0]?.id ?? ""),
-    workStationId: submission?.workStationId ?? "",
-    units: submission?.units?.toString() ?? "",
-    shift: submission?.shift?.toString() ?? "",
-    notes: submission?.notes ?? "",
-    status: submission?.status ?? "draft",
+    workProductId: production?.workProductId ?? (workProducts[0]?.id ?? ""),
+    workStationId: production?.workStationId ?? "",
+    units: production?.units?.toString() ?? "",
+    shift: production?.shift?.toString() ?? "",
+    notes: production?.notes ?? "",
+    status: production?.status ?? "draft",
   });
   const [defects, setDefects] = useState<DefectEntry[]>(() =>
     (existingDefects ?? []).map((d) => {
@@ -102,7 +102,7 @@ export function SubmissionForm({ submission, workProducts, workStations, workCom
     })
   );
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<Record<keyof SubmissionInput, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof WorkerProductionInput, string>>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -159,7 +159,7 @@ export function SubmissionForm({ submission, workProducts, workStations, workCom
     setSuccess(false);
 
     if (!isEdit) {
-      const result = submissionSchema.safeParse({
+      const result = workerProductionSchema.safeParse({
         workProductId: form.workProductId,
         workStationId: form.workStationId || null,
         units: form.units ? parseInt(form.units, 10) : null,
@@ -169,7 +169,7 @@ export function SubmissionForm({ submission, workProducts, workStations, workCom
       if (!result.success) {
         const fieldErrors: typeof errors = {};
         result.error.issues.forEach((issue) => {
-          const key = issue.path[0] as keyof SubmissionInput;
+          const key = issue.path[0] as keyof WorkerProductionInput;
           fieldErrors[key] = issue.message;
         });
         setErrors(fieldErrors);
@@ -179,7 +179,7 @@ export function SubmissionForm({ submission, workProducts, workStations, workCom
 
     setLoading(true);
     try {
-      const url = isEdit ? (editUrl ?? `/api/admin/submissions/${submission!.id}`) : "/api/submissions";
+      const url = isEdit ? (editUrl ?? `/api/admin/worker-productions/${production!.id}`) : "/api/worker-productions";
       const method = isEdit ? "PATCH" : "POST";
       const parsedDefects = defects
         .filter((d) => d.workDefectId && d.units)
@@ -189,8 +189,8 @@ export function SubmissionForm({ submission, workProducts, workStations, workCom
         }));
 
       const body = isEdit
-        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workSubmissionDefects: parsedDefects })
-        : JSON.stringify({ workProductId: form.workProductId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workSubmissionDefects: parsedDefects });
+        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workerProductionDefects: parsedDefects })
+        : JSON.stringify({ workProductId: form.workProductId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workerProductionDefects: parsedDefects });
 
       const res = await fetch(url, {
         method,
@@ -208,7 +208,7 @@ export function SubmissionForm({ submission, workProducts, workStations, workCom
         setSuccess(true);
         router.push(resolvedBackUrl);
       } else {
-        router.push("/submissions");
+        router.push("/worker-productions");
       }
     } catch {
       setServerError("Network error. Please try again.");
@@ -225,11 +225,11 @@ export function SubmissionForm({ submission, workProducts, workStations, workCom
             {form.status}
           </span>
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            by <span className="font-medium text-gray-700 dark:text-gray-300">{submission!.userName}</span>{" "}
-            <span className="text-gray-400 dark:text-gray-500">({submission!.userEmail})</span>
+            by <span className="font-medium text-gray-700 dark:text-gray-300">{production!.userName}</span>{" "}
+            <span className="text-gray-400 dark:text-gray-500">({production!.userEmail})</span>
           </span>
           <span className="text-sm text-gray-400 dark:text-gray-500 ml-auto">
-            Updated {new Date(submission!.updatedAt).toLocaleString()}
+            Updated {new Date(production!.updatedAt).toLocaleString()}
           </span>
         </div>
       )}

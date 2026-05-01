@@ -1,38 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workSubmissionDefects, workProducts, categories } from "@/lib/db/schema";
-import { submissionSchema } from "@/lib/validations/submission";
+import { workerProductions, workerProductionDefects, workProducts, categories } from "@/lib/db/schema";
+import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-// GET /api/submissions — list submissions for the current user
+// GET /api/worker-productions — list worker productions for the current user
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userSubmissions = await db
+  const userProductions = await db
     .select({
-      id: submissions.id,
-      status: submissions.status,
-      units: submissions.units,
-      createdAt: submissions.createdAt,
+      id: workerProductions.id,
+      status: workerProductions.status,
+      units: workerProductions.units,
+      createdAt: workerProductions.createdAt,
       workProductName: workProducts.name,
       categoryName: categories.name,
     })
-    .from(submissions)
-    .innerJoin(workProducts, eq(submissions.workProductId, workProducts.id))
+    .from(workerProductions)
+    .innerJoin(workProducts, eq(workerProductions.workProductId, workProducts.id))
     .innerJoin(categories, eq(workProducts.categoryId, categories.id))
-    .where(eq(submissions.userId, session.user.id))
-    .orderBy(submissions.createdAt);
+    .where(eq(workerProductions.userId, session.user.id))
+    .orderBy(workerProductions.createdAt);
 
-  return NextResponse.json(userSubmissions);
+  return NextResponse.json(userProductions);
 }
 
-// POST /api/submissions — create a new submission
+// POST /api/worker-productions — create a new worker production
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const result = submissionSchema.safeParse(body);
+  const result = workerProductionSchema.safeParse(body);
 
   if (!result.success) {
     return NextResponse.json(
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const [submission] = await db
-    .insert(submissions)
+  const [production] = await db
+    .insert(workerProductions)
     .values({
       workProductId: result.data.workProductId,
       workStationId: result.data.workStationId ?? null,
@@ -62,10 +62,10 @@ export async function POST(request: NextRequest) {
     })
     .returning();
 
-  if (result.data.workSubmissionDefects?.length) {
-    await db.insert(workSubmissionDefects).values(
-      result.data.workSubmissionDefects.map((d) => ({
-        submissionId: submission.id,
+  if (result.data.workerProductionDefects?.length) {
+    await db.insert(workerProductionDefects).values(
+      result.data.workerProductionDefects.map((d) => ({
+        workerProductionId: production.id,
         workDefectId: d.workDefectId,
         units: d.units,
       }))
@@ -76,15 +76,14 @@ export async function POST(request: NextRequest) {
   Promise.all([
     sendSubmissionConfirmation({
       user: { name: session.user.name, email: session.user.email },
-      submissionId: submission.id,
+      submissionId: production.id,
     }),
-    // Replace with your actual admin email or fetch from DB
     sendAdminNotification({
       adminEmail: process.env.ADMIN_EMAIL ?? "admin@yourdomain.com",
       submitterName: session.user.name,
-      submissionId: submission.id,
+      submissionId: production.id,
     }),
   ]).catch(console.error);
 
-  return NextResponse.json(submission, { status: 201 });
+  return NextResponse.json(production, { status: 201 });
 }

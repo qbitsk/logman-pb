@@ -16,11 +16,11 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const userNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/submissions", label: "My Submissions", icon: FileText },
+  { href: "/worker-productions", label: "My Productions", icon: FileText },
 ];
 
 const adminNavItems = [
-  { href: "/admin/submissions", label: "Submissions", icon: FileText },
+  { href: "/admin/worker-productions", label: "Productions", icon: FileText },
   { href: "/admin/work-categories", label: "Definitions", icon: Layers },
   { href: "/admin/exports", label: "Exports", icon: Download },
   { href: "/admin/users", label: "Users", icon: Users },

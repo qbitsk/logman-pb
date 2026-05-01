@@ -1,5 +1,5 @@
 {
-  "id": "cd44fabf-db55-4e84-9546-eb1dc49882ad",
+  "id": "543ef0bc-9302-47be-ab09-353281851798",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -628,8 +628,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.submissions": {
-      "name": "submissions",
+    "public.worker_productions": {
+      "name": "worker_productions",
       "schema": "",
       "columns": {
         "id": {
@@ -699,9 +699,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "submissions_user_id_users_id_fk": {
-          "name": "submissions_user_id_users_id_fk",
-          "tableFrom": "submissions",
+        "worker_productions_user_id_users_id_fk": {
+          "name": "worker_productions_user_id_users_id_fk",
+          "tableFrom": "worker_productions",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -712,9 +712,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "submissions_work_product_id_work_products_id_fk": {
-          "name": "submissions_work_product_id_work_products_id_fk",
-          "tableFrom": "submissions",
+        "worker_productions_work_product_id_work_products_id_fk": {
+          "name": "worker_productions_work_product_id_work_products_id_fk",
+          "tableFrom": "worker_productions",
           "tableTo": "work_products",
           "columnsFrom": [
             "work_product_id"
@@ -725,9 +725,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "submissions_work_station_id_work_stations_id_fk": {
-          "name": "submissions_work_station_id_work_stations_id_fk",
-          "tableFrom": "submissions",
+        "worker_productions_work_station_id_work_stations_id_fk": {
+          "name": "worker_productions_work_station_id_work_stations_id_fk",
+          "tableFrom": "worker_productions",
           "tableTo": "work_stations",
           "columnsFrom": [
             "work_station_id"
@@ -745,8 +745,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.work_submission_defects": {
-      "name": "work_submission_defects",
+    "public.worker_production_defects": {
+      "name": "worker_production_defects",
       "schema": "",
       "columns": {
         "id": {
@@ -755,8 +755,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "submission_id": {
-          "name": "submission_id",
+        "worker_production_id": {
+          "name": "worker_production_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -790,12 +790,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "work_submission_defects_submission_id_submissions_id_fk": {
-          "name": "work_submission_defects_submission_id_submissions_id_fk",
-          "tableFrom": "work_submission_defects",
-          "tableTo": "submissions",
+        "worker_production_defects_worker_production_id_worker_productions_id_fk": {
+          "name": "worker_production_defects_worker_production_id_worker_productions_id_fk",
+          "tableFrom": "worker_production_defects",
+          "tableTo": "worker_productions",
           "columnsFrom": [
-            "submission_id"
+            "worker_production_id"
           ],
           "columnsTo": [
             "id"
@@ -803,9 +803,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "work_submission_defects_work_defect_id_work_defects_id_fk": {
-          "name": "work_submission_defects_work_defect_id_work_defects_id_fk",
-          "tableFrom": "work_submission_defects",
+        "worker_production_defects_work_defect_id_work_defects_id_fk": {
+          "name": "worker_production_defects_work_defect_id_work_defects_id_fk",
+          "tableFrom": "worker_production_defects",
           "tableTo": "work_defects",
           "columnsFrom": [
             "work_defect_id"

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workSubmissionDefects, workDefects, workComponents, workProducts, workStations, users, categories } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, workDefects, workComponents, workProducts, workStations, users, categories } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { workSubmissionDefectSchema } from "@/lib/validations/submission";
+import { workerProductionDefectSchema } from "@/lib/validations/worker-production";
 
 const patchSchema = z.object({
   workProductId: z.string().min(1).optional(),
@@ -13,10 +13,10 @@ const patchSchema = z.object({
   units: z.number().int().positive().optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
-  workSubmissionDefects: z.array(workSubmissionDefectSchema).optional(),
+  workerProductionDefects: z.array(workerProductionDefectSchema).optional(),
 });
 
-// GET /api/submissions/[id] — fetch a single submission owned by the current user
+// GET /api/worker-productions/[id] — fetch a single worker production owned by the current user
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -30,21 +30,21 @@ export async function GET(
 
   const [row] = await db
     .select({
-      id: submissions.id,
-      workProductId: submissions.workProductId,
-      workStationId: submissions.workStationId,
-      units: submissions.units,
-      shift: submissions.shift,
-      notes: submissions.notes,
-      status: submissions.status,
-      createdAt: submissions.createdAt,
-      updatedAt: submissions.updatedAt,
+      id: workerProductions.id,
+      workProductId: workerProductions.workProductId,
+      workStationId: workerProductions.workStationId,
+      units: workerProductions.units,
+      shift: workerProductions.shift,
+      notes: workerProductions.notes,
+      status: workerProductions.status,
+      createdAt: workerProductions.createdAt,
+      updatedAt: workerProductions.updatedAt,
       userName: users.name,
       userEmail: users.email,
     })
-    .from(submissions)
-    .innerJoin(users, eq(submissions.userId, users.id))
-    .where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)))
+    .from(workerProductions)
+    .innerJoin(users, eq(workerProductions.userId, users.id))
+    .where(and(eq(workerProductions.id, id), eq(workerProductions.userId, session.user.id)))
     .limit(1);
 
   if (!row) {
@@ -54,22 +54,22 @@ export async function GET(
   const [existingDefects, defectsDisplay, categoryRow, stationRow] = await Promise.all([
     db
       .select({
-        workDefectId: workSubmissionDefects.workDefectId,
-        units: workSubmissionDefects.units,
+        workDefectId: workerProductionDefects.workDefectId,
+        units: workerProductionDefects.units,
       })
-      .from(workSubmissionDefects)
-      .where(eq(workSubmissionDefects.submissionId, id)),
+      .from(workerProductionDefects)
+      .where(eq(workerProductionDefects.workerProductionId, id)),
     db
       .select({
         workDefectName: workDefects.name,
         workDefectType: workDefects.type,
         workComponentName: workComponents.name,
-        units: workSubmissionDefects.units,
+        units: workerProductionDefects.units,
       })
-      .from(workSubmissionDefects)
-      .innerJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
+      .from(workerProductionDefects)
+      .innerJoin(workDefects, eq(workerProductionDefects.workDefectId, workDefects.id))
       .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-      .where(eq(workSubmissionDefects.submissionId, id)),
+      .where(eq(workerProductionDefects.workerProductionId, id)),
     db.select({ name: workProducts.name, categoryName: categories.name }).from(workProducts).innerJoin(categories, eq(workProducts.categoryId, categories.id)).where(eq(workProducts.id, row.workProductId)).limit(1),
     row.workStationId
       ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
@@ -86,7 +86,7 @@ export async function GET(
   });
 }
 
-// PATCH /api/submissions/[id] — update a submission owned by the current user
+// PATCH /api/worker-productions/[id] — update a worker production owned by the current user
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -107,33 +107,33 @@ export async function PATCH(
     );
   }
 
-  const { workSubmissionDefects: defectsPayload, ...submissionData } = result.data;
+  const { workerProductionDefects: defectsPayload, ...productionData } = result.data;
 
-  // Only allow edits when submission is in draft or submitted state
+  // Only allow edits when production is in draft or submitted state
   const [existing] = await db
-    .select({ status: submissions.status })
-    .from(submissions)
-    .where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)))
+    .select({ status: workerProductions.status })
+    .from(workerProductions)
+    .where(and(eq(workerProductions.id, id), eq(workerProductions.userId, session.user.id)))
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (existing.status !== "draft" && existing.status !== "submitted") {
-    return NextResponse.json({ error: "Submission cannot be edited in its current status" }, { status: 403 });
+    return NextResponse.json({ error: "Worker production cannot be edited in its current status" }, { status: 403 });
   }
 
   const [updated] = await db
-    .update(submissions)
-    .set({ ...submissionData, updatedAt: new Date() })
-    .where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)))
+    .update(workerProductions)
+    .set({ ...productionData, updatedAt: new Date() })
+    .where(and(eq(workerProductions.id, id), eq(workerProductions.userId, session.user.id)))
     .returning();
 
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await db.delete(workSubmissionDefects).where(eq(workSubmissionDefects.submissionId, id));
+  await db.delete(workerProductionDefects).where(eq(workerProductionDefects.workerProductionId, id));
   if (defectsPayload?.length) {
-    await db.insert(workSubmissionDefects).values(
+    await db.insert(workerProductionDefects).values(
       defectsPayload.map((d) => ({
-        submissionId: id,
+        workerProductionId: id,
         workDefectId: d.workDefectId,
         units: d.units,
       }))
@@ -143,7 +143,7 @@ export async function PATCH(
   return NextResponse.json(updated);
 }
 
-// DELETE /api/submissions/[id] — delete a submission owned by the current user (draft or submitted only)
+// DELETE /api/worker-productions/[id] — delete a worker production owned by the current user (draft or submitted only)
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -156,17 +156,17 @@ export async function DELETE(
   const { id } = await params;
 
   const [existing] = await db
-    .select({ status: submissions.status })
-    .from(submissions)
-    .where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)))
+    .select({ status: workerProductions.status })
+    .from(workerProductions)
+    .where(and(eq(workerProductions.id, id), eq(workerProductions.userId, session.user.id)))
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (existing.status !== "draft" && existing.status !== "submitted") {
-    return NextResponse.json({ error: "Submission cannot be deleted in its current status" }, { status: 403 });
+    return NextResponse.json({ error: "Worker production cannot be deleted in its current status" }, { status: 403 });
   }
 
-  await db.delete(submissions).where(and(eq(submissions.id, id), eq(submissions.userId, session.user.id)));
+  await db.delete(workerProductions).where(and(eq(workerProductions.id, id), eq(workerProductions.userId, session.user.id)));
 
   return new NextResponse(null, { status: 204 });
 }

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, workSubmissionDefects, workDefects, workComponents, workProducts, workStations, categories } from "@/lib/db/schema";
+import { workerProductions, users, workerProductionDefects, workDefects, workComponents, workProducts, workStations, categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { workSubmissionDefectSchema } from "@/lib/validations/submission";
+import { workerProductionDefectSchema } from "@/lib/validations/worker-production";
 
 const patchSchema = z.object({
   workProductId: z.string().min(1).optional(),
@@ -14,7 +14,7 @@ const patchSchema = z.object({
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   status: z.enum(["draft", "submitted", "approved", "rejected"]).optional(),
-  workSubmissionDefects: z.array(workSubmissionDefectSchema).optional(),
+  workerProductionDefects: z.array(workerProductionDefectSchema).optional(),
 });
 
 async function requireAdmin() {
@@ -23,7 +23,7 @@ async function requireAdmin() {
   return session;
 }
 
-// GET /api/admin/submissions/[id]
+// GET /api/admin/worker-productions/[id]
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -36,22 +36,22 @@ export async function GET(
 
   const [row] = await db
     .select({
-      id: submissions.id,
-      workProductId: submissions.workProductId,
-      workStationId: submissions.workStationId,
-      units: submissions.units,
-      shift: submissions.shift,
-      notes: submissions.notes,
-      status: submissions.status,
-      createdAt: submissions.createdAt,
-      updatedAt: submissions.updatedAt,
-      userId: submissions.userId,
+      id: workerProductions.id,
+      workProductId: workerProductions.workProductId,
+      workStationId: workerProductions.workStationId,
+      units: workerProductions.units,
+      shift: workerProductions.shift,
+      notes: workerProductions.notes,
+      status: workerProductions.status,
+      createdAt: workerProductions.createdAt,
+      updatedAt: workerProductions.updatedAt,
+      userId: workerProductions.userId,
       userName: users.name,
       userEmail: users.email,
     })
-    .from(submissions)
-    .innerJoin(users, eq(submissions.userId, users.id))
-    .where(eq(submissions.id, id))
+    .from(workerProductions)
+    .innerJoin(users, eq(workerProductions.userId, users.id))
+    .where(eq(workerProductions.id, id))
     .limit(1);
 
   if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -59,22 +59,22 @@ export async function GET(
   const [existingDefects, defectsDisplay, categoryRow, stationRow] = await Promise.all([
     db
       .select({
-        workDefectId: workSubmissionDefects.workDefectId,
-        units: workSubmissionDefects.units,
+        workDefectId: workerProductionDefects.workDefectId,
+        units: workerProductionDefects.units,
       })
-      .from(workSubmissionDefects)
-      .where(eq(workSubmissionDefects.submissionId, id)),
+      .from(workerProductionDefects)
+      .where(eq(workerProductionDefects.workerProductionId, id)),
     db
       .select({
         workDefectName: workDefects.name,
         workDefectType: workDefects.type,
         workComponentName: workComponents.name,
-        units: workSubmissionDefects.units,
+        units: workerProductionDefects.units,
       })
-      .from(workSubmissionDefects)
-      .innerJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
+      .from(workerProductionDefects)
+      .innerJoin(workDefects, eq(workerProductionDefects.workDefectId, workDefects.id))
       .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-      .where(eq(workSubmissionDefects.submissionId, id)),
+      .where(eq(workerProductionDefects.workerProductionId, id)),
     db.select({ name: workProducts.name, categoryName: categories.name }).from(workProducts).innerJoin(categories, eq(workProducts.categoryId, categories.id)).where(eq(workProducts.id, row.workProductId)).limit(1),
     row.workStationId
       ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
@@ -91,7 +91,7 @@ export async function GET(
   });
 }
 
-// PATCH /api/admin/submissions/[id]
+// PATCH /api/admin/worker-productions/[id]
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -111,21 +111,21 @@ export async function PATCH(
     );
   }
 
-  const { workSubmissionDefects: defectsPayload, ...submissionData } = result.data;
+  const { workerProductionDefects: defectsPayload, ...productionData } = result.data;
 
   const [updated] = await db
-    .update(submissions)
-    .set({ ...submissionData, updatedAt: new Date() })
-    .where(eq(submissions.id, id))
+    .update(workerProductions)
+    .set({ ...productionData, updatedAt: new Date() })
+    .where(eq(workerProductions.id, id))
     .returning();
 
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await db.delete(workSubmissionDefects).where(eq(workSubmissionDefects.submissionId, id));
+  await db.delete(workerProductionDefects).where(eq(workerProductionDefects.workerProductionId, id));
   if (defectsPayload?.length) {
-    await db.insert(workSubmissionDefects).values(
+    await db.insert(workerProductionDefects).values(
       defectsPayload.map((d) => ({
-        submissionId: id,
+        workerProductionId: id,
         workDefectId: d.workDefectId,
         units: d.units,
       }))
@@ -135,7 +135,7 @@ export async function PATCH(
   return NextResponse.json(updated);
 }
 
-// DELETE /api/admin/submissions/[id]
+// DELETE /api/admin/worker-productions/[id]
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -147,14 +147,14 @@ export async function DELETE(
   const { id } = await params;
 
   const [existing] = await db
-    .select({ id: submissions.id })
-    .from(submissions)
-    .where(eq(submissions.id, id))
+    .select({ id: workerProductions.id })
+    .from(workerProductions)
+    .where(eq(workerProductions.id, id))
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await db.delete(submissions).where(eq(submissions.id, id));
+  await db.delete(workerProductions).where(eq(workerProductions.id, id));
 
   return new NextResponse(null, { status: 204 });
 }

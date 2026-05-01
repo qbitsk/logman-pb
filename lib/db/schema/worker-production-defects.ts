@@ -1,12 +1,12 @@
 import { pgTable, text, integer, timestamp } from "drizzle-orm/pg-core";
-import { submissions } from "./submissions";
+import { workerProductions } from "./worker-productions";
 import { workDefects } from "./work-defects";
 
-export const workSubmissionDefects = pgTable("work_submission_defects", {
+export const workerProductionDefects = pgTable("worker_production_defects", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  submissionId: text("submission_id")
+  workerProductionId: text("worker_production_id")
     .notNull()
-    .references(() => submissions.id, { onDelete: "cascade" }),
+    .references(() => workerProductions.id, { onDelete: "cascade" }),
   workDefectId: text("work_defect_id")
     .notNull()
     .references(() => workDefects.id),
@@ -15,5 +15,5 @@ export const workSubmissionDefects = pgTable("work_submission_defects", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export type WorkSubmissionDefect = typeof workSubmissionDefects.$inferSelect;
-export type NewWorkSubmissionDefect = typeof workSubmissionDefects.$inferInsert;
+export type WorkerProductionDefect = typeof workerProductionDefects.$inferSelect;
+export type NewWorkerProductionDefect = typeof workerProductionDefects.$inferInsert;

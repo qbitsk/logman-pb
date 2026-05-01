@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Pencil } from "lucide-react";
-import { DeleteSubmissionButton } from "@/components/DeleteSubmissionButton";
+import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
 
-type Submission = {
+type WorkerProduction = {
   id: string;
   status: string;
   units: number | null;
@@ -22,24 +22,24 @@ const statusStyles: Record<string, string> = {
   rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-export default function SubmissionsPage() {
-  const [userSubmissions, setUserSubmissions] = useState<Submission[]>([]);
+export default function WorkerProductionsPage() {
+  const [productions, setProductions] = useState<WorkerProduction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/submissions")
+    fetch("/api/worker-productions")
       .then((r) => r.json())
-      .then(setUserSubmissions)
+      .then(setProductions)
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">My Submissions</h1>
-        <Link href="/submissions/new" className="btn-primary flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">My Productions</h1>
+        <Link href="/worker-productions/new" className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          Submission
+          New Production
         </Link>
       </div>
 
@@ -47,11 +47,11 @@ export default function SubmissionsPage() {
         <div className="card text-center py-16">
           <p className="text-gray-400">Loading…</p>
         </div>
-      ) : userSubmissions.length === 0 ? (
+      ) : productions.length === 0 ? (
         <div className="card text-center py-16">
-          <p className="text-gray-400 mb-4">No submissions yet.</p>
-          <Link href="/submissions/new" className="btn-primary inline-flex">
-            Create your first submission
+          <p className="text-gray-400 mb-4">No productions yet.</p>
+          <Link href="/worker-productions/new" className="btn-primary inline-flex">
+            Create your first production
           </Link>
         </div>
       ) : (
@@ -68,10 +68,10 @@ export default function SubmissionsPage() {
               </tr>
             </thead>
             <tbody>
-              {userSubmissions.map((s) => (
+              {productions.map((s) => (
                 <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 dark:border-gray-700/50 dark:hover:bg-brand-900/10 transition-colors">
                   <td className="px-5 py-3 text-gray-400 dark:text-gray-500">
-                    <Link href={`/submissions/${s.id}`} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                    <Link href={`/worker-productions/${s.id}`} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
                       {new Date(s.createdAt).toLocaleDateString()}
                     </Link>
                   </td>
@@ -86,12 +86,12 @@ export default function SubmissionsPage() {
                   <td className="px-5 py-3 text-end">
                     <div className="flex items-center justify-end gap-1">
                       {(s.status === "draft" || s.status === "submitted") && (
-                        <Link href={`/submissions/${s.id}/edit`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors" aria-label="Edit submission">
+                        <Link href={`/worker-productions/${s.id}/edit`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors" aria-label="Edit production">
                           <Pencil className="w-4 h-4" />
                         </Link>
                       )}
                       {(s.status === "draft" || s.status === "submitted") && (
-                        <DeleteSubmissionButton id={s.id} apiPath="/api/submissions" onDeleted={(id) => setUserSubmissions((prev) => prev.filter((x) => x.id !== id))} />
+                        <DeleteWorkerProductionButton id={s.id} apiPath="/api/worker-productions" onDeleted={(id) => setProductions((prev) => prev.filter((x) => x.id !== id))} />
                       )}
                     </div>
                   </td>

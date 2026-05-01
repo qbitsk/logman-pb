@@ -2,22 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { SubmissionDetail, type SubmissionDetailData } from "@/components/SubmissionDetail";
+import { WorkerProductionDetail, type WorkerProductionDetailData } from "@/components/WorkerProductionDetail";
 
-export default function UserSubmissionDetailPage() {
+export default function UserWorkerProductionDetailPage() {
   const { id } = useParams<{ id: string }>();
 
-  const [submission, setSubmission] = useState<SubmissionDetailData | null>(null);
+  const [production, setProduction] = useState<WorkerProductionDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/submissions/${id}`)
+    fetch(`/api/worker-productions/${id}`)
       .then((r) => {
         if (r.status === 404) { setNotFound(true); return null; }
         return r.json();
       })
-      .then((data) => { if (data) setSubmission(data); })
+      .then((data) => { if (data) setProduction(data); })
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -29,20 +29,19 @@ export default function UserSubmissionDetailPage() {
     );
   }
 
-  if (notFound || !submission) {
+  if (notFound || !production) {
     return (
       <div className="max-w-2xl card text-center py-16">
-        <p className="text-gray-400">Submission not found.</p>
+        <p className="text-gray-400">Production not found.</p>
       </div>
     );
   }
 
   return (
-    <SubmissionDetail
-      submission={submission}
-      backUrl="/submissions"
-      editUrl={(submission.status === "draft" || submission.status === "submitted") ? `/submissions/${id}/edit` : undefined}
+    <WorkerProductionDetail
+      production={production}
+      backUrl="/worker-productions"
+      editUrl={(production.status === "draft" || production.status === "submitted") ? `/worker-productions/${id}/edit` : undefined}
     />
   );
 }
-

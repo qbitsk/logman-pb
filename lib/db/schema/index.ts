@@ -4,5 +4,5 @@ export * from "./work-products";
 export * from "./work-stations";
 export * from "./work-components";
 export * from "./work-defects";
-export * from "./submissions";
-export * from "./work-submission-defects";
+export * from "./worker-productions";
+export * from "./worker-production-defects";

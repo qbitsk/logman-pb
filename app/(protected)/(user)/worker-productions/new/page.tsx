@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SubmissionForm } from "@/components/forms/SubmissionForm";
+import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -10,7 +10,7 @@ type WorkStation = { id: string; name: string; workProductId: string };
 type WorkComponent = { id: string; name: string; workProductId: string };
 type WorkDefect = { id: string; name: string; type: "unit" | "component"; workProductId: string; workComponentId: string | null };
 
-export default function NewSubmissionPage() {
+export default function NewWorkerProductionPage() {
   const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
   const [components, setComponents] = useState<WorkComponent[]>([]);
@@ -39,13 +39,13 @@ export default function NewSubmissionPage() {
   return (
     <div>
       <Link
-        href="/submissions"
+        href="/worker-productions"
         className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to submissions
+        Back to productions
       </Link>
-      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-1">New Submission</h1>
+      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-1">New Production</h1>
       <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Fill in the form below and submit your data.</p>
 
       {loading ? (
@@ -54,7 +54,7 @@ export default function NewSubmissionPage() {
         </div>
       ) : (
         <div className="card max-w-2xl">
-          <SubmissionForm
+          <WorkerProductionForm
             workProducts={workProducts}
             workStations={stations}
             workComponents={components}
@@ -65,4 +65,3 @@ export default function NewSubmissionPage() {
     </div>
   );
 }
-

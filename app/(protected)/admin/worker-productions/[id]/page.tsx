@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { SubmissionDetail, type SubmissionDetailData } from "@/components/SubmissionDetail";
+import { WorkerProductionDetail, type WorkerProductionDetailData } from "@/components/WorkerProductionDetail";
 
-export default function AdminSubmissionDetailPage() {
+export default function AdminWorkerProductionDetailPage() {
   const { id } = useParams<{ id: string }>();
 
-  const [submission, setSubmission] = useState<SubmissionDetailData | null>(null);
+  const [production, setProduction] = useState<WorkerProductionDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/admin/submissions/${id}`)
+    fetch(`/api/admin/worker-productions/${id}`)
       .then((r) => {
         if (r.status === 404) { setNotFound(true); return null; }
         return r.json();
@@ -20,7 +20,7 @@ export default function AdminSubmissionDetailPage() {
       .then((data) => {
         if (!data) return;
         const { existingDefects: _ignored, workProductId: _wp, workStationId: _ws, userId: _uid, ...rest } = data;
-        setSubmission(rest);
+        setProduction(rest);
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -33,20 +33,19 @@ export default function AdminSubmissionDetailPage() {
     );
   }
 
-  if (notFound || !submission) {
+  if (notFound || !production) {
     return (
       <div className="max-w-2xl card text-center py-16">
-        <p className="text-gray-400">Submission not found.</p>
+        <p className="text-gray-400">Production not found.</p>
       </div>
     );
   }
 
   return (
-    <SubmissionDetail
-      submission={submission}
-      backUrl="/admin/submissions"
-      editUrl={`/admin/submissions/${id}/edit`}
+    <WorkerProductionDetail
+      production={production}
+      backUrl="/admin/worker-productions"
+      editUrl={`/admin/worker-productions/${id}/edit`}
     />
   );
 }
-

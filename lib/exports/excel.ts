@@ -1,8 +1,8 @@
 import ExcelJS from "exceljs";
-import type { Submission } from "@/lib/db/schema";
+import type { WorkerProduction } from "@/lib/db/schema";
 
 export async function generateSubmissionsExcel(
-  submissions: (Omit<Submission, "workCategoryId"> & { workCategoryId: string; userName: string; userEmail: string })[]
+  submissions: (Omit<WorkerProduction, "workCategoryId"> & { workCategoryId: string; userName: string; userEmail: string })[]
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "My App";

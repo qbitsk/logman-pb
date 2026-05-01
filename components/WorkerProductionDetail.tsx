@@ -4,7 +4,7 @@ import Link from "next/link";
 import { clsx } from "clsx";
 import { ArrowLeft, Pencil } from "lucide-react";
 
-export type SubmissionDetailData = {
+export type WorkerProductionDetailData = {
   id: string;
   status: string;
   units: number | null;
@@ -20,7 +20,7 @@ export type SubmissionDetailData = {
 };
 
 type Props = {
-  submission: SubmissionDetailData;
+  production: WorkerProductionDetailData;
   backUrl: string;
   editUrl?: string;
 };
@@ -32,10 +32,10 @@ const statusStyles: Record<string, string> = {
   rejected:  "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 };
 
-export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
-  const defectedComponents = submission.defects.filter((d) => d.workDefectType === "component").reduce((sum, d) => sum + d.units, 0);
-  const defectedProducts = submission.defects.filter((d) => d.workDefectType === "unit").reduce((sum, d) => sum + d.units, 0);
-  const wasUpdated = new Date(submission.updatedAt) > new Date(submission.createdAt);
+export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) {
+  const defectedComponents = production.defects.filter((d) => d.workDefectType === "component").reduce((sum, d) => sum + d.units, 0);
+  const defectedProducts = production.defects.filter((d) => d.workDefectType === "unit").reduce((sum, d) => sum + d.units, 0);
+  const wasUpdated = new Date(production.updatedAt) > new Date(production.createdAt);
 
   return (
     <div className="max-w-2xl">
@@ -60,52 +60,52 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
 
       <div className="mb-6">
         <div className="flex items-center gap-3 mt-2">
-          <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[submission.status])}>
-            {submission.status}
+          <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[production.status])}>
+            {production.status}
           </span>
           <span className="text-sm text-gray-400 dark:text-gray-500">
-            {new Date(submission.createdAt).toLocaleDateString()}
+            {new Date(production.createdAt).toLocaleDateString()}
           </span>
         </div>
       </div>
 
       <div className="card space-y-5">
-        {submission.userName && (
+        {production.userName && (
           <div>
             <p className="label">User</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{submission.userName}</p>
-            {submission.userEmail && (
-              <p className="text-xs text-gray-400 dark:text-gray-500">{submission.userEmail}</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{production.userName}</p>
+            {production.userEmail && (
+              <p className="text-xs text-gray-400 dark:text-gray-500">{production.userEmail}</p>
             )}
           </div>
         )}
 
-        {submission.categoryName && (
+        {production.categoryName && (
           <div>
             <p className="label">Category</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{submission.categoryName}</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{production.categoryName}</p>
           </div>
         )}
 
         <div>
           <p className="label">Product</p>
-          <p className="text-sm text-gray-800 dark:text-gray-200">{submission.workProductName}</p>
+          <p className="text-sm text-gray-800 dark:text-gray-200">{production.workProductName}</p>
         </div>
 
-        {submission.stationName && (
+        {production.stationName && (
           <div>
             <p className="label">Work Station</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{submission.stationName}</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{production.stationName}</p>
           </div>
         )}
 
-        {submission.units != null && (
+        {production.units != null && (
           <>
             <div>
               <p className="label">Units</p>
-              <p className="text-sm text-emerald-600">{submission.units}</p>
+              <p className="text-sm text-emerald-600">{production.units}</p>
             </div>
-            {submission.defects.length > 0 && (
+            {production.defects.length > 0 && (
               <>
                 <div>
                   <p className="label">Defected Products</p>
@@ -120,26 +120,26 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
           </>
         )}
 
-        {submission.notes && (
+        {production.notes && (
           <div>
             <p className="label">Notes</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{submission.notes}</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{production.notes}</p>
           </div>
         )}
 
         <div>
           <p className="label">Submitted</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(submission.createdAt).toLocaleString()}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(production.createdAt).toLocaleString()}</p>
         </div>
 
         {wasUpdated && (
           <div>
             <p className="label">Last updated</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(submission.updatedAt).toLocaleString()}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(production.updatedAt).toLocaleString()}</p>
           </div>
         )}
 
-        {submission.defects.length > 0 && (
+        {production.defects.length > 0 && (
           <div>
             <p className="label">Defects</p>
             <div className="mt-1 divide-y divide-gray-100 dark:divide-gray-700 border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden">
@@ -148,7 +148,7 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
                 <span>Component</span>
                 <span className="text-right">Units</span>
               </div>
-              {submission.defects.map((d, i) => (
+              {production.defects.map((d, i) => (
                 <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-x-4 px-3 py-2 text-sm text-gray-800 dark:text-gray-200">
                   <span>{d.workDefectName ?? "—"}</span>
                   <span>{d.workComponentName ?? "—"}</span>

@@ -1,6 +1,5 @@
 import { pgTable, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { categories } from "./categories";
 import { workStations } from "./work-stations";
 import { workProducts } from "./work-products";
 
@@ -11,7 +10,7 @@ export const statusEnum = pgEnum("submission_status", [
   "rejected",
 ]);
 
-export const submissions = pgTable("submissions", {
+export const workerProductions = pgTable("worker_productions", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id")
     .notNull()
@@ -32,5 +31,5 @@ export const submissions = pgTable("submissions", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export type Submission = typeof submissions.$inferSelect;
-export type NewSubmission = typeof submissions.$inferInsert;
+export type WorkerProduction = typeof workerProductions.$inferSelect;
+export type NewWorkerProduction = typeof workerProductions.$inferInsert;

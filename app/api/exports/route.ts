@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, workProducts, workStations, workSubmissionDefects, workComponents, workDefects } from "@/lib/db/schema";
+import { workerProductions, users, workProducts, workStations, workerProductionDefects, workComponents, workDefects } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -13,26 +13,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Join submissions with user, category and station data
+  // Join worker productions with user, category and station data
   const rows = await db
     .select({
-      id: submissions.id,
+      id: workerProductions.id,
       workProductName: workProducts.name,
       workStationName: workStations.name,
-      units: submissions.units,
-      shift: submissions.shift,
-      notes: submissions.notes,
-      status: submissions.status,
-      createdAt: submissions.createdAt,
-      updatedAt: submissions.updatedAt,
-      userId: submissions.userId,
+      units: workerProductions.units,
+      shift: workerProductions.shift,
+      notes: workerProductions.notes,
+      status: workerProductions.status,
+      createdAt: workerProductions.createdAt,
+      updatedAt: workerProductions.updatedAt,
+      userId: workerProductions.userId,
       userName: users.name,
     })
-    .from(submissions)
-    .leftJoin(users, eq(submissions.userId, users.id))
-    .leftJoin(workProducts, eq(submissions.workProductId, workProducts.id))
-    .leftJoin(workStations, eq(submissions.workStationId, workStations.id))
-    .orderBy(submissions.createdAt);
+    .from(workerProductions)
+    .leftJoin(users, eq(workerProductions.userId, users.id))
+    .leftJoin(workProducts, eq(workerProductions.workProductId, workProducts.id))
+    .leftJoin(workStations, eq(workerProductions.workStationId, workStations.id))
+    .orderBy(workerProductions.createdAt);
 
   const typedRows = rows.map((r) => ({
     ...r,
@@ -44,13 +44,13 @@ export async function GET(request: NextRequest) {
   // Fetch all defects with component and defect category names
   const defectRows = await db
     .select({
-      submissionId: workSubmissionDefects.submissionId,
+      submissionId: workerProductionDefects.workerProductionId,
       componentName: workComponents.name,
       defectCategoryName: workProducts.name,
-      units: workSubmissionDefects.units,
+      units: workerProductionDefects.units,
     })
-    .from(workSubmissionDefects)
-    .leftJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
+    .from(workerProductionDefects)
+    .leftJoin(workDefects, eq(workerProductionDefects.workDefectId, workDefects.id))
     .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
     .leftJoin(workProducts, eq(workDefects.workProductId, workProducts.id));
 
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv",
-      "Content-Disposition": `attachment; filename="submissions-${Date.now()}.csv"`,
+      "Content-Disposition": `attachment; filename="worker-productions-${Date.now()}.csv"`,
     },
   });
 }

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, workProducts, categories } from "@/lib/db/schema";
+import { workerProductions, users, workProducts, categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-// GET /api/admin/submissions — list all submissions with user info (admin only)
+// GET /api/admin/worker-productions — list all worker productions with user info (admin only)
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session || session.user.role !== "admin") {
@@ -14,20 +14,20 @@ export async function GET() {
 
   const rows = await db
     .select({
-      id: submissions.id,
-      units: submissions.units,
-      status: submissions.status,
-      createdAt: submissions.createdAt,
+      id: workerProductions.id,
+      units: workerProductions.units,
+      status: workerProductions.status,
+      createdAt: workerProductions.createdAt,
       workProductName: workProducts.name,
       categoryName: categories.name,
       userName: users.name,
       userEmail: users.email,
     })
-    .from(submissions)
-    .innerJoin(users, eq(submissions.userId, users.id))
-    .innerJoin(workProducts, eq(submissions.workProductId, workProducts.id))
+    .from(workerProductions)
+    .innerJoin(users, eq(workerProductions.userId, users.id))
+    .innerJoin(workProducts, eq(workerProductions.workProductId, workProducts.id))
     .innerJoin(categories, eq(workProducts.categoryId, categories.id))
-    .orderBy(submissions.createdAt);
+    .orderBy(workerProductions.createdAt);
 
   return NextResponse.json(rows);
 }
