@@ -18,7 +18,7 @@ export default function DashboardPage() {
   }, []);
 
   const statCards = [
-    { label: "Total Productions", value: stats?.total, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
+    { label: "Total", value: stats?.total, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
     { label: "New", value: stats?.new, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
     { label: "Approved", value: stats?.approved, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
   ];

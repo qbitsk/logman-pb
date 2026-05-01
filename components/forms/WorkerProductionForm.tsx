@@ -245,8 +245,7 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
             {form.status}
           </span>
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            by <span className="font-medium text-gray-700 dark:text-gray-300">{production!.userName}</span>{" "}
-            <span className="text-gray-400 dark:text-gray-500">({production!.userEmail})</span>
+            by <span className="font-medium text-gray-700 dark:text-gray-300">{production!.userName}</span>
           </span>
           <span className="text-sm text-gray-400 dark:text-gray-500 ml-auto">
             Updated {new Date(production!.updatedAt).toLocaleString()}
@@ -400,10 +399,10 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
             <label className="label">Defects</label>
             <div className="flex gap-2">
               <button type="button" onClick={() => addDefect("unit")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
-                <Plus className="w-3 h-3" /> Product Defect
+                <Plus className="w-3 h-3" /> Product <span className="hidden sm:block">Defect</span>
               </button>
               <button type="button" onClick={() => addDefect("component")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
-                <Plus className="w-3 h-3" /> Component Defect
+                <Plus className="w-3 h-3" /> Component <span className="hidden sm:block">Defect</span>
               </button>
             </div>
           </div>

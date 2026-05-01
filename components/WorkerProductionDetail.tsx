@@ -69,15 +69,6 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
       </div>
 
       <div className="card space-y-5">
-        {production.userName && (
-          <div>
-            <p className="label">User</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{production.userName}</p>
-            {production.userEmail && (
-              <p className="text-xs text-gray-400 dark:text-gray-500">{production.userEmail}</p>
-            )}
-          </div>
-        )}
 
         {production.categoryName && (
           <div>
@@ -123,6 +114,13 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
           <div>
             <p className="label">Notes</p>
             <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{production.notes}</p>
+          </div>
+        )}
+
+        {production.userName && (
+          <div>
+            <p className="label">User</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{production.userName}</p>
           </div>
         )}
 
