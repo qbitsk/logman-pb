@@ -1,6 +1,6 @@
 CREATE TYPE "public"."category_type" AS ENUM('product', 'defect');--> statement-breakpoint
 CREATE TYPE "public"."work_defect_type" AS ENUM('unit', 'component');--> statement-breakpoint
-CREATE TYPE "public"."worker_production_status" AS ENUM('new', 'approved', 'denied');--> statement-breakpoint
+CREATE TYPE "public"."worker_production_status" AS ENUM('new', 'approved', 'rejected');--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,

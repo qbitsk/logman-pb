@@ -6,7 +6,7 @@ import { workProducts } from "./work-products";
 export const statusEnum = pgEnum("worker_production_status", [
   "new",
   "approved",
-  "denied",
+  "rejected",
 ]);
 
 export const workerProductions = pgTable("worker_productions", {

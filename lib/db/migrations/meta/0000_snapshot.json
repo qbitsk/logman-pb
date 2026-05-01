@@ -1,5 +1,5 @@
 {
-  "id": "df5fbdfa-0ab7-4781-9db1-ff31f819d41d",
+  "id": "b466a4a0-0046-4235-bcdf-6539c9f323ac",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -847,7 +847,7 @@
       "values": [
         "new",
         "approved",
-        "denied"
+        "rejected"
       ]
     }
   },
