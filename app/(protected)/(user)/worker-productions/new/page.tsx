@@ -5,23 +5,29 @@ import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-type WorkProduct = { id: string; name: string };
+type WorkProduct = { id: string; name: string; categoryId: string };
+type Category = { id: string; name: string };
 type WorkStation = { id: string; name: string; workProductId: string };
 type WorkComponent = { id: string; name: string; workProductId: string };
 type WorkDefect = { id: string; name: string; type: "unit" | "component"; workProductId: string; workComponentId: string | null };
 
 export default function NewWorkerProductionPage() {
   const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
   const [components, setComponents] = useState<WorkComponent[]>([]);
   const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
   const [loaded, setLoaded] = useState(0);
-  const loading = loaded < 4;
+  const loading = loaded < 5;
 
   function done() { setLoaded((n) => n + 1); }
 
   useEffect(() => {
     fetch("/api/work-products").then((r) => r.json()).then(setWorkProducts).finally(done);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/categories?type=product").then((r) => r.json()).then(setCategories).finally(done);
   }, []);
 
   useEffect(() => {
@@ -55,6 +61,7 @@ export default function NewWorkerProductionPage() {
       ) : (
         <div className="card max-w-2xl">
           <WorkerProductionForm
+            categories={categories}
             workProducts={workProducts}
             workStations={stations}
             workComponents={components}

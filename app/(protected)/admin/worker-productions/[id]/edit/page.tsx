@@ -18,7 +18,8 @@ type WorkerProduction = {
   userEmail: string;
 };
 
-type WorkProduct = { id: string; name: string };
+type WorkProduct = { id: string; name: string; categoryId: string };
+type Category = { id: string; name: string };
 type WorkStation = { id: string; name: string; workProductId: string };
 type WorkComponent = { id: string; name: string; workProductId: string };
 type WorkDefect = { id: string; name: string; type: "unit" | "component"; workProductId: string; workComponentId: string | null };
@@ -30,6 +31,7 @@ export default function AdminWorkerProductionEditPage() {
   const [production, setProduction] = useState<WorkerProduction | null>(null);
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
   const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
   const [components, setComponents] = useState<WorkComponent[]>([]);
   const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
@@ -55,6 +57,10 @@ export default function AdminWorkerProductionEditPage() {
   }, []);
 
   useEffect(() => {
+    fetch("/api/categories?type=product").then((r) => r.json()).then(setCategories);
+  }, []);
+
+  useEffect(() => {
     fetch("/api/work-stations").then((r) => r.json()).then(setStations);
   }, []);
 
@@ -67,7 +73,7 @@ export default function AdminWorkerProductionEditPage() {
   }, []);
 
   useEffect(() => {
-    if (production && workProducts.length && stations.length && components.length && workDefects.length) {
+    if (production && workProducts.length && categories.length && stations.length && components.length && workDefects.length) {
       setLoading(false);
     }
   }, [production, workProducts, stations, components, workDefects]);
@@ -94,6 +100,7 @@ export default function AdminWorkerProductionEditPage() {
       ) : (
         <WorkerProductionForm
           production={{ ...production!, createdAt: new Date(production!.createdAt), updatedAt: new Date(production!.updatedAt) }}
+          categories={categories}
           workProducts={workProducts}
           workStations={stations}
           workComponents={components}

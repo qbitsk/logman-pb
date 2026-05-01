@@ -32,6 +32,12 @@ type WorkerProduction = {
 type WorkProduct = {
   id: string;
   name: string;
+  categoryId: string;
+};
+
+type Category = {
+  id: string;
+  name: string;
 };
 
 type WorkStation = {
@@ -66,6 +72,7 @@ type DefectEntry = {
 
 type Props = {
   production?: WorkerProduction;
+  categories: Category[];
   workProducts: WorkProduct[];
   workStations: WorkStation[];
   workComponents: WorkComponent[];
@@ -76,10 +83,18 @@ type Props = {
   allowStatusChange?: boolean;
 };
 
-export function WorkerProductionForm({ production, workProducts, workStations, workComponents, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
+export function WorkerProductionForm({ production, categories, workProducts, workStations, workComponents, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
   const router = useRouter();
   const isEdit = !!production;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/worker-productions" : "/worker-productions");
+
+  const [categoryId, setCategoryId] = useState(() => {
+    const initialProductId = production?.workProductId ?? workProducts[0]?.id ?? "";
+    const product = workProducts.find((p) => p.id === initialProductId);
+    return product?.categoryId ?? categories[0]?.id ?? "";
+  });
+
+  const filteredProducts = workProducts.filter((p) => p.categoryId === categoryId);
 
   const [form, setForm] = useState({
     workProductId: production?.workProductId ?? (workProducts[0]?.id ?? ""),
@@ -109,6 +124,12 @@ export function WorkerProductionForm({ production, workProducts, workStations, w
   const filteredStations = workStations.filter(
     (ws) => ws.workProductId === form.workProductId
   );
+
+  function handleCategoryChange(newCategoryId: string) {
+    setCategoryId(newCategoryId);
+    const firstProduct = workProducts.find((p) => p.categoryId === newCategoryId);
+    set("workProductId", firstProduct?.id ?? "");
+  }
 
   function set(key: "workProductId" | "workStationId" | "units" | "shift" | "notes" | "status", value: string) {
     setForm((prev) => {
@@ -265,6 +286,22 @@ export function WorkerProductionForm({ production, workProducts, workStations, w
         )}
 
         <div>
+          <label className="label" htmlFor="categoryId">Category{!isEdit && " *"}</label>
+          <select
+            id="categoryId"
+            value={categoryId}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="input"
+          >
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label className="label" htmlFor="workProductId">Product{!isEdit && " *"}</label>
           <select
             id="workProductId"
@@ -273,7 +310,7 @@ export function WorkerProductionForm({ production, workProducts, workStations, w
             onChange={(e) => set("workProductId", e.target.value)}
             className="input"
           >
-            {workProducts.map((c) => (
+            {filteredProducts.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
