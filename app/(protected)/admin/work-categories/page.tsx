@@ -49,10 +49,10 @@ type Tab = "categories" | "products" | "components" | "defects" | "unitdefects";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "categories", label: "Categories" },
-  { id: "products", label: "Work Products" },
+  { id: "products", label: "Products" },
   { id: "components", label: "Components" },
   { id: "defects", label: "Component Defects" },
-  { id: "unitdefects", label: "Unit Defects" },
+  { id: "unitdefects", label: "Product Defects" },
 ];
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -274,7 +274,7 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteProd(id: string) {
-    if (!confirm("Delete this work product? This may affect existing data.")) return;
+    if (!confirm("Delete this product? This may affect existing data.")) return;
     const res = await fetch(`/api/admin/work-products/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setWorkProducts((prev) => prev.filter((p) => p.id !== id));
@@ -450,7 +450,7 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteUnitDef(id: string) {
-    if (!confirm("Delete this unit defect?")) return;
+    if (!confirm("Delete this product defect?")) return;
     const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setUnitDefects((prev) => prev.filter((d) => d.id !== id));
@@ -536,16 +536,16 @@ export default function WorkCategoriesPage() {
       {activeTab === "products" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{workProducts.length} work products</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{workProducts.length} products</span>
             <button onClick={openProdCreate} className="btn-primary flex items-center gap-2" disabled={categories.length === 0}>
               <Plus className="w-4 h-4" />
-              Work Product
+              Product
             </button>
           </div>
           {prodLoading ? (
             <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
           ) : workProducts.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No work products yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">No products yet.</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
@@ -600,7 +600,7 @@ export default function WorkCategoriesPage() {
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Work Product</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -684,23 +684,23 @@ export default function WorkCategoriesPage() {
       {activeTab === "unitdefects" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} unit defects</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} product defects</span>
             <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={workProducts.length === 0}>
               <Plus className="w-4 h-4" />
-              Unit Defect
+              Product Defect
             </button>
           </div>
           {unitDefLoading ? (
             <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
           ) : unitDefects.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No unit defects yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">No product defects yet.</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Work Product</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -761,7 +761,7 @@ export default function WorkCategoriesPage() {
       {/* ── Work Product Modal ── */}
       {prodModal.open && (
         <Modal
-          title={prodModal.editing ? "Edit Work Product" : "New Work Product"}
+          title={prodModal.editing ? "Edit Product" : "New Product"}
           onClose={() => setProdModal({ open: false, editing: null })}
         >
           <form onSubmit={submitProd} className="space-y-4">
@@ -820,7 +820,7 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Work Product</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
               <select
                 className="input w-full"
                 value={compForm.workProductId}
@@ -894,7 +894,7 @@ export default function WorkCategoriesPage() {
       {/* ── Unit Defect Modal ── */}
       {unitDefModal.open && (
         <Modal
-          title={unitDefModal.editing ? "Edit Unit Defect" : "New Unit Defect"}
+          title={unitDefModal.editing ? "Edit Product Defect" : "New Product Defect"}
           onClose={() => setUnitDefModal({ open: false, editing: null })}
         >
           <form onSubmit={submitUnitDef} className="space-y-4">
@@ -909,14 +909,14 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Work Product</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
               <select
                 className="input w-full"
                 value={unitDefForm.workProductId}
                 onChange={(e) => setUnitDefForm((f) => ({ ...f, workProductId: e.target.value }))}
                 required
               >
-                <option value="">— Select Work Product —</option>
+                <option value="">— Select Product —</option>
                 {workProducts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
