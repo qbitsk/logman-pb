@@ -51,8 +51,8 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "categories", label: "Categories" },
   { id: "products", label: "Products" },
   { id: "components", label: "Components" },
-  { id: "defects", label: "Component Defects" },
   { id: "unitdefects", label: "Product Defects" },
+  { id: "defects", label: "Component Defects" },
 ];
 
 // ─── Modal ────────────────────────────────────────────────────────────────────

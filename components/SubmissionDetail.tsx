@@ -33,7 +33,7 @@ const statusStyles: Record<string, string> = {
 
 export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
   const defectedComponents = submission.defects.filter((d) => d.workDefectType === "component").reduce((sum, d) => sum + d.units, 0);
-  const defectedUnits = submission.defects.filter((d) => d.workDefectType === "unit").reduce((sum, d) => sum + d.units, 0);
+  const defectedProducts = submission.defects.filter((d) => d.workDefectType === "unit").reduce((sum, d) => sum + d.units, 0);
   const wasUpdated = new Date(submission.updatedAt) > new Date(submission.createdAt);
 
   return (
@@ -100,8 +100,8 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
             {submission.defects.length > 0 && (
               <>
                 <div>
-                  <p className="label">Defected Units</p>
-                  <p className="text-sm text-red-600 font-medium">{defectedUnits}</p>
+                  <p className="label">Defected Products</p>
+                  <p className="text-sm text-red-600 font-medium">{defectedProducts}</p>
                 </div>
                 <div>
                   <p className="label">Defected Components</p>
