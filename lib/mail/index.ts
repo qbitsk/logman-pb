@@ -26,7 +26,7 @@ export async function sendSubmissionConfirmation(params: {
     subject: `Submission received`,
     react: SubmissionReceivedEmail({
       userName: params.user.name,
-      submissionUrl: `${APP_URL}/submissions/${params.submissionId}`,
+      submissionUrl: `${APP_URL}/worker-productions/${params.submissionId}`,
     }),
   });
 }
@@ -42,7 +42,7 @@ export async function sendAdminNotification(params: {
     subject: `New submission`,
     react: AdminNotificationEmail({
       submitterName: params.submitterName,
-      submissionUrl: `${APP_URL}/admin/submissions/${params.submissionId}`,
+      submissionUrl: `${APP_URL}/admin/worker-productions/${params.submissionId}`,
     }),
   });
 }

@@ -18,7 +18,7 @@ export default function DashboardPage() {
   }, []);
 
   const statCards = [
-    { label: "Total Submissions", value: stats?.total, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
+    { label: "Total Productions", value: stats?.total, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
     { label: "Submitted", value: stats?.submitted, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
     { label: "Approved", value: stats?.approved, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
   ];
@@ -32,9 +32,9 @@ export default function DashboardPage() {
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Here&apos;s an overview of your activity</p>
         </div>
-        <Link href="/submissions/new" className="btn-primary flex items-center gap-2">
+        <Link href="/worker-productions/new" className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          Submission
+          New Production
         </Link>
       </div>
 
@@ -62,11 +62,11 @@ export default function DashboardPage() {
       <div className="card">
         <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Quick actions</h2>
         <div className="flex flex-wrap gap-3">
-          <Link href="/submissions/new" className="btn-primary">
-            Submit new data
+          <Link href="/worker-productions/new" className="btn-primary">
+            New production
           </Link>
-          <Link href="/submissions" className="btn-secondary">
-            View all submissions
+          <Link href="/worker-productions" className="btn-secondary">
+            View all productions
           </Link>
         </div>
       </div>

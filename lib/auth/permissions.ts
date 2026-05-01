@@ -20,7 +20,7 @@ export const routePermissions: Array<{ prefix: string; role: Role }> = [
   { prefix: "/api/admin", role: "admin" },
   { prefix: "/api/exports", role: "editor" },
   { prefix: "/dashboard", role: "user" },
-  { prefix: "/submissions", role: "user" },
+  { prefix: "/worker-productions", role: "user" },
   { prefix: "/profile", role: "user" },
 ];
 
