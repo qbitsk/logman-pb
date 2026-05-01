@@ -265,7 +265,7 @@ export function SubmissionForm({ submission, workProducts, workStations, workCom
         )}
 
         <div>
-          <label className="label" htmlFor="workProductId">Work Product{!isEdit && " *"}</label>
+          <label className="label" htmlFor="workProductId">Product{!isEdit && " *"}</label>
           <select
             id="workProductId"
             name="workProductId"

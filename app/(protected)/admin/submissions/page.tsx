@@ -55,7 +55,7 @@ export default function AdminSubmissionsPage() {
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Date</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Work Product</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Units</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Status</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">User</th>

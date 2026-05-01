@@ -80,7 +80,7 @@ export function SubmissionDetail({ submission, backUrl, editUrl }: Props) {
         )}
 
         <div>
-          <p className="label">Work Product</p>
+          <p className="label">Product</p>
           <p className="text-sm text-gray-800 dark:text-gray-200">{submission.workProductName}</p>
         </div>
 
