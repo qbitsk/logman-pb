@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
 
-export const categoryTypeEnum = pgEnum("category_type", ["work", "defect"]);
+export const categoryTypeEnum = pgEnum("category_type", ["product", "defect"]);
 
 export const categories = pgTable("categories", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),

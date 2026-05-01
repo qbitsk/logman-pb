@@ -1,5 +1,5 @@
 {
-  "id": "c1d236e2-77eb-4676-8e19-9b734c332e11",
+  "id": "cd44fabf-db55-4e84-9546-eb1dc49882ad",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -366,8 +366,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.work_stations": {
-      "name": "work_stations",
+    "public.work_products": {
+      "name": "work_products",
       "schema": "",
       "columns": {
         "id": {
@@ -382,8 +382,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "work_category_id": {
-          "name": "work_category_id",
+        "category_id": {
+          "name": "category_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -405,12 +405,71 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "work_stations_work_category_id_categories_id_fk": {
-          "name": "work_stations_work_category_id_categories_id_fk",
-          "tableFrom": "work_stations",
+        "work_products_category_id_categories_id_fk": {
+          "name": "work_products_category_id_categories_id_fk",
+          "tableFrom": "work_products",
           "tableTo": "categories",
           "columnsFrom": [
-            "work_category_id"
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.work_stations": {
+      "name": "work_stations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "work_product_id": {
+          "name": "work_product_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "work_stations_work_product_id_work_products_id_fk": {
+          "name": "work_stations_work_product_id_work_products_id_fk",
+          "tableFrom": "work_stations",
+          "tableTo": "work_products",
+          "columnsFrom": [
+            "work_product_id"
           ],
           "columnsTo": [
             "id"
@@ -441,8 +500,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "work_category_id": {
-          "name": "work_category_id",
+        "work_product_id": {
+          "name": "work_product_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -464,12 +523,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "work_components_work_category_id_categories_id_fk": {
-          "name": "work_components_work_category_id_categories_id_fk",
+        "work_components_work_product_id_work_products_id_fk": {
+          "name": "work_components_work_product_id_work_products_id_fk",
           "tableFrom": "work_components",
-          "tableTo": "categories",
+          "tableTo": "work_products",
           "columnsFrom": [
-            "work_category_id"
+            "work_product_id"
           ],
           "columnsTo": [
             "id"
@@ -507,8 +566,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "work_category_id": {
-          "name": "work_category_id",
+        "work_product_id": {
+          "name": "work_product_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -536,12 +595,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "work_defects_work_category_id_categories_id_fk": {
-          "name": "work_defects_work_category_id_categories_id_fk",
+        "work_defects_work_product_id_work_products_id_fk": {
+          "name": "work_defects_work_product_id_work_products_id_fk",
           "tableFrom": "work_defects",
-          "tableTo": "categories",
+          "tableTo": "work_products",
           "columnsFrom": [
-            "work_category_id"
+            "work_product_id"
           ],
           "columnsTo": [
             "id"
@@ -585,8 +644,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "work_category_id": {
-          "name": "work_category_id",
+        "work_product_id": {
+          "name": "work_product_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -653,12 +712,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "submissions_work_category_id_categories_id_fk": {
-          "name": "submissions_work_category_id_categories_id_fk",
+        "submissions_work_product_id_work_products_id_fk": {
+          "name": "submissions_work_product_id_work_products_id_fk",
           "tableFrom": "submissions",
-          "tableTo": "categories",
+          "tableTo": "work_products",
           "columnsFrom": [
-            "work_category_id"
+            "work_product_id"
           ],
           "columnsTo": [
             "id"
@@ -770,7 +829,7 @@
       "name": "category_type",
       "schema": "public",
       "values": [
-        "work",
+        "product",
         "defect"
       ]
     },

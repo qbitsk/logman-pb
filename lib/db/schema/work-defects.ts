@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
-import { categories } from "./categories";
 import { workComponents } from "./work-components";
+import { workProducts } from "./work-products";
 
 export const workDefectTypeEnum = pgEnum("work_defect_type", ["unit", "component"]);
 
@@ -8,9 +8,9 @@ export const workDefects = pgTable("work_defects", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   type: workDefectTypeEnum("type").notNull(),
-  workCategoryId: text("work_category_id")
+  workProductId: text("work_product_id")
     .notNull()
-    .references(() => categories.id),
+    .references(() => workProducts.id),
   workComponentId: text("work_component_id")
     .references(() => workComponents.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),

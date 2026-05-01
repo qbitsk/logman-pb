@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { categories } from "./categories";
 import { workStations } from "./work-stations";
+import { workProducts } from "./work-products";
 
 export const statusEnum = pgEnum("submission_status", [
   "draft",
@@ -16,9 +17,9 @@ export const submissions = pgTable("submissions", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
 
-  workCategoryId: text("work_category_id")
+  workProductId: text("work_product_id")
     .notNull()
-    .references(() => categories.id),
+    .references(() => workProducts.id),
   workStationId: text("work_station_id")
     .references(() => workStations.id),
   units: integer("units"),
