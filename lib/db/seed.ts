@@ -89,7 +89,7 @@ async function seed() {
     console.log("WorkStations seeded.");
   }
 
-  // Seed WorkComponents linked to the first work Category
+  // Seed WorkComponents linked to the first work Product
   const existingComponents = await db.select().from(workComponents).limit(1);
   if (existingComponents.length > 0) {
     console.log("WorkComponents already exist. Skipping.");

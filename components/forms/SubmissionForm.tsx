@@ -17,7 +17,7 @@ const statusStyles: Record<string, string> = {
 
 type Submission = {
   id: string;
-  workCategoryId: string;
+  workProductId: string;
   workStationId: string | null;
   units: number | null;
   shift: number | null;
@@ -29,29 +29,28 @@ type Submission = {
   userEmail: string;
 };
 
-type WorkCategory = {
+type WorkProduct = {
   id: string;
   name: string;
-  type: string | null;
 };
 
 type WorkStation = {
   id: string;
   name: string;
-  workCategoryId: string;
+  workProductId: string;
 };
 
 type WorkComponent = {
   id: string;
   name: string;
-  workCategoryId: string;
+  workProductId: string;
 };
 
 type WorkDefect = {
   id: string;
   name: string;
   type: "unit" | "component";
-  workCategoryId: string;
+  workProductId: string;
   workComponentId: string | null;
 };
 
@@ -67,7 +66,7 @@ type DefectEntry = {
 
 type Props = {
   submission?: Submission;
-  workCategories: WorkCategory[];
+  workProducts: WorkProduct[];
   workStations: WorkStation[];
   workComponents: WorkComponent[];
   workDefects: WorkDefect[];
@@ -77,13 +76,13 @@ type Props = {
   allowStatusChange?: boolean;
 };
 
-export function SubmissionForm({ submission, workCategories, workStations, workComponents, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
+export function SubmissionForm({ submission, workProducts, workStations, workComponents, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
   const router = useRouter();
   const isEdit = !!submission;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/submissions" : "/submissions");
 
   const [form, setForm] = useState({
-    workCategoryId: submission?.workCategoryId ?? (workCategories[0]?.id ?? ""),
+    workProductId: submission?.workProductId ?? (workProducts[0]?.id ?? ""),
     workStationId: submission?.workStationId ?? "",
     units: submission?.units?.toString() ?? "",
     shift: submission?.shift?.toString() ?? "",
@@ -108,17 +107,17 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
   const [success, setSuccess] = useState(false);
 
   const filteredStations = workStations.filter(
-    (ws) => ws.workCategoryId === form.workCategoryId
+    (ws) => ws.workProductId === form.workProductId
   );
 
-  function set(key: "workCategoryId" | "workStationId" | "units" | "shift" | "notes" | "status", value: string) {
+  function set(key: "workProductId" | "workStationId" | "units" | "shift" | "notes" | "status", value: string) {
     setForm((prev) => {
       const next = { ...prev, [key]: value };
-      // Reset station when category changes
-      if (key === "workCategoryId") next.workStationId = "";
+      // Reset station when work product changes
+      if (key === "workProductId") next.workStationId = "";
       return next;
     });
-    if (key === "workCategoryId") {
+    if (key === "workProductId") {
       setDefects((prev) =>
         prev.map((d) => ({ ...d, workComponentId: "", workDefectId: "" }))
       );
@@ -161,7 +160,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
 
     if (!isEdit) {
       const result = submissionSchema.safeParse({
-        workCategoryId: form.workCategoryId,
+        workProductId: form.workProductId,
         workStationId: form.workStationId || null,
         units: form.units ? parseInt(form.units, 10) : null,
         shift: form.shift ? (parseInt(form.shift, 10) as 1 | 2 | 3) : null,
@@ -191,7 +190,7 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
 
       const body = isEdit
         ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workSubmissionDefects: parsedDefects })
-        : JSON.stringify({ workCategoryId: form.workCategoryId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workSubmissionDefects: parsedDefects });
+        : JSON.stringify({ workProductId: form.workProductId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workSubmissionDefects: parsedDefects });
 
       const res = await fetch(url, {
         method,
@@ -266,21 +265,21 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
         )}
 
         <div>
-          <label className="label" htmlFor="workCategoryId">Category{!isEdit && " *"}</label>
+          <label className="label" htmlFor="workProductId">Work Product{!isEdit && " *"}</label>
           <select
-            id="workCategoryId"
-            name="workCategoryId"
-            value={form.workCategoryId}
-            onChange={(e) => set("workCategoryId", e.target.value)}
+            id="workProductId"
+            name="workProductId"
+            value={form.workProductId}
+            onChange={(e) => set("workProductId", e.target.value)}
             className="input"
           >
-            {workCategories.map((c) => (
+            {workProducts.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          {errors.workCategoryId && <p className="text-red-600 text-xs mt-1">{errors.workCategoryId}</p>}
+          {errors.workProductId && <p className="text-red-600 text-xs mt-1">{errors.workProductId}</p>}
         </div>
 
         <div>
@@ -378,10 +377,10 @@ export function SubmissionForm({ submission, workCategories, workStations, workC
           <div className="space-y-2">
             {defects.map((defect) => {
               const filteredComponents = workComponents.filter(
-                (wc) => wc.workCategoryId === form.workCategoryId
+                (wc) => wc.workProductId === form.workProductId
               );
               const filteredDefects = workDefects.filter((wd) => {
-                if (wd.workCategoryId !== form.workCategoryId) return false;
+                if (wd.workProductId !== form.workProductId) return false;
                 if (wd.type !== defect.type) return false;
                 if (defect.type === "component") {
                   return wd.workComponentId === (defect.workComponentId || null);

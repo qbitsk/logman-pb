@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workDefects, workComponents } from "@/lib/db/schema";
+import { workProducts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,8 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
-  workComponentId: z.string().min(1).optional(),
-  workProductId: z.string().min(1).optional(),
+  categoryId: z.string().min(1).optional(),
 });
 
 export async function PATCH(
@@ -33,29 +32,10 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const update: Record<string, unknown> = { updatedAt: new Date() };
-  if (result.data.name) update.name = result.data.name;
-  if (result.data.workProductId) update.workProductId = result.data.workProductId;
-
-  if (result.data.workComponentId) {
-    const component = await db
-      .select({ workProductId: workComponents.workProductId })
-      .from(workComponents)
-      .where(eq(workComponents.id, result.data.workComponentId))
-      .limit(1);
-
-    if (!component[0]) {
-      return NextResponse.json({ error: "Component not found" }, { status: 400 });
-    }
-
-    update.workComponentId = result.data.workComponentId;
-    update.workProductId = component[0].workProductId;
-  }
-
   const [updated] = await db
-    .update(workDefects)
-    .set(update)
-    .where(eq(workDefects.id, id))
+    .update(workProducts)
+    .set({ ...result.data, updatedAt: new Date() })
+    .where(eq(workProducts.id, id))
     .returning();
 
   if (!updated) {
@@ -75,17 +55,14 @@ export async function DELETE(
 
   const { id } = await params;
 
-  const [existing] = await db
-    .select({ id: workDefects.id })
-    .from(workDefects)
-    .where(eq(workDefects.id, id))
-    .limit(1);
+  const [deleted] = await db
+    .delete(workProducts)
+    .where(eq(workProducts.id, id))
+    .returning({ id: workProducts.id });
 
-  if (!existing) {
+  if (!deleted) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-
-  await db.delete(workDefects).where(eq(workDefects.id, id));
 
   return new NextResponse(null, { status: 204 });
 }

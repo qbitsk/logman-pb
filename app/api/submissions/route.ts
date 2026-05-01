@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workSubmissionDefects, categories } from "@/lib/db/schema";
+import { submissions, workSubmissionDefects, workProducts } from "@/lib/db/schema";
 import { submissionSchema } from "@/lib/validations/submission";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -20,10 +20,10 @@ export async function GET() {
       status: submissions.status,
       units: submissions.units,
       createdAt: submissions.createdAt,
-      categoryName: categories.name,
+      workProductName: workProducts.name,
     })
     .from(submissions)
-    .innerJoin(categories, eq(submissions.workCategoryId, categories.id))
+    .innerJoin(workProducts, eq(submissions.workProductId, workProducts.id))
     .where(eq(submissions.userId, session.user.id))
     .orderBy(submissions.createdAt);
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   const [submission] = await db
     .insert(submissions)
     .values({
-      workCategoryId: result.data.workCategoryId,
+      workProductId: result.data.workProductId,
       workStationId: result.data.workStationId ?? null,
       units: result.data.units ?? null,
       shift: result.data.shift ?? null,

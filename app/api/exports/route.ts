@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, users, categories, workStations, workSubmissionDefects, workComponents, workDefects } from "@/lib/db/schema";
+import { submissions, users, workProducts, workStations, workSubmissionDefects, workComponents, workDefects } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const rows = await db
     .select({
       id: submissions.id,
-      workCategoryName: categories.name,
+      workProductName: workProducts.name,
       workStationName: workStations.name,
       units: submissions.units,
       shift: submissions.shift,
@@ -30,13 +30,13 @@ export async function GET(request: NextRequest) {
     })
     .from(submissions)
     .leftJoin(users, eq(submissions.userId, users.id))
-    .leftJoin(categories, eq(submissions.workCategoryId, categories.id))
+    .leftJoin(workProducts, eq(submissions.workProductId, workProducts.id))
     .leftJoin(workStations, eq(submissions.workStationId, workStations.id))
     .orderBy(submissions.createdAt);
 
   const typedRows = rows.map((r) => ({
     ...r,
-    workCategoryName: r.workCategoryName ?? "Unknown",
+    workProductName: r.workProductName ?? "Unknown",
     workStationName: r.workStationName ?? "",
     userName: r.userName ?? "Unknown",
   }));
@@ -46,13 +46,13 @@ export async function GET(request: NextRequest) {
     .select({
       submissionId: workSubmissionDefects.submissionId,
       componentName: workComponents.name,
-      defectCategoryName: categories.name,
+      defectCategoryName: workProducts.name,
       units: workSubmissionDefects.units,
     })
     .from(workSubmissionDefects)
     .leftJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
     .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-    .leftJoin(categories, eq(workDefects.workCategoryId, categories.id));
+    .leftJoin(workProducts, eq(workDefects.workProductId, workProducts.id));
 
   const typedDefectRows = defectRows.map((d) => ({
     submissionId: d.submissionId,

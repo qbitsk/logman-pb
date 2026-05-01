@@ -8,7 +8,7 @@ import Link from "next/link";
 
 type Submission = {
   id: string;
-  workCategoryId: string;
+  workProductId: string;
   workStationId: string | null;
   units: number | null;
   shift: number | null;
@@ -20,10 +20,10 @@ type Submission = {
   userEmail: string;
 };
 
-type WorkCategory = { id: string; name: string; type: string | null };
-type WorkStation = { id: string; name: string; workCategoryId: string };
-type WorkComponent = { id: string; name: string; workCategoryId: string };
-type WorkDefect = { id: string; name: string; type: "unit" | "component"; workCategoryId: string; workComponentId: string | null };
+type WorkProduct = { id: string; name: string };
+type WorkStation = { id: string; name: string; workProductId: string };
+type WorkComponent = { id: string; name: string; workProductId: string };
+type WorkDefect = { id: string; name: string; type: "unit" | "component"; workProductId: string; workComponentId: string | null };
 type ExistingDefect = { workDefectId: string; units: number };
 
 export default function EditSubmissionPage() {
@@ -32,7 +32,7 @@ export default function EditSubmissionPage() {
 
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
-  const [categories, setCategories] = useState<WorkCategory[]>([]);
+  const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
   const [components, setComponents] = useState<WorkComponent[]>([]);
   const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
@@ -58,7 +58,7 @@ export default function EditSubmissionPage() {
   }, [id, router]);
 
   useEffect(() => {
-    fetch("/api/categories?type=work").then((r) => r.json()).then(setCategories);
+    fetch("/api/work-products").then((r) => r.json()).then(setWorkProducts);
   }, []);
 
   useEffect(() => {
@@ -74,10 +74,10 @@ export default function EditSubmissionPage() {
   }, []);
 
   useEffect(() => {
-    if (submission && categories.length && stations.length && components.length && workDefects.length) {
+    if (submission && workProducts.length && stations.length && components.length && workDefects.length) {
       setLoading(false);
     }
-  }, [submission, categories, stations, components, workDefects]);
+  }, [submission, workProducts, stations, components, workDefects]);
 
   if (notFound) {
     return (
@@ -105,7 +105,7 @@ export default function EditSubmissionPage() {
       ) : (
         <SubmissionForm
           submission={{ ...submission!, createdAt: new Date(submission!.createdAt), updatedAt: new Date(submission!.updatedAt) }}
-          workCategories={categories}
+          workProducts={workProducts}
           workStations={stations}
           workComponents={components}
           workDefects={workDefects}

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const type = request.nextUrl.searchParams.get("type") as "work" | "defect" | null;
+  const type = request.nextUrl.searchParams.get("type") as "product" | "defect" | null;
 
   const query = db.select().from(categories).orderBy(categories.name);
   const rows = type

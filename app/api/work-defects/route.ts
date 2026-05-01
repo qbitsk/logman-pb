@@ -13,10 +13,10 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const workCategoryId = searchParams.get("workCategoryId");
+  const workProductId = searchParams.get("workProductId");
 
-  const rows = workCategoryId
-    ? await db.select().from(workDefects).where(eq(workDefects.workCategoryId, workCategoryId))
+  const rows = workProductId
+    ? await db.select().from(workDefects).where(eq(workDefects.workProductId, workProductId))
     : await db.select().from(workDefects);
 
   return NextResponse.json(rows);

@@ -19,7 +19,7 @@ export default function AdminSubmissionDetailPage() {
       })
       .then((data) => {
         if (!data) return;
-        const { existingDefects: _ignored, workCategoryId: _wc, workStationId: _ws, userId: _uid, ...rest } = data;
+        const { existingDefects: _ignored, workProductId: _wp, workStationId: _ws, userId: _uid, ...rest } = data;
         setSubmission(rest);
       })
       .finally(() => setLoading(false));

@@ -14,7 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
-  type: z.enum(["work", "defect"]).optional(),
+  type: z.enum(["product", "defect"]).optional(),
 });
 
 export async function PATCH(

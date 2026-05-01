@@ -6,18 +6,25 @@ import { clsx } from "clsx";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type WorkCategory = {
+type Category = {
   id: string;
   name: string;
-  type: "work" | "defect";
+  createdAt: string;
+};
+
+type WorkProduct = {
+  id: string;
+  name: string;
+  categoryId: string;
+  categoryName: string;
   createdAt: string;
 };
 
 type WorkComponent = {
   id: string;
   name: string;
-  workCategoryId: string;
-  categoryName: string;
+  workProductId: string;
+  workProductName: string;
   createdAt: string;
 };
 
@@ -26,22 +33,23 @@ type WorkDefect = {
   name: string;
   workComponentId: string | null;
   componentName: string | null;
-  categoryName: string | null;
+  workProductName: string | null;
   createdAt: string;
 };
 
 type UnitDefect = {
   id: string;
   name: string;
-  workCategoryId: string;
-  categoryName: string | null;
+  workProductId: string;
+  workProductName: string | null;
   createdAt: string;
 };
 
-type Tab = "categories" | "components" | "defects" | "unitdefects";
+type Tab = "categories" | "products" | "components" | "defects" | "unitdefects";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "categories", label: "Categories" },
+  { id: "products", label: "Work Products" },
   { id: "components", label: "Components" },
   { id: "defects", label: "Component Defects" },
   { id: "unitdefects", label: "Unit Defects" },
@@ -79,18 +87,26 @@ export default function WorkCategoriesPage() {
   const [activeTab, setActiveTab] = useState<Tab>("categories");
 
   // ── Categories state ──
-  const [categories, setCategories] = useState<WorkCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [catLoading, setCatLoading] = useState(true);
-  const [catModal, setCatModal] = useState<{ open: boolean; editing: WorkCategory | null }>({ open: false, editing: null });
-  const [catForm, setCatForm] = useState({ name: "", type: "" });
+  const [catModal, setCatModal] = useState<{ open: boolean; editing: Category | null }>({ open: false, editing: null });
+  const [catForm, setCatForm] = useState({ name: "" });
   const [catError, setCatError] = useState<string | null>(null);
   const [catSaving, setCatSaving] = useState(false);
+
+  // ── Work Products state ──
+  const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
+  const [prodLoading, setProdLoading] = useState(true);
+  const [prodModal, setProdModal] = useState<{ open: boolean; editing: WorkProduct | null }>({ open: false, editing: null });
+  const [prodForm, setProdForm] = useState({ name: "", categoryId: "" });
+  const [prodError, setProdError] = useState<string | null>(null);
+  const [prodSaving, setProdSaving] = useState(false);
 
   // ── Components state ──
   const [components, setComponents] = useState<WorkComponent[]>([]);
   const [compLoading, setCompLoading] = useState(true);
   const [compModal, setCompModal] = useState<{ open: boolean; editing: WorkComponent | null }>({ open: false, editing: null });
-  const [compForm, setCompForm] = useState({ name: "", workCategoryId: "" });
+  const [compForm, setCompForm] = useState({ name: "", workProductId: "" });
   const [compError, setCompError] = useState<string | null>(null);
   const [compSaving, setCompSaving] = useState(false);
 
@@ -106,16 +122,23 @@ export default function WorkCategoriesPage() {
   const [unitDefects, setUnitDefects] = useState<UnitDefect[]>([]);
   const [unitDefLoading, setUnitDefLoading] = useState(true);
   const [unitDefModal, setUnitDefModal] = useState<{ open: boolean; editing: UnitDefect | null }>({ open: false, editing: null });
-  const [unitDefForm, setUnitDefForm] = useState({ name: "", workCategoryId: "" });
+  const [unitDefForm, setUnitDefForm] = useState({ name: "", workProductId: "" });
   const [unitDefError, setUnitDefError] = useState<string | null>(null);
   const [unitDefSaving, setUnitDefSaving] = useState(false);
 
   // ── Fetch ──
   useEffect(() => {
-    fetch("/api/admin/categories?type=work")
+    fetch("/api/admin/categories?type=product")
       .then((r) => r.json())
       .then(setCategories)
       .finally(() => setCatLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/work-products")
+      .then((r) => r.json())
+      .then(setWorkProducts)
+      .finally(() => setProdLoading(false));
   }, []);
 
   useEffect(() => {
@@ -137,11 +160,11 @@ export default function WorkCategoriesPage() {
       .then((r) => r.json())
       .then((rows) =>
         setUnitDefects(
-          rows.map((r: WorkDefect & { workCategoryId: string }) => ({
+          rows.map((r: WorkDefect & { workProductId: string; workProductName: string | null }) => ({
             id: r.id,
             name: r.name,
-            workCategoryId: r.workCategoryId,
-            categoryName: r.categoryName,
+            workProductId: r.workProductId,
+            workProductName: r.workProductName,
             createdAt: r.createdAt,
           }))
         )
@@ -154,13 +177,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openCatCreate() {
-    setCatForm({ name: "", type: "" });
+    setCatForm({ name: "" });
     setCatError(null);
     setCatModal({ open: true, editing: null });
   }
 
-  function openCatEdit(cat: WorkCategory) {
-    setCatForm({ name: cat.name, type: cat.type ?? "" });
+  function openCatEdit(cat: Category) {
+    setCatForm({ name: cat.name });
     setCatError(null);
     setCatModal({ open: true, editing: cat });
   }
@@ -170,7 +193,7 @@ export default function WorkCategoriesPage() {
     setCatError(null);
     setCatSaving(true);
 
-    const payload = { name: catForm.name, type: catForm.type || "work" };
+    const payload = { name: catForm.name, type: "product" };
     const isEdit = !!catModal.editing;
     const url = isEdit
       ? `/api/admin/categories/${catModal.editing!.id}`
@@ -183,7 +206,7 @@ export default function WorkCategoriesPage() {
     });
 
     if (res.ok) {
-      const saved: WorkCategory = await res.json();
+      const saved: Category = await res.json();
       setCategories((prev) =>
         isEdit ? prev.map((c) => (c.id === saved.id ? saved : c)) : [...prev, saved].sort((a, b) => a.name.localeCompare(b.name))
       );
@@ -204,17 +227,72 @@ export default function WorkCategoriesPage() {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
+  // Work Products handlers
+  // ───────────────────────────────────────────────────────────────────────────
+
+  function openProdCreate() {
+    setProdForm({ name: "", categoryId: categories[0]?.id ?? "" });
+    setProdError(null);
+    setProdModal({ open: true, editing: null });
+  }
+
+  function openProdEdit(prod: WorkProduct) {
+    setProdForm({ name: prod.name, categoryId: prod.categoryId });
+    setProdError(null);
+    setProdModal({ open: true, editing: prod });
+  }
+
+  async function submitProd(e: React.FormEvent) {
+    e.preventDefault();
+    setProdError(null);
+    setProdSaving(true);
+
+    const isEdit = !!prodModal.editing;
+    const url = isEdit
+      ? `/api/admin/work-products/${prodModal.editing!.id}`
+      : "/api/admin/work-products";
+
+    const res = await fetch(url, {
+      method: isEdit ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prodForm),
+    });
+
+    if (res.ok) {
+      const saved = await res.json();
+      const catName = categories.find((c) => c.id === saved.categoryId)?.name ?? "";
+      const enriched: WorkProduct = { ...saved, categoryName: catName };
+      setWorkProducts((prev) =>
+        isEdit ? prev.map((p) => (p.id === enriched.id ? enriched : p)) : [...prev, enriched]
+      );
+      setProdModal({ open: false, editing: null });
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setProdError(err?.error ?? "Failed to save");
+    }
+    setProdSaving(false);
+  }
+
+  async function deleteProd(id: string) {
+    if (!confirm("Delete this work product? This may affect existing data.")) return;
+    const res = await fetch(`/api/admin/work-products/${id}`, { method: "DELETE" });
+    if (res.ok || res.status === 204) {
+      setWorkProducts((prev) => prev.filter((p) => p.id !== id));
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
   // Work Components handlers
   // ───────────────────────────────────────────────────────────────────────────
 
   function openCompCreate() {
-    setCompForm({ name: "", workCategoryId: categories[0]?.id ?? "" });
+    setCompForm({ name: "", workProductId: workProducts[0]?.id ?? "" });
     setCompError(null);
     setCompModal({ open: true, editing: null });
   }
 
   function openCompEdit(comp: WorkComponent) {
-    setCompForm({ name: comp.name, workCategoryId: comp.workCategoryId });
+    setCompForm({ name: comp.name, workProductId: comp.workProductId });
     setCompError(null);
     setCompModal({ open: true, editing: comp });
   }
@@ -237,8 +315,8 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const catName = categories.find((c) => c.id === saved.workCategoryId)?.name ?? "";
-      const enriched: WorkComponent = { ...saved, categoryName: catName };
+      const productName = workProducts.find((p) => p.id === saved.workProductId)?.name ?? "";
+      const enriched: WorkComponent = { ...saved, workProductName: productName };
       setComponents((prev) =>
         isEdit ? prev.map((c) => (c.id === enriched.id ? enriched : c)) : [...prev, enriched]
       );
@@ -293,10 +371,8 @@ export default function WorkCategoriesPage() {
     if (res.ok) {
       const saved = await res.json();
       const compName = components.find((c) => c.id === saved.workComponentId)?.name ?? null;
-      const catName = components.find((c) => c.id === saved.workComponentId)
-        ? categories.find((cat) => cat.id === components.find((c) => c.id === saved.workComponentId)?.workCategoryId)?.name ?? null
-        : null;
-      const enriched: WorkDefect = { ...saved, componentName: compName, categoryName: catName };
+      const productName = components.find((c) => c.id === saved.workComponentId)?.workProductName ?? null;
+      const enriched: WorkDefect = { ...saved, componentName: compName, workProductName: productName };
       setDefects((prev) =>
         isEdit ? prev.map((d) => (d.id === enriched.id ? enriched : d)) : [...prev, enriched]
       );
@@ -321,13 +397,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openUnitDefCreate() {
-    setUnitDefForm({ name: "", workCategoryId: categories[0]?.id ?? "" });
+    setUnitDefForm({ name: "", workProductId: workProducts[0]?.id ?? "" });
     setUnitDefError(null);
     setUnitDefModal({ open: true, editing: null });
   }
 
   function openUnitDefEdit(def: UnitDefect) {
-    setUnitDefForm({ name: def.name, workCategoryId: def.workCategoryId });
+    setUnitDefForm({ name: def.name, workProductId: def.workProductId });
     setUnitDefError(null);
     setUnitDefModal({ open: true, editing: def });
   }
@@ -343,8 +419,8 @@ export default function WorkCategoriesPage() {
       : "/api/admin/work-defects";
 
     const payload = isEdit
-      ? { name: unitDefForm.name, workCategoryId: unitDefForm.workCategoryId }
-      : { name: unitDefForm.name, workCategoryId: unitDefForm.workCategoryId, type: "unit" };
+      ? { name: unitDefForm.name, workProductId: unitDefForm.workProductId }
+      : { name: unitDefForm.name, workProductId: unitDefForm.workProductId, type: "unit" };
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
@@ -354,12 +430,12 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const catName = categories.find((c) => c.id === saved.workCategoryId)?.name ?? null;
+      const productName = workProducts.find((p) => p.id === saved.workProductId)?.name ?? null;
       const enriched: UnitDefect = {
         id: saved.id,
         name: saved.name,
-        workCategoryId: saved.workCategoryId,
-        categoryName: catName,
+        workProductId: saved.workProductId,
+        workProductName: productName,
         createdAt: saved.createdAt,
       };
       setUnitDefects((prev) =>
@@ -456,12 +532,60 @@ export default function WorkCategoriesPage() {
         </div>
       )}
 
+      {/* ── Work Products tab ── */}
+      {activeTab === "products" && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-gray-500 dark:text-gray-400">{workProducts.length} work products</span>
+            <button onClick={openProdCreate} className="btn-primary flex items-center gap-2" disabled={categories.length === 0}>
+              <Plus className="w-4 h-4" />
+              Work Product
+            </button>
+          </div>
+          {prodLoading ? (
+            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+          ) : workProducts.length === 0 ? (
+            <div className="card text-center py-12 text-gray-400 text-sm">No work products yet.</div>
+          ) : (
+            <div className="card p-0 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                    <th className="px-5 py-3" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {workProducts.map((prod) => (
+                    <tr key={prod.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{prod.name}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{prod.categoryName}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => openProdEdit(prod)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => deleteProd(prod.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Work Components tab ── */}
       {activeTab === "components" && (
         <div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">{components.length} components</span>
-            <button onClick={openCompCreate} className="btn-primary flex items-center gap-2" disabled={categories.length === 0}>
+            <button onClick={openCompCreate} className="btn-primary flex items-center gap-2" disabled={workProducts.length === 0}>
               <Plus className="w-4 h-4" />
               Component
             </button>
@@ -476,7 +600,7 @@ export default function WorkCategoriesPage() {
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Work Product</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -484,7 +608,7 @@ export default function WorkCategoriesPage() {
                   {components.map((comp) => (
                     <tr key={comp.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{comp.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{comp.categoryName}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{comp.workProductName}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -533,8 +657,8 @@ export default function WorkCategoriesPage() {
                     <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
                       <td className="px-5 py-3 text-gray-500 dark:text-gray-400">
-                        {def.categoryName && def.componentName
-                          ? `${def.categoryName} → ${def.componentName}`
+                        {def.workProductName && def.componentName
+                          ? `${def.workProductName} → ${def.componentName}`
                           : def.componentName ?? "—"}
                       </td>
                       <td className="px-5 py-3">
@@ -561,7 +685,7 @@ export default function WorkCategoriesPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} unit defects</span>
-            <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={categories.length === 0}>
+            <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={workProducts.length === 0}>
               <Plus className="w-4 h-4" />
               Unit Defect
             </button>
@@ -576,7 +700,7 @@ export default function WorkCategoriesPage() {
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Work Product</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -584,7 +708,7 @@ export default function WorkCategoriesPage() {
                   {unitDefects.map((def) => (
                     <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.categoryName ?? "—"}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.workProductName ?? "—"}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openUnitDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -607,7 +731,7 @@ export default function WorkCategoriesPage() {
       {/* ── Category Modal ── */}
       {catModal.open && (
         <Modal
-          title={catModal.editing ? "Edit Work Category" : "New Work Category"}
+          title={catModal.editing ? "Edit Category" : "New Category"}
           onClose={() => setCatModal({ open: false, editing: null })}
         >
           <form onSubmit={submitCat} className="space-y-4">
@@ -634,6 +758,50 @@ export default function WorkCategoriesPage() {
         </Modal>
       )}
 
+      {/* ── Work Product Modal ── */}
+      {prodModal.open && (
+        <Modal
+          title={prodModal.editing ? "Edit Work Product" : "New Work Product"}
+          onClose={() => setProdModal({ open: false, editing: null })}
+        >
+          <form onSubmit={submitProd} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <input
+                className="input w-full"
+                value={prodForm.name}
+                onChange={(e) => setProdForm((f) => ({ ...f, name: e.target.value }))}
+                required
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Category</label>
+              <select
+                className="input w-full"
+                value={prodForm.categoryId}
+                onChange={(e) => setProdForm((f) => ({ ...f, categoryId: e.target.value }))}
+                required
+              >
+                <option value="">— Select Category —</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+            {prodError && <p className="text-sm text-red-600">{prodError}</p>}
+            <div className="flex justify-end gap-3 pt-1">
+              <button type="button" onClick={() => setProdModal({ open: false, editing: null })} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" disabled={prodSaving} className="btn-primary">
+                {prodSaving ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
       {/* ── Component Modal ── */}
       {compModal.open && (
         <Modal
@@ -652,15 +820,15 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Work Category</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Work Product</label>
               <select
                 className="input w-full"
-                value={compForm.workCategoryId}
-                onChange={(e) => setCompForm((f) => ({ ...f, workCategoryId: e.target.value }))}
+                value={compForm.workProductId}
+                onChange={(e) => setCompForm((f) => ({ ...f, workProductId: e.target.value }))}
                 required
               >
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                {workProducts.map((prod) => (
+                  <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
               </select>
             </div>
@@ -705,7 +873,7 @@ export default function WorkCategoriesPage() {
                 <option value="">— Select Component —</option>
                 {components.map((comp) => (
                   <option key={comp.id} value={comp.id}>
-                    {comp.categoryName ? `${comp.categoryName} → ${comp.name}` : comp.name}
+                    {comp.workProductName ? `${comp.workProductName} → ${comp.name}` : comp.name}
                   </option>
                 ))}
               </select>
@@ -741,16 +909,16 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Category</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Work Product</label>
               <select
                 className="input w-full"
-                value={unitDefForm.workCategoryId}
-                onChange={(e) => setUnitDefForm((f) => ({ ...f, workCategoryId: e.target.value }))}
+                value={unitDefForm.workProductId}
+                onChange={(e) => setUnitDefForm((f) => ({ ...f, workProductId: e.target.value }))}
                 required
               >
-                <option value="">— Select Category —</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <option value="">— Select Work Product —</option>
+                {workProducts.map((prod) => (
+                  <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
               </select>
             </div>

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { submissions, workSubmissionDefects, workDefects, workComponents, categories, workStations, users } from "@/lib/db/schema";
+import { submissions, workSubmissionDefects, workDefects, workComponents, workProducts, workStations, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { workSubmissionDefectSchema } from "@/lib/validations/submission";
 
 const patchSchema = z.object({
-  workCategoryId: z.string().min(1).optional(),
+  workProductId: z.string().min(1).optional(),
   workStationId: z.string().optional().nullable(),
   units: z.number().int().positive().optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
@@ -31,7 +31,7 @@ export async function GET(
   const [row] = await db
     .select({
       id: submissions.id,
-      workCategoryId: submissions.workCategoryId,
+      workProductId: submissions.workProductId,
       workStationId: submissions.workStationId,
       units: submissions.units,
       shift: submissions.shift,
@@ -70,7 +70,7 @@ export async function GET(
       .innerJoin(workDefects, eq(workSubmissionDefects.workDefectId, workDefects.id))
       .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
       .where(eq(workSubmissionDefects.submissionId, id)),
-    db.select({ name: categories.name }).from(categories).where(eq(categories.id, row.workCategoryId)).limit(1),
+    db.select({ name: workProducts.name }).from(workProducts).where(eq(workProducts.id, row.workProductId)).limit(1),
     row.workStationId
       ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
       : Promise.resolve([]),
@@ -78,7 +78,7 @@ export async function GET(
 
   return NextResponse.json({
     ...row,
-    categoryName: categoryRow[0]?.name ?? null,
+    workProductName: categoryRow[0]?.name ?? null,
     stationName: stationRow[0]?.name ?? null,
     existingDefects,
     defects: defectsDisplay,

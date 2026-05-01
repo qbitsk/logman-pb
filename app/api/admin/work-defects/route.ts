@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workDefects, workComponents, categories } from "@/lib/db/schema";
+import { workDefects, workComponents, workProducts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -19,7 +19,7 @@ const componentBodySchema = z.object({
 
 const unitBodySchema = z.object({
   name: z.string().min(1),
-  workCategoryId: z.string().min(1),
+  workProductId: z.string().min(1),
 });
 
 export async function GET(request: NextRequest) {
@@ -34,18 +34,18 @@ export async function GET(request: NextRequest) {
       id: workDefects.id,
       name: workDefects.name,
       type: workDefects.type,
-      workCategoryId: workDefects.workCategoryId,
+      workProductId: workDefects.workProductId,
       workComponentId: workDefects.workComponentId,
       componentName: workComponents.name,
-      categoryName: categories.name,
+      workProductName: workProducts.name,
       createdAt: workDefects.createdAt,
       updatedAt: workDefects.updatedAt,
     })
     .from(workDefects)
     .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-    .leftJoin(categories, eq(workDefects.workCategoryId, categories.id))
+    .leftJoin(workProducts, eq(workDefects.workProductId, workProducts.id))
     .where(type ? eq(workDefects.type, type) : undefined)
-    .orderBy(categories.name, workComponents.name, workDefects.name);
+    .orderBy(workProducts.name, workComponents.name, workDefects.name);
 
   return NextResponse.json(componentRows);
 }
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       .values({
         name: result.data.name,
         type: "unit",
-        workCategoryId: result.data.workCategoryId,
+        workProductId: result.data.workProductId,
         workComponentId: null,
       })
       .returning();
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
   }
 
   const component = await db
-    .select({ workCategoryId: workComponents.workCategoryId })
+    .select({ workProductId: workComponents.workProductId })
     .from(workComponents)
     .where(eq(workComponents.id, result.data.workComponentId))
     .limit(1);
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       name: result.data.name,
       type: "component",
       workComponentId: result.data.workComponentId,
-      workCategoryId: component[0].workCategoryId,
+      workProductId: component[0].workProductId,
     })
     .returning();
 

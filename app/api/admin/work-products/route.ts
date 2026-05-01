@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { categories } from "@/lib/db/schema";
+import { workProducts, categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,19 +14,26 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1),
-  type: z.enum(["product", "defect"]),
+  categoryId: z.string().min(1),
 });
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const type = request.nextUrl.searchParams.get("type") as "product" | "defect" | null;
-
-  const rows = type
-    ? await db.select().from(categories).where(eq(categories.type, type)).orderBy(categories.name)
-    : await db.select().from(categories).orderBy(categories.name);
+  const rows = await db
+    .select({
+      id: workProducts.id,
+      name: workProducts.name,
+      categoryId: workProducts.categoryId,
+      categoryName: categories.name,
+      createdAt: workProducts.createdAt,
+      updatedAt: workProducts.updatedAt,
+    })
+    .from(workProducts)
+    .innerJoin(categories, eq(workProducts.categoryId, categories.id))
+    .orderBy(categories.name, workProducts.name);
 
   return NextResponse.json(rows);
 }
@@ -43,8 +50,8 @@ export async function POST(request: NextRequest) {
   }
 
   const [created] = await db
-    .insert(categories)
-    .values({ name: result.data.name, type: result.data.type })
+    .insert(workProducts)
+    .values({ name: result.data.name, categoryId: result.data.categoryId })
     .returning();
 
   return NextResponse.json(created, { status: 201 });

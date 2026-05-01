@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workComponents, categories } from "@/lib/db/schema";
+import { workComponents, workProducts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,7 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1),
-  workCategoryId: z.string().min(1),
+  workProductId: z.string().min(1),
 });
 
 export async function GET() {
@@ -26,14 +26,14 @@ export async function GET() {
     .select({
       id: workComponents.id,
       name: workComponents.name,
-      workCategoryId: workComponents.workCategoryId,
-      categoryName: categories.name,
+      workProductId: workComponents.workProductId,
+      workProductName: workProducts.name,
       createdAt: workComponents.createdAt,
       updatedAt: workComponents.updatedAt,
     })
     .from(workComponents)
-    .innerJoin(categories, eq(workComponents.workCategoryId, categories.id))
-    .orderBy(categories.name, workComponents.name);
+    .innerJoin(workProducts, eq(workComponents.workProductId, workProducts.id))
+    .orderBy(workProducts.name, workComponents.name);
 
   return NextResponse.json(rows);
 }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
   const [created] = await db
     .insert(workComponents)
-    .values({ name: result.data.name, workCategoryId: result.data.workCategoryId })
+    .values({ name: result.data.name, workProductId: result.data.workProductId })
     .returning();
 
   return NextResponse.json(created, { status: 201 });

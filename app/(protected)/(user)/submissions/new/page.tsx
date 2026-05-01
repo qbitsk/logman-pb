@@ -5,13 +5,13 @@ import { SubmissionForm } from "@/components/forms/SubmissionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-type WorkCategory = { id: string; name: string; type: string | null };
-type WorkStation = { id: string; name: string; workCategoryId: string };
-type WorkComponent = { id: string; name: string; workCategoryId: string };
-type WorkDefect = { id: string; name: string; type: "unit" | "component"; workCategoryId: string; workComponentId: string | null };
+type WorkProduct = { id: string; name: string };
+type WorkStation = { id: string; name: string; workProductId: string };
+type WorkComponent = { id: string; name: string; workProductId: string };
+type WorkDefect = { id: string; name: string; type: "unit" | "component"; workProductId: string; workComponentId: string | null };
 
 export default function NewSubmissionPage() {
-  const [categories, setCategories] = useState<WorkCategory[]>([]);
+  const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
   const [stations, setStations] = useState<WorkStation[]>([]);
   const [components, setComponents] = useState<WorkComponent[]>([]);
   const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
@@ -21,7 +21,7 @@ export default function NewSubmissionPage() {
   function done() { setLoaded((n) => n + 1); }
 
   useEffect(() => {
-    fetch("/api/categories?type=work").then((r) => r.json()).then(setCategories).finally(done);
+    fetch("/api/work-products").then((r) => r.json()).then(setWorkProducts).finally(done);
   }, []);
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function NewSubmissionPage() {
       ) : (
         <div className="card max-w-2xl">
           <SubmissionForm
-            workCategories={categories}
+            workProducts={workProducts}
             workStations={stations}
             workComponents={components}
             workDefects={workDefects}
