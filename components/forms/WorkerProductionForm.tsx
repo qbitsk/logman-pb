@@ -8,6 +8,13 @@ import { Trash2, Plus } from "lucide-react";
 
 const STATUSES = ["new", "approved", "rejected"] as const;
 
+function generateKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
 const statusStyles: Record<string, string> = {
   new:      "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   approved: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
@@ -107,7 +114,7 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
     (existingDefects ?? []).map((d) => {
       const wd = workDefects.find((w) => w.id === d.workDefectId);
       return {
-        _key: crypto.randomUUID(),
+        _key: generateKey(),
         type: wd?.type ?? "component",
         workComponentId: wd?.workComponentId ?? "",
         workDefectId: d.workDefectId,
@@ -149,7 +156,7 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
   function addDefect(type: "unit" | "component") {
     setDefects((prev) => [
       ...prev,
-      { _key: crypto.randomUUID(), type, workComponentId: "", workDefectId: "", units: "" },
+      { _key: generateKey(), type, workComponentId: "", workDefectId: "", units: "" },
     ]);
   }
 
