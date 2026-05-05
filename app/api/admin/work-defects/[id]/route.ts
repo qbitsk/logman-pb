@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workDefects, workComponents } from "@/lib/db/schema";
+import { productionDefects, productionComponents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,8 +14,8 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
-  workComponentId: z.string().min(1).optional(),
-  workProductId: z.string().min(1).optional(),
+  productionComponentId: z.string().min(1).optional(),
+  productionProductId: z.string().min(1).optional(),
 });
 
 export async function PATCH(
@@ -35,27 +35,27 @@ export async function PATCH(
 
   const update: Record<string, unknown> = { updatedAt: new Date() };
   if (result.data.name) update.name = result.data.name;
-  if (result.data.workProductId) update.workProductId = result.data.workProductId;
+  if (result.data.productionProductId) update.productionProductId = result.data.productionProductId;
 
-  if (result.data.workComponentId) {
+  if (result.data.productionComponentId) {
     const component = await db
-      .select({ workProductId: workComponents.workProductId })
-      .from(workComponents)
-      .where(eq(workComponents.id, result.data.workComponentId))
+      .select({ productionProductId: productionComponents.productionProductId })
+      .from(productionComponents)
+      .where(eq(productionComponents.id, result.data.productionComponentId))
       .limit(1);
 
     if (!component[0]) {
       return NextResponse.json({ error: "Component not found" }, { status: 400 });
     }
 
-    update.workComponentId = result.data.workComponentId;
-    update.workProductId = component[0].workProductId;
+    update.productionComponentId = result.data.productionComponentId;
+    update.productionProductId = component[0].productionProductId;
   }
 
   const [updated] = await db
-    .update(workDefects)
+    .update(productionDefects)
     .set(update)
-    .where(eq(workDefects.id, id))
+    .where(eq(productionDefects.id, id))
     .returning();
 
   if (!updated) {
@@ -76,16 +76,16 @@ export async function DELETE(
   const { id } = await params;
 
   const [existing] = await db
-    .select({ id: workDefects.id })
-    .from(workDefects)
-    .where(eq(workDefects.id, id))
+    .select({ id: productionDefects.id })
+    .from(productionDefects)
+    .where(eq(productionDefects.id, id))
     .limit(1);
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await db.delete(workDefects).where(eq(workDefects.id, id));
+  await db.delete(productionDefects).where(eq(productionDefects.id, id));
 
   return new NextResponse(null, { status: 204 });
 }

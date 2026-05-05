@@ -5,25 +5,25 @@ import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-type WorkProduct = { id: string; name: string; categoryId: string };
+type ProductionProduct = { id: string; name: string; categoryId: string };
 type Category = { id: string; name: string };
-type WorkStation = { id: string; name: string; workProductId: string };
-type WorkComponent = { id: string; name: string; workProductId: string };
-type WorkDefect = { id: string; name: string; type: "unit" | "component"; workProductId: string; workComponentId: string | null };
+type ProductionStation = { id: string; name: string; productionProductId: string };
+type ProductionComponent = { id: string; name: string; productionProductId: string };
+type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionProductId: string; productionComponentId: string | null };
 
 export default function NewWorkerProductionPage() {
-  const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
+  const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [stations, setStations] = useState<WorkStation[]>([]);
-  const [components, setComponents] = useState<WorkComponent[]>([]);
-  const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
+  const [stations, setStations] = useState<ProductionStation[]>([]);
+  const [components, setComponents] = useState<ProductionComponent[]>([]);
+  const [productionDefects, setProductionDefects] = useState<ProductionDefect[]>([]);
   const [loaded, setLoaded] = useState(0);
   const loading = loaded < 5;
 
   function done() { setLoaded((n) => n + 1); }
 
   useEffect(() => {
-    fetch("/api/work-products").then((r) => r.json()).then(setWorkProducts).finally(done);
+    fetch("/api/work-products").then((r) => r.json()).then(setProductionProducts).finally(done);
   }, []);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function NewWorkerProductionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-defects").then((r) => r.json()).then(setWorkDefects).finally(done);
+    fetch("/api/work-defects").then((r) => r.json()).then(setProductionDefects).finally(done);
   }, []);
 
   return (
@@ -62,10 +62,10 @@ export default function NewWorkerProductionPage() {
         <div className="card max-w-2xl">
           <WorkerProductionForm
             categories={categories}
-            workProducts={workProducts}
-            workStations={stations}
-            workComponents={components}
-            workDefects={workDefects}
+            productionProducts={productionProducts}
+            productionStations={stations}
+            productionComponents={components}
+            productionDefects={productionDefects}
           />
         </div>
       )}

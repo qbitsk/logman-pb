@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workDefects } from "@/lib/db/schema";
+import { productionDefects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
@@ -13,11 +13,11 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const workProductId = searchParams.get("workProductId");
+  const productionProductId = searchParams.get("productionProductId");
 
-  const rows = workProductId
-    ? await db.select().from(workDefects).where(eq(workDefects.workProductId, workProductId))
-    : await db.select().from(workDefects);
+  const rows = productionProductId
+    ? await db.select().from(productionDefects).where(eq(productionDefects.productionProductId, productionProductId))
+    : await db.select().from(productionDefects);
 
   return NextResponse.json(rows);
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, users, workProducts, workStations, workerProductionDefects, workComponents, workDefects } from "@/lib/db/schema";
+import { workerProductions, users, productionProducts, productionStations, workerProductionDefects, productionComponents, productionDefects } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
   const rows = await db
     .select({
       id: workerProductions.id,
-      workProductName: workProducts.name,
-      workStationName: workStations.name,
+      workProductName: productionProducts.name,
+      workStationName: productionStations.name,
       units: workerProductions.units,
       shift: workerProductions.shift,
       notes: workerProductions.notes,
@@ -30,8 +30,8 @@ export async function GET(request: NextRequest) {
     })
     .from(workerProductions)
     .leftJoin(users, eq(workerProductions.userId, users.id))
-    .leftJoin(workProducts, eq(workerProductions.workProductId, workProducts.id))
-    .leftJoin(workStations, eq(workerProductions.workStationId, workStations.id))
+    .leftJoin(productionProducts, eq(workerProductions.productionProductId, productionProducts.id))
+    .leftJoin(productionStations, eq(workerProductions.productionStationId, productionStations.id))
     .orderBy(workerProductions.createdAt);
 
   const typedRows = rows.map((r) => ({
@@ -45,14 +45,14 @@ export async function GET(request: NextRequest) {
   const defectRows = await db
     .select({
       submissionId: workerProductionDefects.workerProductionId,
-      componentName: workComponents.name,
-      defectName: workDefects.name,
-      defectType: workDefects.type,
+      componentName: productionComponents.name,
+      defectName: productionDefects.name,
+      defectType: productionDefects.type,
       units: workerProductionDefects.units,
     })
     .from(workerProductionDefects)
-    .leftJoin(workDefects, eq(workerProductionDefects.workDefectId, workDefects.id))
-    .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id));
+    .leftJoin(productionDefects, eq(workerProductionDefects.productionDefectId, productionDefects.id))
+    .leftJoin(productionComponents, eq(productionDefects.productionComponentId, productionComponents.id));
 
   const typedDefectRows = defectRows.map((d) => ({
     submissionId: d.submissionId,

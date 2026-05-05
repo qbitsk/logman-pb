@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, workProducts, categories } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionProducts, categories } from "@/lib/db/schema";
 import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -20,12 +20,12 @@ export async function GET() {
       status: workerProductions.status,
       units: workerProductions.units,
       createdAt: workerProductions.createdAt,
-      workProductName: workProducts.name,
+      workProductName: productionProducts.name,
       categoryName: categories.name,
     })
     .from(workerProductions)
-    .innerJoin(workProducts, eq(workerProductions.workProductId, workProducts.id))
-    .innerJoin(categories, eq(workProducts.categoryId, categories.id))
+    .innerJoin(productionProducts, eq(workerProductions.productionProductId, productionProducts.id))
+    .innerJoin(categories, eq(productionProducts.categoryId, categories.id))
     .where(eq(workerProductions.userId, session.user.id))
     .orderBy(workerProductions.createdAt);
 
@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
   const [production] = await db
     .insert(workerProductions)
     .values({
-      workProductId: result.data.workProductId,
-      workStationId: result.data.workStationId ?? null,
+      productionProductId: result.data.productionProductId,
+      productionStationId: result.data.productionStationId ?? null,
       units: result.data.units ?? null,
       shift: result.data.shift ?? null,
       notes: result.data.notes,
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     await db.insert(workerProductionDefects).values(
       result.data.workerProductionDefects.map((d) => ({
         workerProductionId: production.id,
-        workDefectId: d.workDefectId,
+        productionDefectId: d.productionDefectId,
         units: d.units,
       }))
     );

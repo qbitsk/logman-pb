@@ -1,5 +1,5 @@
 CREATE TYPE "public"."category_type" AS ENUM('product', 'defect');--> statement-breakpoint
-CREATE TYPE "public"."work_defect_type" AS ENUM('unit', 'component');--> statement-breakpoint
+CREATE TYPE "public"."production_defect_type" AS ENUM('unit', 'component');--> statement-breakpoint
 CREATE TYPE "public"."worker_production_status" AS ENUM('new', 'approved', 'rejected');--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"id" text PRIMARY KEY NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE "categories" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "work_products" (
+CREATE TABLE "production_products" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"category_id" text NOT NULL,
@@ -66,28 +66,28 @@ CREATE TABLE "work_products" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "work_stations" (
+CREATE TABLE "production_stations" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"work_product_id" text NOT NULL,
+	"production_product_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "work_components" (
+CREATE TABLE "production_components" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"work_product_id" text NOT NULL,
+	"production_product_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "work_defects" (
+CREATE TABLE "production_defects" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"type" "work_defect_type" NOT NULL,
-	"work_product_id" text NOT NULL,
-	"work_component_id" text,
+	"type" "production_defect_type" NOT NULL,
+	"production_product_id" text NOT NULL,
+	"production_component_id" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -95,8 +95,8 @@ CREATE TABLE "work_defects" (
 CREATE TABLE "worker_productions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
-	"work_product_id" text NOT NULL,
-	"work_station_id" text,
+	"production_product_id" text NOT NULL,
+	"production_station_id" text,
 	"units" integer,
 	"shift" integer,
 	"notes" text,
@@ -108,7 +108,7 @@ CREATE TABLE "worker_productions" (
 CREATE TABLE "worker_production_defects" (
 	"id" text PRIMARY KEY NOT NULL,
 	"worker_production_id" text NOT NULL,
-	"work_defect_id" text NOT NULL,
+	"production_defect_id" text NOT NULL,
 	"units" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -116,13 +116,13 @@ CREATE TABLE "worker_production_defects" (
 --> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "work_products" ADD CONSTRAINT "work_products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "work_stations" ADD CONSTRAINT "work_stations_work_product_id_work_products_id_fk" FOREIGN KEY ("work_product_id") REFERENCES "public"."work_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "work_components" ADD CONSTRAINT "work_components_work_product_id_work_products_id_fk" FOREIGN KEY ("work_product_id") REFERENCES "public"."work_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "work_defects" ADD CONSTRAINT "work_defects_work_product_id_work_products_id_fk" FOREIGN KEY ("work_product_id") REFERENCES "public"."work_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "work_defects" ADD CONSTRAINT "work_defects_work_component_id_work_components_id_fk" FOREIGN KEY ("work_component_id") REFERENCES "public"."work_components"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_products" ADD CONSTRAINT "production_products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_stations" ADD CONSTRAINT "production_stations_production_product_id_production_products_id_fk" FOREIGN KEY ("production_product_id") REFERENCES "public"."production_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_components" ADD CONSTRAINT "production_components_production_product_id_production_products_id_fk" FOREIGN KEY ("production_product_id") REFERENCES "public"."production_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_defects" ADD CONSTRAINT "production_defects_production_product_id_production_products_id_fk" FOREIGN KEY ("production_product_id") REFERENCES "public"."production_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_defects" ADD CONSTRAINT "production_defects_production_component_id_production_components_id_fk" FOREIGN KEY ("production_component_id") REFERENCES "public"."production_components"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "worker_productions" ADD CONSTRAINT "worker_productions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "worker_productions" ADD CONSTRAINT "worker_productions_work_product_id_work_products_id_fk" FOREIGN KEY ("work_product_id") REFERENCES "public"."work_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "worker_productions" ADD CONSTRAINT "worker_productions_work_station_id_work_stations_id_fk" FOREIGN KEY ("work_station_id") REFERENCES "public"."work_stations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "worker_productions" ADD CONSTRAINT "worker_productions_production_product_id_production_products_id_fk" FOREIGN KEY ("production_product_id") REFERENCES "public"."production_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "worker_productions" ADD CONSTRAINT "worker_productions_production_station_id_production_stations_id_fk" FOREIGN KEY ("production_station_id") REFERENCES "public"."production_stations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "worker_production_defects" ADD CONSTRAINT "worker_production_defects_worker_production_id_worker_productions_id_fk" FOREIGN KEY ("worker_production_id") REFERENCES "public"."worker_productions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "worker_production_defects" ADD CONSTRAINT "worker_production_defects_work_defect_id_work_defects_id_fk" FOREIGN KEY ("work_defect_id") REFERENCES "public"."work_defects"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "worker_production_defects" ADD CONSTRAINT "worker_production_defects_production_defect_id_production_defects_id_fk" FOREIGN KEY ("production_defect_id") REFERENCES "public"."production_defects"("id") ON DELETE no action ON UPDATE no action;

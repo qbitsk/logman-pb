@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, workDefects, workComponents, workProducts, workStations, users, categories } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionDefects, productionComponents, productionProducts, productionStations, users, categories } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { workerProductionDefectSchema } from "@/lib/validations/worker-production";
 
 const patchSchema = z.object({
-  workProductId: z.string().min(1).optional(),
-  workStationId: z.string().optional().nullable(),
+  productionProductId: z.string().min(1).optional(),
+  productionStationId: z.string().optional().nullable(),
   units: z.number().int().positive().optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
@@ -31,8 +31,8 @@ export async function GET(
   const [row] = await db
     .select({
       id: workerProductions.id,
-      workProductId: workerProductions.workProductId,
-      workStationId: workerProductions.workStationId,
+      productionProductId: workerProductions.productionProductId,
+      productionStationId: workerProductions.productionStationId,
       units: workerProductions.units,
       shift: workerProductions.shift,
       notes: workerProductions.notes,
@@ -54,25 +54,25 @@ export async function GET(
   const [existingDefects, defectsDisplay, categoryRow, stationRow] = await Promise.all([
     db
       .select({
-        workDefectId: workerProductionDefects.workDefectId,
+        productionDefectId: workerProductionDefects.productionDefectId,
         units: workerProductionDefects.units,
       })
       .from(workerProductionDefects)
       .where(eq(workerProductionDefects.workerProductionId, id)),
     db
       .select({
-        workDefectName: workDefects.name,
-        workDefectType: workDefects.type,
-        workComponentName: workComponents.name,
+        workDefectName: productionDefects.name,
+        workDefectType: productionDefects.type,
+        workComponentName: productionComponents.name,
         units: workerProductionDefects.units,
       })
       .from(workerProductionDefects)
-      .innerJoin(workDefects, eq(workerProductionDefects.workDefectId, workDefects.id))
-      .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
+      .innerJoin(productionDefects, eq(workerProductionDefects.productionDefectId, productionDefects.id))
+      .leftJoin(productionComponents, eq(productionDefects.productionComponentId, productionComponents.id))
       .where(eq(workerProductionDefects.workerProductionId, id)),
-    db.select({ name: workProducts.name, categoryName: categories.name }).from(workProducts).innerJoin(categories, eq(workProducts.categoryId, categories.id)).where(eq(workProducts.id, row.workProductId)).limit(1),
-    row.workStationId
-      ? db.select({ name: workStations.name }).from(workStations).where(eq(workStations.id, row.workStationId)).limit(1)
+    db.select({ name: productionProducts.name, categoryName: categories.name }).from(productionProducts).innerJoin(categories, eq(productionProducts.categoryId, categories.id)).where(eq(productionProducts.id, row.productionProductId)).limit(1),
+    row.productionStationId
+      ? db.select({ name: productionStations.name }).from(productionStations).where(eq(productionStations.id, row.productionStationId)).limit(1)
       : Promise.resolve([]),
   ]);
 
@@ -134,7 +134,7 @@ export async function PATCH(
     await db.insert(workerProductionDefects).values(
       defectsPayload.map((d) => ({
         workerProductionId: id,
-        workDefectId: d.workDefectId,
+        productionDefectId: d.productionDefectId,
         units: d.units,
       }))
     );

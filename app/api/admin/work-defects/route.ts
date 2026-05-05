@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workDefects, workComponents, workProducts } from "@/lib/db/schema";
+import { productionDefects, productionComponents, productionProducts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,12 +14,12 @@ async function requireAdmin() {
 
 const componentBodySchema = z.object({
   name: z.string().min(1),
-  workComponentId: z.string().min(1),
+  productionComponentId: z.string().min(1),
 });
 
 const unitBodySchema = z.object({
   name: z.string().min(1),
-  workProductId: z.string().min(1),
+  productionProductId: z.string().min(1),
 });
 
 export async function GET(request: NextRequest) {
@@ -31,21 +31,21 @@ export async function GET(request: NextRequest) {
 
   const componentRows = await db
     .select({
-      id: workDefects.id,
-      name: workDefects.name,
-      type: workDefects.type,
-      workProductId: workDefects.workProductId,
-      workComponentId: workDefects.workComponentId,
-      componentName: workComponents.name,
-      workProductName: workProducts.name,
-      createdAt: workDefects.createdAt,
-      updatedAt: workDefects.updatedAt,
+      id: productionDefects.id,
+      name: productionDefects.name,
+      type: productionDefects.type,
+      productionProductId: productionDefects.productionProductId,
+      productionComponentId: productionDefects.productionComponentId,
+      componentName: productionComponents.name,
+      workProductName: productionProducts.name,
+      createdAt: productionDefects.createdAt,
+      updatedAt: productionDefects.updatedAt,
     })
-    .from(workDefects)
-    .leftJoin(workComponents, eq(workDefects.workComponentId, workComponents.id))
-    .leftJoin(workProducts, eq(workDefects.workProductId, workProducts.id))
-    .where(type ? eq(workDefects.type, type) : undefined)
-    .orderBy(workProducts.name, workComponents.name, workDefects.name);
+    .from(productionDefects)
+    .leftJoin(productionComponents, eq(productionDefects.productionComponentId, productionComponents.id))
+    .leftJoin(productionProducts, eq(productionDefects.productionProductId, productionProducts.id))
+    .where(type ? eq(productionDefects.type, type) : undefined)
+    .orderBy(productionProducts.name, productionComponents.name, productionDefects.name);
 
   return NextResponse.json(componentRows);
 }
@@ -64,12 +64,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
     const [created] = await db
-      .insert(workDefects)
+      .insert(productionDefects)
       .values({
         name: result.data.name,
         type: "unit",
-        workProductId: result.data.workProductId,
-        workComponentId: null,
+        productionProductId: result.data.productionProductId,
+        productionComponentId: null,
       })
       .returning();
     return NextResponse.json(created, { status: 201 });
@@ -82,9 +82,9 @@ export async function POST(request: NextRequest) {
   }
 
   const component = await db
-    .select({ workProductId: workComponents.workProductId })
-    .from(workComponents)
-    .where(eq(workComponents.id, result.data.workComponentId))
+    .select({ productionProductId: productionComponents.productionProductId })
+    .from(productionComponents)
+    .where(eq(productionComponents.id, result.data.productionComponentId))
     .limit(1);
 
   if (!component[0]) {
@@ -92,12 +92,12 @@ export async function POST(request: NextRequest) {
   }
 
   const [created] = await db
-    .insert(workDefects)
+    .insert(productionDefects)
     .values({
       name: result.data.name,
       type: "component",
-      workComponentId: result.data.workComponentId,
-      workProductId: component[0].workProductId,
+      productionComponentId: result.data.productionComponentId,
+      productionProductId: component[0].productionProductId,
     })
     .returning();
 

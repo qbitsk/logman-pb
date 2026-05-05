@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workComponents, workProducts } from "@/lib/db/schema";
+import { productionComponents, productionProducts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,7 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1),
-  workProductId: z.string().min(1),
+  productionProductId: z.string().min(1),
 });
 
 export async function GET() {
@@ -24,16 +24,16 @@ export async function GET() {
 
   const rows = await db
     .select({
-      id: workComponents.id,
-      name: workComponents.name,
-      workProductId: workComponents.workProductId,
-      workProductName: workProducts.name,
-      createdAt: workComponents.createdAt,
-      updatedAt: workComponents.updatedAt,
+      id: productionComponents.id,
+      name: productionComponents.name,
+      productionProductId: productionComponents.productionProductId,
+      workProductName: productionProducts.name,
+      createdAt: productionComponents.createdAt,
+      updatedAt: productionComponents.updatedAt,
     })
-    .from(workComponents)
-    .innerJoin(workProducts, eq(workComponents.workProductId, workProducts.id))
-    .orderBy(workProducts.name, workComponents.name);
+    .from(productionComponents)
+    .innerJoin(productionProducts, eq(productionComponents.productionProductId, productionProducts.id))
+    .orderBy(productionProducts.name, productionComponents.name);
 
   return NextResponse.json(rows);
 }
@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
   }
 
   const [created] = await db
-    .insert(workComponents)
-    .values({ name: result.data.name, workProductId: result.data.workProductId })
+    .insert(productionComponents)
+    .values({ name: result.data.name, productionProductId: result.data.productionProductId })
     .returning();
 
   return NextResponse.json(created, { status: 201 });

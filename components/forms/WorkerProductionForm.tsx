@@ -23,8 +23,8 @@ const statusStyles: Record<string, string> = {
 
 type WorkerProduction = {
   id: string;
-  workProductId: string;
-  workStationId: string | null;
+  productionProductId: string;
+  productionStationId: string | null;
   units: number | null;
   shift: number | null;
   notes: string | null;
@@ -35,7 +35,7 @@ type WorkerProduction = {
   userEmail: string;
 };
 
-type WorkProduct = {
+type ProductionProduct = {
   id: string;
   name: string;
   categoryId: string;
@@ -46,24 +46,24 @@ type Category = {
   name: string;
 };
 
-type WorkStation = {
+type ProductionStation = {
   id: string;
   name: string;
-  workProductId: string;
+  productionProductId: string;
 };
 
-type WorkComponent = {
+type ProductionComponent = {
   id: string;
   name: string;
-  workProductId: string;
+  productionProductId: string;
 };
 
-type WorkDefect = {
+type ProductionDefect = {
   id: string;
   name: string;
   type: "unit" | "component";
-  workProductId: string;
-  workComponentId: string | null;
+  productionProductId: string;
+  productionComponentId: string | null;
 };
 
 type DefectEntry = {
@@ -71,40 +71,40 @@ type DefectEntry = {
   /** UI-only: drives cascading filters */
   type: "unit" | "component";
   /** UI-only: drives cascading filter for component-type defects */
-  workComponentId: string;
-  workDefectId: string;
+  productionComponentId: string;
+  productionDefectId: string;
   units: string;
 };
 
 type Props = {
   production?: WorkerProduction;
   categories: Category[];
-  workProducts: WorkProduct[];
-  workStations: WorkStation[];
-  workComponents: WorkComponent[];
-  workDefects: WorkDefect[];
-  existingDefects?: { workDefectId: string; units: number }[];
+  productionProducts: ProductionProduct[];
+  productionStations: ProductionStation[];
+  productionComponents: ProductionComponent[];
+  productionDefects: ProductionDefect[];
+  existingDefects?: { productionDefectId: string; units: number }[];
   editUrl?: string;
   backUrl?: string;
   allowStatusChange?: boolean;
 };
 
-export function WorkerProductionForm({ production, categories, workProducts, workStations, workComponents, workDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
+export function WorkerProductionForm({ production, categories, productionProducts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
   const router = useRouter();
   const isEdit = !!production;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/worker-productions" : "/worker-productions");
 
   const [categoryId, setCategoryId] = useState(() => {
-    const initialProductId = production?.workProductId ?? workProducts[0]?.id ?? "";
-    const product = workProducts.find((p) => p.id === initialProductId);
+    const initialProductId = production?.productionProductId ?? productionProducts[0]?.id ?? "";
+    const product = productionProducts.find((p) => p.id === initialProductId);
     return product?.categoryId ?? categories[0]?.id ?? "";
   });
 
-  const filteredProducts = workProducts.filter((p) => p.categoryId === categoryId);
+  const filteredProducts = productionProducts.filter((p) => p.categoryId === categoryId);
 
   const [form, setForm] = useState({
-    workProductId: production?.workProductId ?? (workProducts[0]?.id ?? ""),
-    workStationId: production?.workStationId ?? "",
+    productionProductId: production?.productionProductId ?? (productionProducts[0]?.id ?? ""),
+    productionStationId: production?.productionStationId ?? "",
     units: production?.units?.toString() ?? "",
     shift: production?.shift?.toString() ?? "",
     notes: production?.notes ?? "",
@@ -112,12 +112,12 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
   });
   const [defects, setDefects] = useState<DefectEntry[]>(() =>
     (existingDefects ?? []).map((d) => {
-      const wd = workDefects.find((w) => w.id === d.workDefectId);
+      const wd = productionDefects.find((w) => w.id === d.productionDefectId);
       return {
         _key: generateKey(),
         type: wd?.type ?? "component",
-        workComponentId: wd?.workComponentId ?? "",
-        workDefectId: d.workDefectId,
+        productionComponentId: wd?.productionComponentId ?? "",
+        productionDefectId: d.productionDefectId,
         units: d.units.toString(),
       };
     })
@@ -127,26 +127,26 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const filteredStations = workStations.filter(
-    (ws) => ws.workProductId === form.workProductId
+  const filteredStations = productionStations.filter(
+    (ws) => ws.productionProductId === form.productionProductId
   );
 
   function handleCategoryChange(newCategoryId: string) {
     setCategoryId(newCategoryId);
-    const firstProduct = workProducts.find((p) => p.categoryId === newCategoryId);
-    set("workProductId", firstProduct?.id ?? "");
+    const firstProduct = productionProducts.find((p) => p.categoryId === newCategoryId);
+    set("productionProductId", firstProduct?.id ?? "");
   }
 
-  function set(key: "workProductId" | "workStationId" | "units" | "shift" | "notes" | "status", value: string) {
+  function set(key: "productionProductId" | "productionStationId" | "units" | "shift" | "notes" | "status", value: string) {
     setForm((prev) => {
       const next = { ...prev, [key]: value };
       // Reset station when work product changes
-      if (key === "workProductId") next.workStationId = "";
+      if (key === "productionProductId") next.productionStationId = "";
       return next;
     });
-    if (key === "workProductId") {
+    if (key === "productionProductId") {
       setDefects((prev) =>
-        prev.map((d) => ({ ...d, workComponentId: "", workDefectId: "" }))
+        prev.map((d) => ({ ...d, productionComponentId: "", productionDefectId: "" }))
       );
     }
     setErrors((prev) => ({ ...prev, [key]: undefined }));
@@ -156,7 +156,7 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
   function addDefect(type: "unit" | "component") {
     setDefects((prev) => [
       ...prev,
-      { _key: generateKey(), type, workComponentId: "", workDefectId: "", units: "" },
+      { _key: generateKey(), type, productionComponentId: "", productionDefectId: "", units: "" },
     ]);
   }
 
@@ -166,15 +166,15 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
 
   function setDefect(
     key: string,
-    field: "type" | "workComponentId" | "workDefectId" | "units",
+    field: "type" | "productionComponentId" | "productionDefectId" | "units",
     value: string
   ) {
     setDefects((prev) =>
       prev.map((d) => {
         if (d._key !== key) return d;
         const next = { ...d, [field]: value };
-        if (field === "type") { next.workComponentId = ""; next.workDefectId = ""; }
-        if (field === "workComponentId") next.workDefectId = "";
+        if (field === "type") { next.productionComponentId = ""; next.productionDefectId = ""; }
+        if (field === "productionComponentId") next.productionDefectId = "";
         return next;
       })
     );
@@ -187,8 +187,8 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
 
     if (!isEdit) {
       const result = workerProductionSchema.safeParse({
-        workProductId: form.workProductId,
-        workStationId: form.workStationId || null,
+        productionProductId: form.productionProductId,
+        productionStationId: form.productionStationId || null,
         units: form.units ? parseInt(form.units, 10) : null,
         shift: form.shift ? (parseInt(form.shift, 10) as 1 | 2 | 3) : null,
         notes: form.notes,
@@ -209,15 +209,15 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
       const url = isEdit ? (editUrl ?? `/api/admin/worker-productions/${production!.id}`) : "/api/worker-productions";
       const method = isEdit ? "PATCH" : "POST";
       const parsedDefects = defects
-        .filter((d) => d.workDefectId && d.units)
+        .filter((d) => d.productionDefectId && d.units)
         .map((d) => ({
-          workDefectId: d.workDefectId,
+          productionDefectId: d.productionDefectId,
           units: parseInt(d.units, 10),
         }));
 
       const body = isEdit
-        ? JSON.stringify({ ...form, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workerProductionDefects: parsedDefects })
-        : JSON.stringify({ workProductId: form.workProductId, workStationId: form.workStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workerProductionDefects: parsedDefects });
+        ? JSON.stringify({ ...form, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workerProductionDefects: parsedDefects })
+        : JSON.stringify({ productionProductId: form.productionProductId, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workerProductionDefects: parsedDefects });
 
       const res = await fetch(url, {
         method,
@@ -307,12 +307,12 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
         </div>
 
         <div>
-          <label className="label" htmlFor="workProductId">Product{!isEdit && " *"}</label>
+          <label className="label" htmlFor="productionProductId">Product{!isEdit && " *"}</label>
           <select
-            id="workProductId"
-            name="workProductId"
-            value={form.workProductId}
-            onChange={(e) => set("workProductId", e.target.value)}
+            id="productionProductId"
+            name="productionProductId"
+            value={form.productionProductId}
+            onChange={(e) => set("productionProductId", e.target.value)}
             className="input"
           >
             {filteredProducts.map((c) => (
@@ -321,7 +321,7 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
               </option>
             ))}
           </select>
-          {errors.workProductId && <p className="text-red-600 text-xs mt-1">{errors.workProductId}</p>}
+          {errors.productionProductId && <p className="text-red-600 text-xs mt-1">{errors.productionProductId}</p>}
         </div>
 
         <div>
@@ -348,14 +348,14 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
         </div>
 
         <div>
-          <label className="label" htmlFor="workStationId">
+          <label className="label" htmlFor="productionStationId">
             Work Station <span className="text-gray-400 font-normal">(optional)</span>
           </label>
           <select
-            id="workStationId"
-            name="workStationId"
-            value={form.workStationId}
-            onChange={(e) => set("workStationId", e.target.value)}
+            id="productionStationId"
+            name="productionStationId"
+            value={form.productionStationId}
+            onChange={(e) => set("productionStationId", e.target.value)}
             className="input"
           >
             <option value="">— None —</option>
@@ -418,24 +418,24 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
           )}
           <div className="space-y-2">
             {defects.map((defect) => {
-              const filteredComponents = workComponents.filter(
-                (wc) => wc.workProductId === form.workProductId
+              const filteredComponents = productionComponents.filter(
+                (wc) => wc.productionProductId === form.productionProductId
               );
-              const filteredDefects = workDefects.filter((wd) => {
-                if (wd.workProductId !== form.workProductId) return false;
+              const filteredDefects = productionDefects.filter((wd) => {
+                if (wd.productionProductId !== form.productionProductId) return false;
                 if (wd.type !== defect.type) return false;
                 if (defect.type === "component") {
-                  return wd.workComponentId === (defect.workComponentId || null);
+                  return wd.productionComponentId === (defect.productionComponentId || null);
                 }
                 // unit defects must have no associated component
-                return wd.workComponentId === null;
+                return wd.productionComponentId === null;
               });
               return (
                 <div key={defect._key} className="flex flex-wrap gap-2 items-center">
                   {defect.type === "component" && (
                     <select
-                      value={defect.workComponentId}
-                      onChange={(e) => setDefect(defect._key, "workComponentId", e.target.value)}
+                      value={defect.productionComponentId}
+                      onChange={(e) => setDefect(defect._key, "productionComponentId", e.target.value)}
                       className="input flex-1 min-w-[140px]"
                     >
                       <option value="">— Component —</option>
@@ -445,8 +445,8 @@ export function WorkerProductionForm({ production, categories, workProducts, wor
                     </select>
                   )}
                   <select
-                    value={defect.workDefectId}
-                    onChange={(e) => setDefect(defect._key, "workDefectId", e.target.value)}
+                    value={defect.productionDefectId}
+                    onChange={(e) => setDefect(defect._key, "productionDefectId", e.target.value)}
                     className="input flex-1 min-w-[140px]"
                   >
                     <option value="">— Defect —</option>

@@ -12,7 +12,7 @@ type Category = {
   createdAt: string;
 };
 
-type WorkProduct = {
+type ProductionProduct = {
   id: string;
   name: string;
   categoryId: string;
@@ -20,18 +20,18 @@ type WorkProduct = {
   createdAt: string;
 };
 
-type WorkComponent = {
+type ProductionComponent = {
   id: string;
   name: string;
-  workProductId: string;
+  productionProductId: string;
   workProductName: string;
   createdAt: string;
 };
 
-type WorkDefect = {
+type ProductionDefect = {
   id: string;
   name: string;
-  workComponentId: string | null;
+  productionComponentId: string | null;
   componentName: string | null;
   workProductName: string | null;
   createdAt: string;
@@ -40,7 +40,7 @@ type WorkDefect = {
 type UnitDefect = {
   id: string;
   name: string;
-  workProductId: string;
+  productionProductId: string;
   workProductName: string | null;
   createdAt: string;
 };
@@ -95,26 +95,26 @@ export default function WorkCategoriesPage() {
   const [catSaving, setCatSaving] = useState(false);
 
   // ── Work Products state ──
-  const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
+  const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
   const [prodLoading, setProdLoading] = useState(true);
-  const [prodModal, setProdModal] = useState<{ open: boolean; editing: WorkProduct | null }>({ open: false, editing: null });
+  const [prodModal, setProdModal] = useState<{ open: boolean; editing: ProductionProduct | null }>({ open: false, editing: null });
   const [prodForm, setProdForm] = useState({ name: "", categoryId: "" });
   const [prodError, setProdError] = useState<string | null>(null);
   const [prodSaving, setProdSaving] = useState(false);
 
   // ── Components state ──
-  const [components, setComponents] = useState<WorkComponent[]>([]);
+  const [components, setComponents] = useState<ProductionComponent[]>([]);
   const [compLoading, setCompLoading] = useState(true);
-  const [compModal, setCompModal] = useState<{ open: boolean; editing: WorkComponent | null }>({ open: false, editing: null });
-  const [compForm, setCompForm] = useState({ name: "", workProductId: "" });
+  const [compModal, setCompModal] = useState<{ open: boolean; editing: ProductionComponent | null }>({ open: false, editing: null });
+  const [compForm, setCompForm] = useState({ name: "", productionProductId: "" });
   const [compError, setCompError] = useState<string | null>(null);
   const [compSaving, setCompSaving] = useState(false);
 
   // ── Defects state ──
-  const [defects, setDefects] = useState<WorkDefect[]>([]);
+  const [defects, setDefects] = useState<ProductionDefect[]>([]);
   const [defLoading, setDefLoading] = useState(true);
-  const [defModal, setDefModal] = useState<{ open: boolean; editing: WorkDefect | null }>({ open: false, editing: null });
-  const [defForm, setDefForm] = useState({ name: "", workComponentId: "" });
+  const [defModal, setDefModal] = useState<{ open: boolean; editing: ProductionDefect | null }>({ open: false, editing: null });
+  const [defForm, setDefForm] = useState({ name: "", productionComponentId: "" });
   const [defError, setDefError] = useState<string | null>(null);
   const [defSaving, setDefSaving] = useState(false);
 
@@ -122,7 +122,7 @@ export default function WorkCategoriesPage() {
   const [unitDefects, setUnitDefects] = useState<UnitDefect[]>([]);
   const [unitDefLoading, setUnitDefLoading] = useState(true);
   const [unitDefModal, setUnitDefModal] = useState<{ open: boolean; editing: UnitDefect | null }>({ open: false, editing: null });
-  const [unitDefForm, setUnitDefForm] = useState({ name: "", workProductId: "" });
+  const [unitDefForm, setUnitDefForm] = useState({ name: "", productionProductId: "" });
   const [unitDefError, setUnitDefError] = useState<string | null>(null);
   const [unitDefSaving, setUnitDefSaving] = useState(false);
 
@@ -137,7 +137,7 @@ export default function WorkCategoriesPage() {
   useEffect(() => {
     fetch("/api/admin/work-products")
       .then((r) => r.json())
-      .then(setWorkProducts)
+      .then(setProductionProducts)
       .finally(() => setProdLoading(false));
   }, []);
 
@@ -160,10 +160,10 @@ export default function WorkCategoriesPage() {
       .then((r) => r.json())
       .then((rows) =>
         setUnitDefects(
-          rows.map((r: WorkDefect & { workProductId: string; workProductName: string | null }) => ({
+          rows.map((r: ProductionDefect & { productionProductId: string; workProductName: string | null }) => ({
             id: r.id,
             name: r.name,
-            workProductId: r.workProductId,
+            productionProductId: r.productionProductId,
             workProductName: r.workProductName,
             createdAt: r.createdAt,
           }))
@@ -236,7 +236,7 @@ export default function WorkCategoriesPage() {
     setProdModal({ open: true, editing: null });
   }
 
-  function openProdEdit(prod: WorkProduct) {
+  function openProdEdit(prod: ProductionProduct) {
     setProdForm({ name: prod.name, categoryId: prod.categoryId });
     setProdError(null);
     setProdModal({ open: true, editing: prod });
@@ -261,8 +261,8 @@ export default function WorkCategoriesPage() {
     if (res.ok) {
       const saved = await res.json();
       const catName = categories.find((c) => c.id === saved.categoryId)?.name ?? "";
-      const enriched: WorkProduct = { ...saved, categoryName: catName };
-      setWorkProducts((prev) =>
+      const enriched: ProductionProduct = { ...saved, categoryName: catName };
+      setProductionProducts((prev) =>
         isEdit ? prev.map((p) => (p.id === enriched.id ? enriched : p)) : [...prev, enriched]
       );
       setProdModal({ open: false, editing: null });
@@ -277,7 +277,7 @@ export default function WorkCategoriesPage() {
     if (!confirm("Delete this product? This may affect existing data.")) return;
     const res = await fetch(`/api/admin/work-products/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
-      setWorkProducts((prev) => prev.filter((p) => p.id !== id));
+      setProductionProducts((prev) => prev.filter((p) => p.id !== id));
     }
   }
 
@@ -286,13 +286,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openCompCreate() {
-    setCompForm({ name: "", workProductId: workProducts[0]?.id ?? "" });
+    setCompForm({ name: "", productionProductId: productionProducts[0]?.id ?? "" });
     setCompError(null);
     setCompModal({ open: true, editing: null });
   }
 
-  function openCompEdit(comp: WorkComponent) {
-    setCompForm({ name: comp.name, workProductId: comp.workProductId });
+  function openCompEdit(comp: ProductionComponent) {
+    setCompForm({ name: comp.name, productionProductId: comp.productionProductId });
     setCompError(null);
     setCompModal({ open: true, editing: comp });
   }
@@ -315,8 +315,8 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const productName = workProducts.find((p) => p.id === saved.workProductId)?.name ?? "";
-      const enriched: WorkComponent = { ...saved, workProductName: productName };
+      const productName = productionProducts.find((p) => p.id === saved.productionProductId)?.name ?? "";
+      const enriched: ProductionComponent = { ...saved, workProductName: productName };
       setComponents((prev) =>
         isEdit ? prev.map((c) => (c.id === enriched.id ? enriched : c)) : [...prev, enriched]
       );
@@ -341,13 +341,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openDefCreate() {
-    setDefForm({ name: "", workComponentId: components[0]?.id ?? "" });
+    setDefForm({ name: "", productionComponentId: components[0]?.id ?? "" });
     setDefError(null);
     setDefModal({ open: true, editing: null });
   }
 
-  function openDefEdit(def: WorkDefect) {
-    setDefForm({ name: def.name, workComponentId: def.workComponentId ?? "" });
+  function openDefEdit(def: ProductionDefect) {
+    setDefForm({ name: def.name, productionComponentId: def.productionComponentId ?? "" });
     setDefError(null);
     setDefModal({ open: true, editing: def });
   }
@@ -370,9 +370,9 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const compName = components.find((c) => c.id === saved.workComponentId)?.name ?? null;
-      const productName = components.find((c) => c.id === saved.workComponentId)?.workProductName ?? null;
-      const enriched: WorkDefect = { ...saved, componentName: compName, workProductName: productName };
+      const compName = components.find((c) => c.id === saved.productionComponentId)?.name ?? null;
+      const productName = components.find((c) => c.id === saved.productionComponentId)?.workProductName ?? null;
+      const enriched: ProductionDefect = { ...saved, componentName: compName, workProductName: productName };
       setDefects((prev) =>
         isEdit ? prev.map((d) => (d.id === enriched.id ? enriched : d)) : [...prev, enriched]
       );
@@ -397,13 +397,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openUnitDefCreate() {
-    setUnitDefForm({ name: "", workProductId: workProducts[0]?.id ?? "" });
+    setUnitDefForm({ name: "", productionProductId: productionProducts[0]?.id ?? "" });
     setUnitDefError(null);
     setUnitDefModal({ open: true, editing: null });
   }
 
   function openUnitDefEdit(def: UnitDefect) {
-    setUnitDefForm({ name: def.name, workProductId: def.workProductId });
+    setUnitDefForm({ name: def.name, productionProductId: def.productionProductId });
     setUnitDefError(null);
     setUnitDefModal({ open: true, editing: def });
   }
@@ -419,8 +419,8 @@ export default function WorkCategoriesPage() {
       : "/api/admin/work-defects";
 
     const payload = isEdit
-      ? { name: unitDefForm.name, workProductId: unitDefForm.workProductId }
-      : { name: unitDefForm.name, workProductId: unitDefForm.workProductId, type: "unit" };
+      ? { name: unitDefForm.name, productionProductId: unitDefForm.productionProductId }
+      : { name: unitDefForm.name, productionProductId: unitDefForm.productionProductId, type: "unit" };
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
@@ -430,11 +430,11 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const productName = workProducts.find((p) => p.id === saved.workProductId)?.name ?? null;
+      const productName = productionProducts.find((p) => p.id === saved.productionProductId)?.name ?? null;
       const enriched: UnitDefect = {
         id: saved.id,
         name: saved.name,
-        workProductId: saved.workProductId,
+        productionProductId: saved.productionProductId,
         workProductName: productName,
         createdAt: saved.createdAt,
       };
@@ -536,7 +536,7 @@ export default function WorkCategoriesPage() {
       {activeTab === "products" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{workProducts.length} products</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{productionProducts.length} products</span>
             <button onClick={openProdCreate} className="btn-primary flex items-center gap-2" disabled={categories.length === 0}>
               <Plus className="w-4 h-4" />
               Product
@@ -544,7 +544,7 @@ export default function WorkCategoriesPage() {
           </div>
           {prodLoading ? (
             <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
-          ) : workProducts.length === 0 ? (
+          ) : productionProducts.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">No products yet.</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
@@ -557,7 +557,7 @@ export default function WorkCategoriesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {workProducts.map((prod) => (
+                  {productionProducts.map((prod) => (
                     <tr key={prod.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{prod.name}</td>
                       <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{prod.categoryName}</td>
@@ -585,7 +585,7 @@ export default function WorkCategoriesPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">{components.length} components</span>
-            <button onClick={openCompCreate} className="btn-primary flex items-center gap-2" disabled={workProducts.length === 0}>
+            <button onClick={openCompCreate} className="btn-primary flex items-center gap-2" disabled={productionProducts.length === 0}>
               <Plus className="w-4 h-4" />
               Component
             </button>
@@ -685,7 +685,7 @@ export default function WorkCategoriesPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} product defects</span>
-            <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={workProducts.length === 0}>
+            <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={productionProducts.length === 0}>
               <Plus className="w-4 h-4" />
               Product Defect
             </button>
@@ -823,11 +823,11 @@ export default function WorkCategoriesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
               <select
                 className="input w-full"
-                value={compForm.workProductId}
-                onChange={(e) => setCompForm((f) => ({ ...f, workProductId: e.target.value }))}
+                value={compForm.productionProductId}
+                onChange={(e) => setCompForm((f) => ({ ...f, productionProductId: e.target.value }))}
                 required
               >
-                {workProducts.map((prod) => (
+                {productionProducts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
               </select>
@@ -866,8 +866,8 @@ export default function WorkCategoriesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Component</label>
               <select
                 className="input w-full"
-                value={defForm.workComponentId}
-                onChange={(e) => setDefForm((f) => ({ ...f, workComponentId: e.target.value }))}
+                value={defForm.productionComponentId}
+                onChange={(e) => setDefForm((f) => ({ ...f, productionComponentId: e.target.value }))}
                 required
               >
                 <option value="">— Select Component —</option>
@@ -912,12 +912,12 @@ export default function WorkCategoriesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
               <select
                 className="input w-full"
-                value={unitDefForm.workProductId}
-                onChange={(e) => setUnitDefForm((f) => ({ ...f, workProductId: e.target.value }))}
+                value={unitDefForm.productionProductId}
+                onChange={(e) => setUnitDefForm((f) => ({ ...f, productionProductId: e.target.value }))}
                 required
               >
                 <option value="">— Select Product —</option>
-                {workProducts.map((prod) => (
+                {productionProducts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
               </select>

@@ -6,8 +6,8 @@ import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 
 type WorkerProduction = {
   id: string;
-  workProductId: string;
-  workStationId: string | null;
+  productionProductId: string;
+  productionStationId: string | null;
   units: number | null;
   shift: number | null;
   notes: string | null;
@@ -18,23 +18,23 @@ type WorkerProduction = {
   userEmail: string;
 };
 
-type WorkProduct = { id: string; name: string; categoryId: string };
+type ProductionProduct = { id: string; name: string; categoryId: string };
 type Category = { id: string; name: string };
-type WorkStation = { id: string; name: string; workProductId: string };
-type WorkComponent = { id: string; name: string; workProductId: string };
-type WorkDefect = { id: string; name: string; type: "unit" | "component"; workProductId: string; workComponentId: string | null };
-type ExistingDefect = { workDefectId: string; units: number };
+type ProductionStation = { id: string; name: string; productionProductId: string };
+type ProductionComponent = { id: string; name: string; productionProductId: string };
+type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionProductId: string; productionComponentId: string | null };
+type ExistingDefect = { productionDefectId: string; units: number };
 
 export default function AdminWorkerProductionEditPage() {
   const { id } = useParams<{ id: string }>();
 
   const [production, setProduction] = useState<WorkerProduction | null>(null);
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
-  const [workProducts, setWorkProducts] = useState<WorkProduct[]>([]);
+  const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [stations, setStations] = useState<WorkStation[]>([]);
-  const [components, setComponents] = useState<WorkComponent[]>([]);
-  const [workDefects, setWorkDefects] = useState<WorkDefect[]>([]);
+  const [stations, setStations] = useState<ProductionStation[]>([]);
+  const [components, setComponents] = useState<ProductionComponent[]>([]);
+  const [productionDefects, setProductionDefects] = useState<ProductionDefect[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -53,7 +53,7 @@ export default function AdminWorkerProductionEditPage() {
   }, [id]);
 
   useEffect(() => {
-    fetch("/api/work-products").then((r) => r.json()).then(setWorkProducts);
+    fetch("/api/work-products").then((r) => r.json()).then(setProductionProducts);
   }, []);
 
   useEffect(() => {
@@ -69,14 +69,14 @@ export default function AdminWorkerProductionEditPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-defects").then((r) => r.json()).then(setWorkDefects);
+    fetch("/api/work-defects").then((r) => r.json()).then(setProductionDefects);
   }, []);
 
   useEffect(() => {
-    if (production && workProducts.length && categories.length && stations.length && components.length && workDefects.length) {
+    if (production && productionProducts.length && categories.length && stations.length && components.length && productionDefects.length) {
       setLoading(false);
     }
-  }, [production, workProducts, stations, components, workDefects]);
+  }, [production, productionProducts, stations, components, productionDefects]);
 
   if (notFound) {
     return (
@@ -101,10 +101,10 @@ export default function AdminWorkerProductionEditPage() {
         <WorkerProductionForm
           production={{ ...production!, createdAt: new Date(production!.createdAt), updatedAt: new Date(production!.updatedAt) }}
           categories={categories}
-          workProducts={workProducts}
-          workStations={stations}
-          workComponents={components}
-          workDefects={workDefects}
+          productionProducts={productionProducts}
+          productionStations={stations}
+          productionComponents={components}
+          productionDefects={productionDefects}
           existingDefects={existingDefects}
           backUrl="/admin/worker-productions"
           allowStatusChange

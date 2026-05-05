@@ -1,7 +1,7 @@
 import { pgTable, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { categories } from "./categories";
 
-export const workProducts = pgTable("work_products", {
+export const productionProducts = pgTable("production_products", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   categoryId: text("category_id")
@@ -11,5 +11,5 @@ export const workProducts = pgTable("work_products", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export type WorkProduct = typeof workProducts.$inferSelect;
-export type NewWorkProduct = typeof workProducts.$inferInsert;
+export type ProductionProduct = typeof productionProducts.$inferSelect;
+export type NewProductionProduct = typeof productionProducts.$inferInsert;

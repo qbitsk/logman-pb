@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workProducts, categories } from "@/lib/db/schema";
+import { productionProducts, categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -24,16 +24,16 @@ export async function GET() {
 
   const rows = await db
     .select({
-      id: workProducts.id,
-      name: workProducts.name,
-      categoryId: workProducts.categoryId,
+      id: productionProducts.id,
+      name: productionProducts.name,
+      categoryId: productionProducts.categoryId,
       categoryName: categories.name,
-      createdAt: workProducts.createdAt,
-      updatedAt: workProducts.updatedAt,
+      createdAt: productionProducts.createdAt,
+      updatedAt: productionProducts.updatedAt,
     })
-    .from(workProducts)
-    .innerJoin(categories, eq(workProducts.categoryId, categories.id))
-    .orderBy(categories.name, workProducts.name);
+    .from(productionProducts)
+    .innerJoin(categories, eq(productionProducts.categoryId, categories.id))
+    .orderBy(categories.name, productionProducts.name);
 
   return NextResponse.json(rows);
 }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   }
 
   const [created] = await db
-    .insert(workProducts)
+    .insert(productionProducts)
     .values({ name: result.data.name, categoryId: result.data.categoryId })
     .returning();
 

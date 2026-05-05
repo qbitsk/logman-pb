@@ -1,7 +1,7 @@
 import { pgTable, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { workStations } from "./work-stations";
-import { workProducts } from "./work-products";
+import { productionStations } from "./production-stations";
+import { productionProducts } from "./production-products";
 
 export const statusEnum = pgEnum("worker_production_status", [
   "new",
@@ -15,11 +15,11 @@ export const workerProductions = pgTable("worker_productions", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
 
-  workProductId: text("work_product_id")
+  productionProductId: text("production_product_id")
     .notNull()
-    .references(() => workProducts.id),
-  workStationId: text("work_station_id")
-    .references(() => workStations.id),
+    .references(() => productionProducts.id),
+  productionStationId: text("production_station_id")
+    .references(() => productionStations.id),
   units: integer("units"),
   shift: integer("shift"),
   notes: text("notes"),
