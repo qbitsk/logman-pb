@@ -21,7 +21,7 @@ const userNavItems = [
 
 const adminNavItems = [
   { href: "/admin/worker-productions", label: "Productions", icon: FileText },
-  { href: "/admin/work-categories", label: "Definitions", icon: Layers },
+  { href: "/admin/definitions", label: "Definitions", icon: Layers },
   { href: "/admin/exports", label: "Exports", icon: Download },
   { href: "/admin/users", label: "Users", icon: Users },
 ];
