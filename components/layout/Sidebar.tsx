@@ -79,9 +79,7 @@ function NavContent({
       {/* Logo */}
       <div className="px-6 py-5 border-b border-brand-100 dark:border-gray-800">
         <div className="flex items-center gap-2 pl-10 md:pl-0">
-          <div className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-brand-600">
-              <Triangle className="w-4 h-4 text-white" />
-            </div>
+          <Image src="/images/logo.png" alt="Logman Triangle" width={100} height={100} style={{ width: "auto", height: "30px" }} loading="eager" />
           <Image src="/images/logo-brand.webp" alt="Logman PB" width={100} height={24} style={{ width: "auto", height: "32px" }} className="dark:hidden" />
           <Image src="/images/logo-white.webp" alt="Logman PB" width={100} height={24} style={{ width: "auto", height: "32px" }} className="hidden dark:block" />
         </div>

@@ -32,10 +32,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-2">
-          <div className="flex items-center justify-center gap-3 mb-5">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600">
-              <Triangle className="w-6 h-6 text-white" />
-            </div>
+          <div className="flex items-center justify-center gap-2 mb-5">
+            <Image src="/images/logo.png" alt="Logman Triangle" width={100} height={100} style={{ width: "auto", height: "42px" }} loading="eager" />
             <Image src="/images/logo-brand.webp" alt="Logman PB" width={130} height={50} style={{ width: "auto", height: "50px" }} loading="eager" className="dark:hidden" />
             <Image src="/images/logo-white.webp" alt="Logman PB" width={130} height={50} style={{ width: "auto", height: "50px" }} loading="eager" className="hidden dark:block" />
           </div>
