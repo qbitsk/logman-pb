@@ -59,10 +59,10 @@ type Tab = "categories" | "products" | "components" | "defects" | "unitdefects" 
 const TABS: { id: Tab; label: string }[] = [
   { id: "categories", label: "Categories" },
   { id: "products", label: "Products" },
+  { id: "stations", label: "Stations" },
   { id: "components", label: "Components" },
   { id: "unitdefects", label: "Product Defects" },
   { id: "defects", label: "Component Defects" },
-  { id: "stations", label: "Stations" },
 ];
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
