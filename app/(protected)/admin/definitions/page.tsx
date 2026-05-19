@@ -54,14 +54,14 @@ type ProductionStation = {
   createdAt: string;
 };
 
-type Tab = "processes" | "products" | "components" | "defects" | "unitdefects" | "stations";
+type Tab = "processes" | "parts" | "components" | "defects" | "unitdefects" | "stations";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "processes", label: "Processes" },
-  { id: "products", label: "Products" },
+  { id: "parts", label: "Parts" },
   { id: "components", label: "Components" },
   { id: "stations", label: "Stations" },
-  { id: "unitdefects", label: "Product Defects" },
+  { id: "unitdefects", label: "Part Defects" },
   { id: "defects", label: "Component Defects" },
   
 ];
@@ -106,7 +106,7 @@ export default function WorkCategoriesPage() {
   const [processError, setProcessError] = useState<string | null>(null);
   const [processSaving, setProcessSaving] = useState(false);
 
-  // ── Work Products state ──
+  // ── Production Parts state ──
   const [productionParts, setProductionParts] = useState<ProductionPart[]>([]);
   const [prodLoading, setProdLoading] = useState(true);
   const [prodModal, setProdModal] = useState<{ open: boolean; editing: ProductionPart | null }>({ open: false, editing: null });
@@ -114,7 +114,7 @@ export default function WorkCategoriesPage() {
   const [prodError, setProdError] = useState<string | null>(null);
   const [prodSaving, setProdSaving] = useState(false);
 
-  // ── Components state ──
+  // ── Production Components state ──
   const [components, setComponents] = useState<ProductionComponent[]>([]);
   const [compLoading, setCompLoading] = useState(true);
   const [compModal, setCompModal] = useState<{ open: boolean; editing: ProductionComponent | null }>({ open: false, editing: null });
@@ -122,7 +122,7 @@ export default function WorkCategoriesPage() {
   const [compError, setCompError] = useState<string | null>(null);
   const [compSaving, setCompSaving] = useState(false);
 
-  // ── Defects state ──
+  // ── Production Defects state ──
   const [defects, setDefects] = useState<ProductionDefect[]>([]);
   const [defLoading, setDefLoading] = useState(true);
   const [defModal, setDefModal] = useState<{ open: boolean; editing: ProductionDefect | null }>({ open: false, editing: null });
@@ -303,7 +303,7 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteProd(id: string) {
-    if (!confirm("Delete this product? This may affect existing data.")) return;
+    if (!confirm("Delete this part? This may affect existing data.")) return;
     const res = await fetch(`/api/admin/work-products/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setProductionParts((prev) => prev.filter((p) => p.id !== id));
@@ -488,7 +488,7 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteUnitDef(id: string) {
-    if (!confirm("Delete this product defect?")) return;
+    if (!confirm("Delete this part defect?")) return;
     const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setUnitDefects((prev) => prev.filter((d) => d.id !== id));
@@ -631,20 +631,20 @@ export default function WorkCategoriesPage() {
         </div>
       )}
 
-      {/* ── Work Products tab ── */}
-      {activeTab === "products" && (
+      {/* ── Work Parts tab ── */}
+      {activeTab === "parts" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{productionParts.length} products</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{productionParts.length} parts</span>
             <button onClick={openProdCreate} className="btn-primary flex items-center gap-2" disabled={productionProcesses.length === 0}>
               <Plus className="w-4 h-4" />
-              Product
+              Part
             </button>
           </div>
           {prodLoading ? (
             <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
           ) : productionParts.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No products yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">No parts yet.</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
@@ -699,7 +699,7 @@ export default function WorkCategoriesPage() {
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Part</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -799,7 +799,7 @@ export default function WorkCategoriesPage() {
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Part</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -831,7 +831,7 @@ export default function WorkCategoriesPage() {
       {activeTab === "unitdefects" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} product defects</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} part defects</span>
             <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={productionParts.length === 0}>
               <Plus className="w-4 h-4" />
               Product Defect
@@ -840,14 +840,14 @@ export default function WorkCategoriesPage() {
           {unitDefLoading ? (
             <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
           ) : unitDefects.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No product defects yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">No part defects yet.</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Part</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -908,7 +908,7 @@ export default function WorkCategoriesPage() {
       {/* ── Work Product Modal ── */}
       {prodModal.open && (
         <Modal
-          title={prodModal.editing ? "Edit Product" : "New Product"}
+          title={prodModal.editing ? "Edit Part" : "New Part"}
           onClose={() => setProdModal({ open: false, editing: null })}
         >
           <form onSubmit={submitProd} className="space-y-4">
@@ -967,7 +967,7 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Part</label>
               <select
                 className="input w-full"
                 value={compForm.productionPartId}
@@ -1056,14 +1056,14 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Part</label>
               <select
                 className="input w-full"
                 value={stationForm.productionPartId}
                 onChange={(e) => setStationForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
-                <option value="">— Select Product —</option>
+                <option value="">— Select Part —</option>
                 {productionParts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
@@ -1085,7 +1085,7 @@ export default function WorkCategoriesPage() {
       {/* ── Unit Defect Modal ── */}
       {unitDefModal.open && (
         <Modal
-          title={unitDefModal.editing ? "Edit Product Defect" : "New Product Defect"}
+          title={unitDefModal.editing ? "Edit Part Defect" : "New Part Defect"}
           onClose={() => setUnitDefModal({ open: false, editing: null })}
         >
           <form onSubmit={submitUnitDef} className="space-y-4">
@@ -1100,14 +1100,14 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Part</label>
               <select
                 className="input w-full"
                 value={unitDefForm.productionPartId}
                 onChange={(e) => setUnitDefForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
-                <option value="">— Select Product —</option>
+                <option value="">— Select Part —</option>
                 {productionParts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
