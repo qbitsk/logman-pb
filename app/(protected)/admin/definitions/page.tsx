@@ -707,7 +707,9 @@ export default function WorkCategoriesPage() {
                   {components.map((comp) => (
                     <tr key={comp.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{comp.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{comp.productionPartName}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">
+                        {(() => { const processName = productionParts.find((p) => p.id === comp.productionPartId)?.productionProcessName; return processName ? `${processName} → ${comp.productionPartName}` : comp.productionPartName; })()}
+                      </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -756,9 +758,16 @@ export default function WorkCategoriesPage() {
                     <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
                       <td className="px-5 py-3 text-gray-500 dark:text-gray-400">
-                        {def.productionPartName && def.componentName
-                          ? `${def.productionPartName} → ${def.componentName}`
-                          : def.componentName ?? "—"}
+                        {(() => {
+                          const comp = components.find((c) => c.id === def.productionComponentId);
+                          const part = comp ? productionParts.find((p) => p.id === comp.productionPartId) : null;
+                          const processName = part?.productionProcessName;
+                          if (processName && def.productionPartName && def.componentName)
+                            return `${processName} → ${def.productionPartName} → ${def.componentName}`;
+                          if (def.productionPartName && def.componentName)
+                            return `${def.productionPartName} → ${def.componentName}`;
+                          return def.componentName ?? "—";
+                        })()}
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
@@ -807,7 +816,9 @@ export default function WorkCategoriesPage() {
                   {stations.map((station) => (
                     <tr key={station.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{station.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{station.productionPartName}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">
+                        {(() => { const processName = productionParts.find((p) => p.id === station.productionPartId)?.productionProcessName; return processName ? `${processName} → ${station.productionPartName}` : station.productionPartName; })()}
+                      </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openStationEdit(station)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -855,7 +866,9 @@ export default function WorkCategoriesPage() {
                   {unitDefects.map((def) => (
                     <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.productionPartName ?? "—"}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">
+                        {(() => { const part = productionParts.find((p) => p.id === def.productionPartId); return part ? `${part.productionProcessName} → ${part.name}` : (def.productionPartName ?? "—"); })()}
+                      </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openUnitDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -974,8 +987,9 @@ export default function WorkCategoriesPage() {
                 onChange={(e) => setCompForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
+                <option value="">— Select Part —</option>
                 {productionParts.map((prod) => (
-                  <option key={prod.id} value={prod.id}>{prod.name}</option>
+                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
                 ))}
               </select>
             </div>
@@ -1018,11 +1032,13 @@ export default function WorkCategoriesPage() {
                 required
               >
                 <option value="">— Select Component —</option>
-                {components.map((comp) => (
-                  <option key={comp.id} value={comp.id}>
-                    {comp.productionPartName ? `${comp.productionPartName} → ${comp.name}` : comp.name}
-                  </option>
-                ))}
+                {components.map((comp) => {
+                  const part = productionParts.find((p) => p.id === comp.productionPartId);
+                  const label = part
+                    ? `${part.productionProcessName} → ${comp.productionPartName} → ${comp.name}`
+                    : comp.productionPartName ? `${comp.productionPartName} → ${comp.name}` : comp.name;
+                  return <option key={comp.id} value={comp.id}>{label}</option>;
+                })}
               </select>
             </div>
             {defError && <p className="text-sm text-red-600">{defError}</p>}
@@ -1065,7 +1081,7 @@ export default function WorkCategoriesPage() {
               >
                 <option value="">— Select Part —</option>
                 {productionParts.map((prod) => (
-                  <option key={prod.id} value={prod.id}>{prod.name}</option>
+                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
                 ))}
               </select>
             </div>
@@ -1109,7 +1125,7 @@ export default function WorkCategoriesPage() {
               >
                 <option value="">— Select Part —</option>
                 {productionParts.map((prod) => (
-                  <option key={prod.id} value={prod.id}>{prod.name}</option>
+                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
                 ))}
               </select>
             </div>
