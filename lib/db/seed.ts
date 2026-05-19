@@ -2,8 +2,10 @@ import { db } from "./index";
 import { users, accounts, productionStations, productionComponents, productionDefects } from "./schema";
 import { productionProcesses } from "./schema/production-processes";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { productionParts } from "./schema/production-parts";
+import fs from "fs";
+import path from "path";
 
 const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? "admin@example.com";
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "Admin1234!";
@@ -67,6 +69,16 @@ async function seed() {
     });
 
     console.log("Admin user created successfully.");
+  }
+
+  const sqlFilePath = path.resolve(process.cwd(), "lib/db/seed.sql");
+  if (fs.existsSync(sqlFilePath)) {
+    console.log("Running seed.sql...");
+    const rawSql = fs.readFileSync(sqlFilePath, "utf-8");
+    await db.execute(sql.raw(rawSql));
+    console.log("seed.sql executed successfully.");
+  } else {
+    console.log("No seed.sql found, skipping.");
   }
 
   process.exit(0);
