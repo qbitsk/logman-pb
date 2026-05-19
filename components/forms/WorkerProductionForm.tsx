@@ -307,7 +307,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
         </div>
 
         <div>
-          <label className="label" htmlFor="productionPartId">Product{!isEdit && " *"}</label>
+          <label className="label" htmlFor="productionPartId">Part{!isEdit && " *"}</label>
           <select
             id="productionPartId"
             name="productionPartId"
@@ -406,7 +406,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             <label className="label">Defects</label>
             <div className="flex gap-2">
               <button type="button" onClick={() => addDefect("unit")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
-                <Plus className="w-3 h-3" /> Product <span className="hidden sm:block">Defect</span>
+                <Plus className="w-3 h-3" /> Part <span className="hidden sm:block">Defect</span>
               </button>
               <button type="button" onClick={() => addDefect("component")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
                 <Plus className="w-3 h-3" /> Component <span className="hidden sm:block">Defect</span>

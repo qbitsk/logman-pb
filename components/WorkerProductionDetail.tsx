@@ -79,7 +79,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
         )}
 
         <div>
-          <p className="label">Product</p>
+          <p className="label">Part</p>
           <p className="text-sm text-gray-800 dark:text-gray-200">{production.productionPartName}</p>
         </div>
 
@@ -99,7 +99,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
             {production.defects.length > 0 && (
               <>
                 <div>
-                  <p className="label">Defected Products</p>
+                  <p className="label">Defected Parts</p>
                   <p className="text-sm text-red-600 font-medium">{defectedProducts}</p>
                 </div>
                 <div>

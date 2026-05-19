@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, users, productionParts, productionStations, workerProductionDefects, productionComponents, productionDefects } from "@/lib/db/schema";
+import { workerProductions, users, productionParts, productionProcesses, productionStations, workerProductionDefects, productionComponents, productionDefects } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
   const rows = await db
     .select({
       id: workerProductions.id,
+      processName: productionProcesses.name,
       productionPartName: productionParts.name,
       workStationName: productionStations.name,
       units: workerProductions.units,
@@ -31,11 +32,13 @@ export async function GET(request: NextRequest) {
     .from(workerProductions)
     .leftJoin(users, eq(workerProductions.userId, users.id))
     .leftJoin(productionParts, eq(workerProductions.productionPartId, productionParts.id))
+    .leftJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id))
     .leftJoin(productionStations, eq(workerProductions.productionStationId, productionStations.id))
     .orderBy(workerProductions.createdAt);
 
   const typedRows = rows.map((r) => ({
     ...r,
+    processName: r.processName ?? "",
     productionPartName: r.productionPartName ?? "Unknown",
     workStationName: r.workStationName ?? "",
     userName: r.userName ?? "Unknown",

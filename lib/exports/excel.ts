@@ -73,6 +73,7 @@ type DefectRow = {
 
 type SubmissionCSVRow = {
   id: string;
+  processName: string;
   productionPartName: string;
   workStationName: string;
   units: number | null;
@@ -115,8 +116,9 @@ export async function generateSubmissionsCSV(
 
   const baseHeaders = [
     "ID",
-    "Work Product",
-    "Work Station",
+    "Process",
+    "Part",
+    "Station",
     "Units",
     "Shift",
     "Status",
@@ -132,6 +134,7 @@ export async function generateSubmissionsCSV(
     const defectValues = sortedDefectCols.map((col) => submissionDefects.get(col) ?? "");
     return [
       s.id,
+      s.processName,
       s.productionPartName,
       s.workStationName,
       s.units ?? "",
