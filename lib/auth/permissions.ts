@@ -1,12 +1,12 @@
 // Maps route path prefixes to the minimum required role.
 // Middleware reads this to make access control decisions.
 
-export type Role = "user" | "editor" | "admin";
+export type Role = "user" | "operator" | "admin";
 
-// Role hierarchy: admin > editor > user
+// Role hierarchy: admin > operator > user
 const roleRank: Record<Role, number> = {
   user: 1,
-  editor: 2,
+  operator: 2,
   admin: 3,
 };
 
@@ -18,7 +18,7 @@ export function hasRequiredRole(userRole: Role, requiredRole: Role): boolean {
 export const routePermissions: Array<{ prefix: string; role: Role }> = [
   { prefix: "/admin", role: "admin" },
   { prefix: "/api/admin", role: "admin" },
-  { prefix: "/api/exports", role: "editor" },
+  { prefix: "/api/exports", role: "operator" },
   { prefix: "/dashboard", role: "user" },
   { prefix: "/worker-productions", role: "user" },
   { prefix: "/profile", role: "user" },

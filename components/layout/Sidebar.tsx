@@ -26,7 +26,7 @@ const adminNavItems = [
   { href: "/admin/users", label: "Users", icon: Users },
 ];
 
-const roleRank: Record<string, number> = { user: 1, editor: 2, admin: 3 };
+const roleRank: Record<string, number> = { user: 1, operator: 2, admin: 3 };
 
 function NavLink({
   href,

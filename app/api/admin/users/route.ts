@@ -11,7 +11,7 @@ const createUserSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(["user", "editor", "admin"]).default("user"),
+  role: z.enum(["user", "operator", "admin"]).default("user"),
 });
 
 export async function POST(request: NextRequest) {
@@ -79,7 +79,7 @@ export async function GET() {
 // PATCH /api/admin/users — update a user's role
 const updateRoleSchema = z.object({
   userId: z.string(),
-  role: z.enum(["user", "editor", "admin"]),
+  role: z.enum(["user", "operator", "admin"]),
 });
 
 export async function PATCH(request: NextRequest) {

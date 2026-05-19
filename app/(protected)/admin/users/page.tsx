@@ -8,13 +8,13 @@ type User = {
   id: string;
   name: string;
   email: string;
-  role: "user" | "editor" | "admin";
+  role: "user" | "operator" | "admin";
   createdAt: string;
 };
 
 const roleStyles: Record<string, string> = {
   user:   "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-  editor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  operator: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   admin:  "bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400",
 };
 
@@ -116,7 +116,7 @@ export default function AdminUsersPage() {
                       className="input py-1 w-28"
                     >
                       <option value="user">user</option>
-                      <option value="editor">editor</option>
+                      <option value="operator">operator</option>
                       <option value="admin">admin</option>
                     </select>
                   </td>
@@ -170,7 +170,7 @@ export default function AdminUsersPage() {
                   onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as User["role"] }))}
                 >
                   <option value="user">user</option>
-                  <option value="editor">editor</option>
+                  <option value="operator">operator</option>
                   <option value="admin">admin</option>
                 </select>
               </div>
