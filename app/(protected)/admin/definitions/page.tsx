@@ -25,7 +25,7 @@ type ProductionComponent = {
   id: string;
   name: string;
   productionPartId: string;
-  workProductName: string;
+  productionPartName: string;
   createdAt: string;
 };
 
@@ -34,7 +34,7 @@ type ProductionDefect = {
   name: string;
   productionComponentId: string | null;
   componentName: string | null;
-  workProductName: string | null;
+  productionPartName: string | null;
   createdAt: string;
 };
 
@@ -42,7 +42,7 @@ type UnitDefect = {
   id: string;
   name: string;
   productionPartId: string;
-  workProductName: string | null;
+  productionPartName: string | null;
   createdAt: string;
 };
 
@@ -50,7 +50,7 @@ type ProductionStation = {
   id: string;
   name: string;
   productionPartId: string;
-  workProductName: string;
+  productionPartName: string;
   createdAt: string;
 };
 
@@ -180,11 +180,11 @@ export default function WorkCategoriesPage() {
       .then((r) => r.json())
       .then((rows) =>
         setUnitDefects(
-          rows.map((r: ProductionDefect & { productionPartId: string; workProductName: string | null }) => ({
+          rows.map((r: ProductionDefect & { productionPartId: string; productionPartName: string | null }) => ({
             id: r.id,
             name: r.name,
             productionPartId: r.productionPartId,
-            workProductName: r.workProductName,
+            productionPartName: r.productionPartName,
             createdAt: r.createdAt,
           }))
         )
@@ -348,7 +348,7 @@ export default function WorkCategoriesPage() {
     if (res.ok) {
       const saved = await res.json();
       const productName = productionParts.find((p) => p.id === saved.productionPartId)?.name ?? "";
-      const enriched: ProductionComponent = { ...saved, workProductName: productName };
+      const enriched: ProductionComponent = { ...saved, productionPartName: productName };
       setComponents((prev) =>
         isEdit ? prev.map((c) => (c.id === enriched.id ? enriched : c)) : [...prev, enriched]
       );
@@ -406,8 +406,8 @@ export default function WorkCategoriesPage() {
     if (res.ok) {
       const saved = await res.json();
       const compName = components.find((c) => c.id === saved.productionComponentId)?.name ?? null;
-      const productName = components.find((c) => c.id === saved.productionComponentId)?.workProductName ?? null;
-      const enriched: ProductionDefect = { ...saved, componentName: compName, workProductName: productName };
+      const productName = components.find((c) => c.id === saved.productionComponentId)?.productionPartName ?? null;
+      const enriched: ProductionDefect = { ...saved, componentName: compName, productionPartName: productName };
       setDefects((prev) =>
         isEdit ? prev.map((d) => (d.id === enriched.id ? enriched : d)) : [...prev, enriched]
       );
@@ -473,7 +473,7 @@ export default function WorkCategoriesPage() {
         id: saved.id,
         name: saved.name,
         productionPartId: saved.productionPartId,
-        workProductName: productName,
+        productionPartName: productName,
         createdAt: saved.createdAt,
       };
       setUnitDefects((prev) =>
@@ -533,7 +533,7 @@ export default function WorkCategoriesPage() {
     if (res.ok) {
       const saved = await res.json();
       const productName = productionParts.find((p) => p.id === saved.productionPartId)?.name ?? "";
-      const enriched: ProductionStation = { ...saved, workProductName: productName };
+      const enriched: ProductionStation = { ...saved, productionPartName: productName };
       setStations((prev) =>
         isEdit ? prev.map((s) => (s.id === enriched.id ? enriched : s)) : [...prev, enriched]
       );
@@ -707,7 +707,7 @@ export default function WorkCategoriesPage() {
                   {components.map((comp) => (
                     <tr key={comp.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{comp.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{comp.workProductName}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{comp.productionPartName}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -756,8 +756,8 @@ export default function WorkCategoriesPage() {
                     <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
                       <td className="px-5 py-3 text-gray-500 dark:text-gray-400">
-                        {def.workProductName && def.componentName
-                          ? `${def.workProductName} → ${def.componentName}`
+                        {def.productionPartName && def.componentName
+                          ? `${def.productionPartName} → ${def.componentName}`
                           : def.componentName ?? "—"}
                       </td>
                       <td className="px-5 py-3">
@@ -807,7 +807,7 @@ export default function WorkCategoriesPage() {
                   {stations.map((station) => (
                     <tr key={station.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{station.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{station.workProductName}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{station.productionPartName}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openStationEdit(station)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -855,7 +855,7 @@ export default function WorkCategoriesPage() {
                   {unitDefects.map((def) => (
                     <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.workProductName ?? "—"}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.productionPartName ?? "—"}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openUnitDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -1020,7 +1020,7 @@ export default function WorkCategoriesPage() {
                 <option value="">— Select Component —</option>
                 {components.map((comp) => (
                   <option key={comp.id} value={comp.id}>
-                    {comp.workProductName ? `${comp.workProductName} → ${comp.name}` : comp.name}
+                    {comp.productionPartName ? `${comp.productionPartName} → ${comp.name}` : comp.name}
                   </option>
                 ))}
               </select>

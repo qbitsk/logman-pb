@@ -27,7 +27,7 @@ export async function GET() {
       id: productionComponents.id,
       name: productionComponents.name,
       productionPartId: productionComponents.productionPartId,
-      workProductName: productionParts.name,
+      productionPartName: productionParts.name,
       createdAt: productionComponents.createdAt,
       updatedAt: productionComponents.updatedAt,
     })

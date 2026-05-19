@@ -78,7 +78,7 @@ export async function GET(
 
   return NextResponse.json({
     ...row,
-    workProductName: categoryRow[0]?.name ?? null,
+    productionPartName: categoryRow[0]?.name ?? null,
     productionProcessName: categoryRow[0]?.productionProcessName ?? null,
     stationName: stationRow[0]?.name ?? null,
     existingDefects,

@@ -8,7 +8,7 @@ import { clsx } from "clsx";
 
 type WorkerProduction = {
   id: string;
-  workProductName: string;
+  productionPartName: string;
   productionProcessName: string;
   status: string;
   units: number | null;
@@ -72,7 +72,7 @@ export default function AdminWorkerProductionsPage() {
                     </Link>
                   </td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionProcessName}</td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.workProductName}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionPartName}</td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{s.units ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>

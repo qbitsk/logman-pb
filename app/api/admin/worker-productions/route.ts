@@ -18,7 +18,7 @@ export async function GET() {
       units: workerProductions.units,
       status: workerProductions.status,
       createdAt: workerProductions.createdAt,
-      workProductName: productionParts.name,
+      productionPartName: productionParts.name,
       productionProcessName: productionProcesses.name,
       userName: users.name,
       userEmail: users.email,

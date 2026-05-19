@@ -83,7 +83,7 @@ export async function GET(
 
   return NextResponse.json({
     ...row,
-    workProductName: categoryRow[0]?.name ?? null,
+    productionPartName: categoryRow[0]?.name ?? null,
     productionProcessName: categoryRow[0]?.productionProcessName ?? null,
     stationName: (stationRow as { name: string }[])[0]?.name ?? null,
     existingDefects,

@@ -20,7 +20,7 @@ export async function GET() {
       status: workerProductions.status,
       units: workerProductions.units,
       createdAt: workerProductions.createdAt,
-      workProductName: productionParts.name,
+      productionPartName: productionParts.name,
       productionProcessName: productionProcesses.name,
     })
     .from(workerProductions)

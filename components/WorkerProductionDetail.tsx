@@ -11,7 +11,7 @@ export type WorkerProductionDetailData = {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
-  workProductName: string | null;
+  productionPartName: string | null;
   categoryName: string | null;
   productionProcessName: string | null;
   stationName: string | null;
@@ -80,7 +80,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
 
         <div>
           <p className="label">Product</p>
-          <p className="text-sm text-gray-800 dark:text-gray-200">{production.workProductName}</p>
+          <p className="text-sm text-gray-800 dark:text-gray-200">{production.productionPartName}</p>
         </div>
 
         {production.stationName && (

@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       productionPartId: productionDefects.productionPartId,
       productionComponentId: productionDefects.productionComponentId,
       componentName: productionComponents.name,
-      workProductName: productionParts.name,
+      productionPartName: productionParts.name,
       createdAt: productionDefects.createdAt,
       updatedAt: productionDefects.updatedAt,
     })

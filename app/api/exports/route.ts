@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const rows = await db
     .select({
       id: workerProductions.id,
-      workProductName: productionParts.name,
+      productionPartName: productionParts.name,
       workStationName: productionStations.name,
       units: workerProductions.units,
       shift: workerProductions.shift,
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const typedRows = rows.map((r) => ({
     ...r,
-    workProductName: r.workProductName ?? "Unknown",
+    productionPartName: r.productionPartName ?? "Unknown",
     workStationName: r.workStationName ?? "",
     userName: r.userName ?? "Unknown",
   }));
