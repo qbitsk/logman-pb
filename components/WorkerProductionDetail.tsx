@@ -12,7 +12,6 @@ export type WorkerProductionDetailData = {
   createdAt: string;
   updatedAt: string;
   productionPartName: string | null;
-  categoryName: string | null;
   productionProcessName: string | null;
   stationName: string | null;
   defects: { workDefectName?: string | null; workDefectType?: string | null; workComponentName?: string | null; units: number }[];

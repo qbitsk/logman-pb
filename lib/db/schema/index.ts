@@ -1,5 +1,4 @@
 export * from "./users";
-export * from "./categories";
 export * from "./production-parts";
 export * from "./production-stations";
 export * from "./production-components";

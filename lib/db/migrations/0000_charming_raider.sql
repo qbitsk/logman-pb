@@ -1,4 +1,3 @@
-CREATE TYPE "public"."category_type" AS ENUM('product', 'defect');--> statement-breakpoint
 CREATE TYPE "public"."production_defect_type" AS ENUM('unit', 'component');--> statement-breakpoint
 CREATE TYPE "public"."worker_production_status" AS ENUM('new', 'approved', 'rejected');--> statement-breakpoint
 CREATE TABLE "accounts" (
@@ -48,14 +47,6 @@ CREATE TABLE "verifications" (
 	"expires_at" timestamp NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
-);
---> statement-breakpoint
-CREATE TABLE "categories" (
-	"id" text PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	"type" "category_type" NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "production_parts" (

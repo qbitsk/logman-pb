@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { users, accounts, categories, productionStations, productionComponents, productionDefects } from "./schema";
+import { users, accounts, productionStations, productionComponents, productionDefects } from "./schema";
 import { productionProcesses } from "./schema/production-processes";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { eq } from "drizzle-orm";
