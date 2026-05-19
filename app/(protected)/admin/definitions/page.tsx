@@ -7,12 +7,6 @@ import { useToast } from "@/components/ui/toast";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Category = {
-  id: string;
-  name: string;
-  createdAt: string;
-};
-
 type ProductionProcess = {
   id: string;
   name: string;
@@ -60,15 +54,16 @@ type ProductionStation = {
   createdAt: string;
 };
 
-type Tab = "categories" | "products" | "components" | "defects" | "unitdefects" | "stations";
+type Tab = "processes" | "products" | "components" | "defects" | "unitdefects" | "stations";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "categories", label: "Categories" },
+  { id: "processes", label: "Processes" },
   { id: "products", label: "Products" },
-  { id: "stations", label: "Stations" },
   { id: "components", label: "Components" },
+  { id: "stations", label: "Stations" },
   { id: "unitdefects", label: "Product Defects" },
   { id: "defects", label: "Component Defects" },
+  
 ];
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -100,19 +95,16 @@ function Modal({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function WorkCategoriesPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("categories");
+  const [activeTab, setActiveTab] = useState<Tab>("processes");
   const { error: toastError } = useToast();
-
-  // ── Categories state ──
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [catLoading, setCatLoading] = useState(true);
-  const [catModal, setCatModal] = useState<{ open: boolean; editing: Category | null }>({ open: false, editing: null });
-  const [catForm, setCatForm] = useState({ name: "" });
-  const [catError, setCatError] = useState<string | null>(null);
-  const [catSaving, setCatSaving] = useState(false);
 
   // ── Production Processes state ──
   const [productionProcesses, setProductionProcesses] = useState<ProductionProcess[]>([]);
+  const [processLoading, setProcessLoading] = useState(true);
+  const [processModal, setProcessModal] = useState<{ open: boolean; editing: ProductionProcess | null }>({ open: false, editing: null });
+  const [processForm, setProcessForm] = useState({ name: "" });
+  const [processError, setProcessError] = useState<string | null>(null);
+  const [processSaving, setProcessSaving] = useState(false);
 
   // ── Work Products state ──
   const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
@@ -156,16 +148,10 @@ export default function WorkCategoriesPage() {
 
   // ── Fetch ──
   useEffect(() => {
-    fetch("/api/admin/categories?type=product")
+    fetch("/api/admin/production-processes")
       .then((r) => r.json())
-      .then(setCategories)
-      .finally(() => setCatLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/production-processes")
-      .then((r) => r.json())
-      .then(setProductionProcesses);
+      .then(setProductionProcesses)
+      .finally(() => setProcessLoading(false));
   }, []);
 
   useEffect(() => {
@@ -214,56 +200,55 @@ export default function WorkCategoriesPage() {
   }, []);
 
   // ───────────────────────────────────────────────────────────────────────────
-  // Work Categories handlers
+  // Production Processes handlers
   // ───────────────────────────────────────────────────────────────────────────
 
-  function openCatCreate() {
-    setCatForm({ name: "" });
-    setCatError(null);
-    setCatModal({ open: true, editing: null });
+  function openProcessCreate() {
+    setProcessForm({ name: "" });
+    setProcessError(null);
+    setProcessModal({ open: true, editing: null });
   }
 
-  function openCatEdit(cat: Category) {
-    setCatForm({ name: cat.name });
-    setCatError(null);
-    setCatModal({ open: true, editing: cat });
+  function openProcessEdit(process: ProductionProcess) {
+    setProcessForm({ name: process.name });
+    setProcessError(null);
+    setProcessModal({ open: true, editing: process });
   }
 
-  async function submitCat(e: React.FormEvent) {
+  async function submitProcess(e: React.FormEvent) {
     e.preventDefault();
-    setCatError(null);
-    setCatSaving(true);
+    setProcessError(null);
+    setProcessSaving(true);
 
-    const payload = { name: catForm.name, type: "product" };
-    const isEdit = !!catModal.editing;
+    const isEdit = !!processModal.editing;
     const url = isEdit
-      ? `/api/admin/categories/${catModal.editing!.id}`
-      : "/api/admin/categories";
+      ? `/api/admin/production-processes/${processModal.editing!.id}`
+      : "/api/admin/production-processes";
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(processForm),
     });
 
     if (res.ok) {
-      const saved: Category = await res.json();
-      setCategories((prev) =>
-        isEdit ? prev.map((c) => (c.id === saved.id ? saved : c)) : [...prev, saved].sort((a, b) => a.name.localeCompare(b.name))
+      const saved: ProductionProcess = await res.json();
+      setProductionProcesses((prev) =>
+        isEdit ? prev.map((p) => (p.id === saved.id ? saved : p)) : [...prev, saved].sort((a, b) => a.name.localeCompare(b.name))
       );
-      setCatModal({ open: false, editing: null });
+      setProcessModal({ open: false, editing: null });
     } else {
       const err = await res.json().catch(() => ({}));
-      setCatError(err?.error ?? "Failed to save");
+      setProcessError(err?.error ?? "Failed to save");
     }
-    setCatSaving(false);
+    setProcessSaving(false);
   }
 
-  async function deleteCat(id: string) {
-    if (!confirm("Delete this category? This may affect existing data.")) return;
-    const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
+  async function deleteProcess(id: string) {
+    if (!confirm("Delete this process? This may affect existing data.")) return;
+    const res = await fetch(`/api/admin/production-processes/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
-      setCategories((prev) => prev.filter((c) => c.id !== id));
+      setProductionProcesses((prev) => prev.filter((p) => p.id !== id));
     } else {
       const err = await res.json().catch(() => ({}));
       toastError(err?.error ?? "Failed to delete.");
@@ -579,7 +564,7 @@ export default function WorkCategoriesPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-brand-950  dark:text-white">Definitions</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage categories, components and defects.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage processes, components and defects.</p>
       </div>
 
       {/* Tabs */}
@@ -600,20 +585,20 @@ export default function WorkCategoriesPage() {
         ))}
       </div>
 
-      {/* ── Work Categories tab ── */}
-      {activeTab === "categories" && (
+      {/* ── Processes tab ── */}
+      {activeTab === "processes" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{categories.length} categories</span>
-            <button onClick={openCatCreate} className="btn-primary flex items-center gap-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400">{productionProcesses.length} processes</span>
+            <button onClick={openProcessCreate} className="btn-primary flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Category
+              Process
             </button>
           </div>
-          {catLoading ? (
+          {processLoading ? (
             <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
-          ) : categories.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No categories yet.</div>
+          ) : productionProcesses.length === 0 ? (
+            <div className="card text-center py-12 text-gray-400 text-sm">No processes yet.</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
@@ -624,15 +609,15 @@ export default function WorkCategoriesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {categories.map((cat) => (
-                    <tr key={cat.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{cat.name}</td>
+                  {productionProcesses.map((process) => (
+                    <tr key={process.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{process.name}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openCatEdit(cat)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                          <button onClick={() => openProcessEdit(process)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteCat(cat.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                          <button onClick={() => deleteProcess(process.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -890,30 +875,30 @@ export default function WorkCategoriesPage() {
         </div>
       )}
 
-      {/* ── Category Modal ── */}
-      {catModal.open && (
+      {/* ── Process Modal ── */}
+      {processModal.open && (
         <Modal
-          title={catModal.editing ? "Edit Category" : "New Category"}
-          onClose={() => setCatModal({ open: false, editing: null })}
+          title={processModal.editing ? "Edit Process" : "New Process"}
+          onClose={() => setProcessModal({ open: false, editing: null })}
         >
-          <form onSubmit={submitCat} className="space-y-4">
+          <form onSubmit={submitProcess} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
               <input
                 className="input w-full"
-                value={catForm.name}
-                onChange={(e) => setCatForm((f) => ({ ...f, name: e.target.value }))}
+                value={processForm.name}
+                onChange={(e) => setProcessForm((f) => ({ ...f, name: e.target.value }))}
                 required
                 autoFocus
               />
             </div>
-            {catError && <p className="text-sm text-red-600">{catError}</p>}
+            {processError && <p className="text-sm text-red-600">{processError}</p>}
             <div className="flex justify-end gap-3 pt-1">
-              <button type="button" onClick={() => setCatModal({ open: false, editing: null })} className="btn-secondary">
+              <button type="button" onClick={() => setProcessModal({ open: false, editing: null })} className="btn-secondary">
                 Cancel
               </button>
-              <button type="submit" disabled={catSaving} className="btn-primary">
-                {catSaving ? "Saving…" : "Save"}
+              <button type="submit" disabled={processSaving} className="btn-primary">
+                {processSaving ? "Saving…" : "Save"}
               </button>
             </div>
           </form>
