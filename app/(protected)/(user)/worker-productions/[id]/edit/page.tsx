@@ -60,7 +60,7 @@ export default function EditWorkerProductionPage() {
   }, [id, router]);
 
   useEffect(() => {
-    fetch("/api/work-products").then((r) => r.json()).then(setProductionParts);
+    fetch("/api/production-parts").then((r) => r.json()).then(setProductionParts);
   }, []);
 
   useEffect(() => {
@@ -68,15 +68,15 @@ export default function EditWorkerProductionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-stations").then((r) => r.json()).then(setStations);
+    fetch("/api/production-stations").then((r) => r.json()).then(setStations);
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-components").then((r) => r.json()).then(setComponents);
+    fetch("/api/production-components").then((r) => r.json()).then(setComponents);
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-defects").then((r) => r.json()).then(setProductionDefects);
+    fetch("/api/production-defects").then((r) => r.json()).then(setProductionDefects);
   }, []);
 
   useEffect(() => {

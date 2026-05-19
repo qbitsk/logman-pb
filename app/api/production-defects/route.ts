@@ -5,7 +5,7 @@ import { productionDefects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-// GET /api/work-defects — list work defects, optionally filtered by workCategoryId
+// GET /api/production-defects — list work defects, optionally filtered by workCategoryId
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {

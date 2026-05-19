@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { productionParts } from "@/lib/db/schema";
+import { productionStations } from "@/lib/db/schema";
 import { headers } from "next/headers";
 
-// GET /api/work-products — list all work products (any authenticated user)
+// GET /api/production-stations — list all work stations (any authenticated user)
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
@@ -13,8 +13,8 @@ export async function GET() {
 
   const rows = await db
     .select()
-    .from(productionParts)
-    .orderBy(productionParts.name);
+    .from(productionStations)
+    .orderBy(productionStations.name);
 
   return NextResponse.json(rows);
 }

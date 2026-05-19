@@ -23,7 +23,7 @@ export default function NewWorkerProductionPage() {
   function done() { setLoaded((n) => n + 1); }
 
   useEffect(() => {
-    fetch("/api/work-products").then((r) => r.json()).then(setProductionParts).finally(done);
+    fetch("/api/production-parts").then((r) => r.json()).then(setProductionParts).finally(done);
   }, []);
 
   useEffect(() => {
@@ -31,15 +31,15 @@ export default function NewWorkerProductionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-stations").then((r) => r.json()).then(setStations).finally(done);
+    fetch("/api/production-stations").then((r) => r.json()).then(setStations).finally(done);
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-components").then((r) => r.json()).then(setComponents).finally(done);
+    fetch("/api/production-components").then((r) => r.json()).then(setComponents).finally(done);
   }, []);
 
   useEffect(() => {
-    fetch("/api/work-defects").then((r) => r.json()).then(setProductionDefects).finally(done);
+    fetch("/api/production-defects").then((r) => r.json()).then(setProductionDefects).finally(done);
   }, []);
 
   return (

@@ -155,28 +155,28 @@ export default function WorkCategoriesPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/work-products")
+    fetch("/api/admin/production-parts")
       .then((r) => r.json())
       .then(setProductionParts)
       .finally(() => setProdLoading(false));
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/work-components")
+    fetch("/api/admin/production-components")
       .then((r) => r.json())
       .then(setComponents)
       .finally(() => setCompLoading(false));
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/work-defects?type=component")
+    fetch("/api/admin/production-defects?type=component")
       .then((r) => r.json())
       .then(setDefects)
       .finally(() => setDefLoading(false));
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/work-defects?type=unit")
+    fetch("/api/admin/production-defects?type=unit")
       .then((r) => r.json())
       .then((rows) =>
         setUnitDefects(
@@ -193,7 +193,7 @@ export default function WorkCategoriesPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/work-stations")
+    fetch("/api/admin/production-stations")
       .then((r) => r.json())
       .then(setStations)
       .finally(() => setStationLoading(false));
@@ -278,8 +278,8 @@ export default function WorkCategoriesPage() {
 
     const isEdit = !!prodModal.editing;
     const url = isEdit
-      ? `/api/admin/work-products/${prodModal.editing!.id}`
-      : "/api/admin/work-products";
+      ? `/api/admin/production-parts/${prodModal.editing!.id}`
+      : "/api/admin/production-parts";
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
@@ -304,7 +304,7 @@ export default function WorkCategoriesPage() {
 
   async function deleteProd(id: string) {
     if (!confirm("Delete this part? This may affect existing data.")) return;
-    const res = await fetch(`/api/admin/work-products/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/production-parts/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setProductionParts((prev) => prev.filter((p) => p.id !== id));
     } else {
@@ -336,8 +336,8 @@ export default function WorkCategoriesPage() {
 
     const isEdit = !!compModal.editing;
     const url = isEdit
-      ? `/api/admin/work-components/${compModal.editing!.id}`
-      : "/api/admin/work-components";
+      ? `/api/admin/production-components/${compModal.editing!.id}`
+      : "/api/admin/production-components";
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
@@ -362,7 +362,7 @@ export default function WorkCategoriesPage() {
 
   async function deleteComp(id: string) {
     if (!confirm("Delete this work component? This may affect existing data.")) return;
-    const res = await fetch(`/api/admin/work-components/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/production-components/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setComponents((prev) => prev.filter((c) => c.id !== id));
     } else {
@@ -394,8 +394,8 @@ export default function WorkCategoriesPage() {
 
     const isEdit = !!defModal.editing;
     const url = isEdit
-      ? `/api/admin/work-defects/${defModal.editing!.id}`
-      : "/api/admin/work-defects";
+      ? `/api/admin/production-defects/${defModal.editing!.id}`
+      : "/api/admin/production-defects";
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
@@ -421,7 +421,7 @@ export default function WorkCategoriesPage() {
 
   async function deleteDef(id: string) {
     if (!confirm("Delete this component defect?")) return;
-    const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/production-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setDefects((prev) => prev.filter((d) => d.id !== id));
     } else {
@@ -453,8 +453,8 @@ export default function WorkCategoriesPage() {
 
     const isEdit = !!unitDefModal.editing;
     const url = isEdit
-      ? `/api/admin/work-defects/${unitDefModal.editing!.id}`
-      : "/api/admin/work-defects";
+      ? `/api/admin/production-defects/${unitDefModal.editing!.id}`
+      : "/api/admin/production-defects";
 
     const payload = isEdit
       ? { name: unitDefForm.name, productionPartId: unitDefForm.productionPartId }
@@ -489,7 +489,7 @@ export default function WorkCategoriesPage() {
 
   async function deleteUnitDef(id: string) {
     if (!confirm("Delete this part defect?")) return;
-    const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/production-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setUnitDefects((prev) => prev.filter((d) => d.id !== id));
     } else {
@@ -521,8 +521,8 @@ export default function WorkCategoriesPage() {
 
     const isEdit = !!stationModal.editing;
     const url = isEdit
-      ? `/api/admin/work-stations/${stationModal.editing!.id}`
-      : "/api/admin/work-stations";
+      ? `/api/admin/production-stations/${stationModal.editing!.id}`
+      : "/api/admin/production-stations";
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
@@ -547,7 +547,7 @@ export default function WorkCategoriesPage() {
 
   async function deleteStation(id: string) {
     if (!confirm("Delete this station? This may affect existing data.")) return;
-    const res = await fetch(`/api/admin/work-stations/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/production-stations/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setStations((prev) => prev.filter((s) => s.id !== id));
     } else {

@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { productionComponents } from "@/lib/db/schema";
 import { headers } from "next/headers";
 
-// GET /api/work-components — list all work components (any authenticated user)
+// GET /api/production-components — list all work components (any authenticated user)
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
