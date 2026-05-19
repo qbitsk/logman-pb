@@ -3,7 +3,7 @@ import { users, accounts, categories, productionStations, productionComponents, 
 import { productionProcesses } from "./schema/production-processes";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
 import { eq } from "drizzle-orm";
-import { productionProducts } from "./schema/production-products";
+import { productionParts } from "./schema/production-parts";
 
 const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? "admin@example.com";
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "Admin1234!";

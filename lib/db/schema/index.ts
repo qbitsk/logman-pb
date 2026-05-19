@@ -1,6 +1,6 @@
 export * from "./users";
 export * from "./categories";
-export * from "./production-products";
+export * from "./production-parts";
 export * from "./production-stations";
 export * from "./production-components";
 export * from "./production-defects";

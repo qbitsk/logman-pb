@@ -13,7 +13,7 @@ type ProductionProcess = {
   createdAt: string;
 };
 
-type ProductionProduct = {
+type ProductionPart = {
   id: string;
   name: string;
   productionProcessId: string;
@@ -24,7 +24,7 @@ type ProductionProduct = {
 type ProductionComponent = {
   id: string;
   name: string;
-  productionProductId: string;
+  productionPartId: string;
   workProductName: string;
   createdAt: string;
 };
@@ -41,7 +41,7 @@ type ProductionDefect = {
 type UnitDefect = {
   id: string;
   name: string;
-  productionProductId: string;
+  productionPartId: string;
   workProductName: string | null;
   createdAt: string;
 };
@@ -49,7 +49,7 @@ type UnitDefect = {
 type ProductionStation = {
   id: string;
   name: string;
-  productionProductId: string;
+  productionPartId: string;
   workProductName: string;
   createdAt: string;
 };
@@ -107,9 +107,9 @@ export default function WorkCategoriesPage() {
   const [processSaving, setProcessSaving] = useState(false);
 
   // ── Work Products state ──
-  const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
+  const [productionParts, setProductionParts] = useState<ProductionPart[]>([]);
   const [prodLoading, setProdLoading] = useState(true);
-  const [prodModal, setProdModal] = useState<{ open: boolean; editing: ProductionProduct | null }>({ open: false, editing: null });
+  const [prodModal, setProdModal] = useState<{ open: boolean; editing: ProductionPart | null }>({ open: false, editing: null });
   const [prodForm, setProdForm] = useState({ name: "", productionProcessId: "" });
   const [prodError, setProdError] = useState<string | null>(null);
   const [prodSaving, setProdSaving] = useState(false);
@@ -118,7 +118,7 @@ export default function WorkCategoriesPage() {
   const [components, setComponents] = useState<ProductionComponent[]>([]);
   const [compLoading, setCompLoading] = useState(true);
   const [compModal, setCompModal] = useState<{ open: boolean; editing: ProductionComponent | null }>({ open: false, editing: null });
-  const [compForm, setCompForm] = useState({ name: "", productionProductId: "" });
+  const [compForm, setCompForm] = useState({ name: "", productionPartId: "" });
   const [compError, setCompError] = useState<string | null>(null);
   const [compSaving, setCompSaving] = useState(false);
 
@@ -134,7 +134,7 @@ export default function WorkCategoriesPage() {
   const [unitDefects, setUnitDefects] = useState<UnitDefect[]>([]);
   const [unitDefLoading, setUnitDefLoading] = useState(true);
   const [unitDefModal, setUnitDefModal] = useState<{ open: boolean; editing: UnitDefect | null }>({ open: false, editing: null });
-  const [unitDefForm, setUnitDefForm] = useState({ name: "", productionProductId: "" });
+  const [unitDefForm, setUnitDefForm] = useState({ name: "", productionPartId: "" });
   const [unitDefError, setUnitDefError] = useState<string | null>(null);
   const [unitDefSaving, setUnitDefSaving] = useState(false);
 
@@ -142,7 +142,7 @@ export default function WorkCategoriesPage() {
   const [stations, setStations] = useState<ProductionStation[]>([]);
   const [stationLoading, setStationLoading] = useState(true);
   const [stationModal, setStationModal] = useState<{ open: boolean; editing: ProductionStation | null }>({ open: false, editing: null });
-  const [stationForm, setStationForm] = useState({ name: "", productionProductId: "" });
+  const [stationForm, setStationForm] = useState({ name: "", productionPartId: "" });
   const [stationError, setStationError] = useState<string | null>(null);
   const [stationSaving, setStationSaving] = useState(false);
 
@@ -157,7 +157,7 @@ export default function WorkCategoriesPage() {
   useEffect(() => {
     fetch("/api/admin/work-products")
       .then((r) => r.json())
-      .then(setProductionProducts)
+      .then(setProductionParts)
       .finally(() => setProdLoading(false));
   }, []);
 
@@ -180,10 +180,10 @@ export default function WorkCategoriesPage() {
       .then((r) => r.json())
       .then((rows) =>
         setUnitDefects(
-          rows.map((r: ProductionDefect & { productionProductId: string; workProductName: string | null }) => ({
+          rows.map((r: ProductionDefect & { productionPartId: string; workProductName: string | null }) => ({
             id: r.id,
             name: r.name,
-            productionProductId: r.productionProductId,
+            productionPartId: r.productionPartId,
             workProductName: r.workProductName,
             createdAt: r.createdAt,
           }))
@@ -265,7 +265,7 @@ export default function WorkCategoriesPage() {
     setProdModal({ open: true, editing: null });
   }
 
-  function openProdEdit(prod: ProductionProduct) {
+  function openProdEdit(prod: ProductionPart) {
     setProdForm({ name: prod.name, productionProcessId: prod.productionProcessId });
     setProdError(null);
     setProdModal({ open: true, editing: prod });
@@ -290,8 +290,8 @@ export default function WorkCategoriesPage() {
     if (res.ok) {
       const saved = await res.json();
       const processName = productionProcesses.find((p) => p.id === saved.productionProcessId)?.name ?? "";
-      const enriched: ProductionProduct = { ...saved, productionProcessName: processName };
-      setProductionProducts((prev) =>
+      const enriched: ProductionPart = { ...saved, productionProcessName: processName };
+      setProductionParts((prev) =>
         isEdit ? prev.map((p) => (p.id === enriched.id ? enriched : p)) : [...prev, enriched]
       );
       setProdModal({ open: false, editing: null });
@@ -306,7 +306,7 @@ export default function WorkCategoriesPage() {
     if (!confirm("Delete this product? This may affect existing data.")) return;
     const res = await fetch(`/api/admin/work-products/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
-      setProductionProducts((prev) => prev.filter((p) => p.id !== id));
+      setProductionParts((prev) => prev.filter((p) => p.id !== id));
     } else {
       const err = await res.json().catch(() => ({}));
       toastError(err?.error ?? "Failed to delete.");
@@ -318,13 +318,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openCompCreate() {
-    setCompForm({ name: "", productionProductId: productionProducts[0]?.id ?? "" });
+    setCompForm({ name: "", productionPartId: productionParts[0]?.id ?? "" });
     setCompError(null);
     setCompModal({ open: true, editing: null });
   }
 
   function openCompEdit(comp: ProductionComponent) {
-    setCompForm({ name: comp.name, productionProductId: comp.productionProductId });
+    setCompForm({ name: comp.name, productionPartId: comp.productionPartId });
     setCompError(null);
     setCompModal({ open: true, editing: comp });
   }
@@ -347,7 +347,7 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const productName = productionProducts.find((p) => p.id === saved.productionProductId)?.name ?? "";
+      const productName = productionParts.find((p) => p.id === saved.productionPartId)?.name ?? "";
       const enriched: ProductionComponent = { ...saved, workProductName: productName };
       setComponents((prev) =>
         isEdit ? prev.map((c) => (c.id === enriched.id ? enriched : c)) : [...prev, enriched]
@@ -435,13 +435,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openUnitDefCreate() {
-    setUnitDefForm({ name: "", productionProductId: productionProducts[0]?.id ?? "" });
+    setUnitDefForm({ name: "", productionPartId: productionParts[0]?.id ?? "" });
     setUnitDefError(null);
     setUnitDefModal({ open: true, editing: null });
   }
 
   function openUnitDefEdit(def: UnitDefect) {
-    setUnitDefForm({ name: def.name, productionProductId: def.productionProductId });
+    setUnitDefForm({ name: def.name, productionPartId: def.productionPartId });
     setUnitDefError(null);
     setUnitDefModal({ open: true, editing: def });
   }
@@ -457,8 +457,8 @@ export default function WorkCategoriesPage() {
       : "/api/admin/work-defects";
 
     const payload = isEdit
-      ? { name: unitDefForm.name, productionProductId: unitDefForm.productionProductId }
-      : { name: unitDefForm.name, productionProductId: unitDefForm.productionProductId, type: "unit" };
+      ? { name: unitDefForm.name, productionPartId: unitDefForm.productionPartId }
+      : { name: unitDefForm.name, productionPartId: unitDefForm.productionPartId, type: "unit" };
 
     const res = await fetch(url, {
       method: isEdit ? "PATCH" : "POST",
@@ -468,11 +468,11 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const productName = productionProducts.find((p) => p.id === saved.productionProductId)?.name ?? null;
+      const productName = productionParts.find((p) => p.id === saved.productionPartId)?.name ?? null;
       const enriched: UnitDefect = {
         id: saved.id,
         name: saved.name,
-        productionProductId: saved.productionProductId,
+        productionPartId: saved.productionPartId,
         workProductName: productName,
         createdAt: saved.createdAt,
       };
@@ -503,13 +503,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openStationCreate() {
-    setStationForm({ name: "", productionProductId: productionProducts[0]?.id ?? "" });
+    setStationForm({ name: "", productionPartId: productionParts[0]?.id ?? "" });
     setStationError(null);
     setStationModal({ open: true, editing: null });
   }
 
   function openStationEdit(station: ProductionStation) {
-    setStationForm({ name: station.name, productionProductId: station.productionProductId });
+    setStationForm({ name: station.name, productionPartId: station.productionPartId });
     setStationError(null);
     setStationModal({ open: true, editing: station });
   }
@@ -532,7 +532,7 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const productName = productionProducts.find((p) => p.id === saved.productionProductId)?.name ?? "";
+      const productName = productionParts.find((p) => p.id === saved.productionPartId)?.name ?? "";
       const enriched: ProductionStation = { ...saved, workProductName: productName };
       setStations((prev) =>
         isEdit ? prev.map((s) => (s.id === enriched.id ? enriched : s)) : [...prev, enriched]
@@ -635,7 +635,7 @@ export default function WorkCategoriesPage() {
       {activeTab === "products" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{productionProducts.length} products</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{productionParts.length} products</span>
             <button onClick={openProdCreate} className="btn-primary flex items-center gap-2" disabled={productionProcesses.length === 0}>
               <Plus className="w-4 h-4" />
               Product
@@ -643,7 +643,7 @@ export default function WorkCategoriesPage() {
           </div>
           {prodLoading ? (
             <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
-          ) : productionProducts.length === 0 ? (
+          ) : productionParts.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">No products yet.</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
@@ -656,7 +656,7 @@ export default function WorkCategoriesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {productionProducts.map((prod) => (
+                  {productionParts.map((prod) => (
                     <tr key={prod.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{prod.name}</td>
                       <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{prod.productionProcessName}</td>
@@ -684,7 +684,7 @@ export default function WorkCategoriesPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">{components.length} components</span>
-            <button onClick={openCompCreate} className="btn-primary flex items-center gap-2" disabled={productionProducts.length === 0}>
+            <button onClick={openCompCreate} className="btn-primary flex items-center gap-2" disabled={productionParts.length === 0}>
               <Plus className="w-4 h-4" />
               Component
             </button>
@@ -784,7 +784,7 @@ export default function WorkCategoriesPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">{stations.length} stations</span>
-            <button onClick={openStationCreate} className="btn-primary flex items-center gap-2" disabled={productionProducts.length === 0}>
+            <button onClick={openStationCreate} className="btn-primary flex items-center gap-2" disabled={productionParts.length === 0}>
               <Plus className="w-4 h-4" />
               Station
             </button>
@@ -832,7 +832,7 @@ export default function WorkCategoriesPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} product defects</span>
-            <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={productionProducts.length === 0}>
+            <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={productionParts.length === 0}>
               <Plus className="w-4 h-4" />
               Product Defect
             </button>
@@ -970,11 +970,11 @@ export default function WorkCategoriesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
               <select
                 className="input w-full"
-                value={compForm.productionProductId}
-                onChange={(e) => setCompForm((f) => ({ ...f, productionProductId: e.target.value }))}
+                value={compForm.productionPartId}
+                onChange={(e) => setCompForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
-                {productionProducts.map((prod) => (
+                {productionParts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
               </select>
@@ -1059,12 +1059,12 @@ export default function WorkCategoriesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
               <select
                 className="input w-full"
-                value={stationForm.productionProductId}
-                onChange={(e) => setStationForm((f) => ({ ...f, productionProductId: e.target.value }))}
+                value={stationForm.productionPartId}
+                onChange={(e) => setStationForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
                 <option value="">— Select Product —</option>
-                {productionProducts.map((prod) => (
+                {productionParts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
               </select>
@@ -1103,12 +1103,12 @@ export default function WorkCategoriesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
               <select
                 className="input w-full"
-                value={unitDefForm.productionProductId}
-                onChange={(e) => setUnitDefForm((f) => ({ ...f, productionProductId: e.target.value }))}
+                value={unitDefForm.productionPartId}
+                onChange={(e) => setUnitDefForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
                 <option value="">— Select Product —</option>
-                {productionProducts.map((prod) => (
+                {productionParts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.name}</option>
                 ))}
               </select>

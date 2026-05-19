@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { productionProducts, productionProcesses } from "@/lib/db/schema";
+import { productionParts, productionProcesses } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -24,16 +24,16 @@ export async function GET() {
 
   const rows = await db
     .select({
-      id: productionProducts.id,
-      name: productionProducts.name,
-      productionProcessId: productionProducts.productionProcessId,
+      id: productionParts.id,
+      name: productionParts.name,
+      productionProcessId: productionParts.productionProcessId,
       productionProcessName: productionProcesses.name,
-      createdAt: productionProducts.createdAt,
-      updatedAt: productionProducts.updatedAt,
+      createdAt: productionParts.createdAt,
+      updatedAt: productionParts.updatedAt,
     })
-    .from(productionProducts)
-    .innerJoin(productionProcesses, eq(productionProducts.productionProcessId, productionProcesses.id))
-    .orderBy(productionProcesses.name, productionProducts.name);
+    .from(productionParts)
+    .innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id))
+    .orderBy(productionProcesses.name, productionParts.name);
 
   return NextResponse.json(rows);
 }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   }
 
   const [created] = await db
-    .insert(productionProducts)
+    .insert(productionParts)
     .values({ name: result.data.name, productionProcessId: result.data.productionProcessId })
     .returning();
 

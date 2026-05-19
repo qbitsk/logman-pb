@@ -15,7 +15,7 @@ async function requireAdmin() {
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
   productionComponentId: z.string().min(1).optional(),
-  productionProductId: z.string().min(1).optional(),
+  productionPartId: z.string().min(1).optional(),
 });
 
 export async function PATCH(
@@ -35,11 +35,11 @@ export async function PATCH(
 
   const update: Record<string, unknown> = { updatedAt: new Date() };
   if (result.data.name) update.name = result.data.name;
-  if (result.data.productionProductId) update.productionProductId = result.data.productionProductId;
+  if (result.data.productionPartId) update.productionPartId = result.data.productionPartId;
 
   if (result.data.productionComponentId) {
     const component = await db
-      .select({ productionProductId: productionComponents.productionProductId })
+      .select({ productionPartId: productionComponents.productionPartId })
       .from(productionComponents)
       .where(eq(productionComponents.id, result.data.productionComponentId))
       .limit(1);
@@ -49,7 +49,7 @@ export async function PATCH(
     }
 
     update.productionComponentId = result.data.productionComponentId;
-    update.productionProductId = component[0].productionProductId;
+    update.productionPartId = component[0].productionPartId;
   }
 
   const [updated] = await db

@@ -1,12 +1,12 @@
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { productionProducts } from "./production-products";
+import { productionParts } from "./production-parts";
 
 export const productionComponents = pgTable("production_components", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
-  productionProductId: text("production_product_id")
+  productionPartId: text("production_part_id")
     .notNull()
-    .references(() => productionProducts.id),
+    .references(() => productionParts.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

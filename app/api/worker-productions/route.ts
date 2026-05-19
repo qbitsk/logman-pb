@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, productionProducts, productionProcesses } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionParts, productionProcesses } from "@/lib/db/schema";
 import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -20,12 +20,12 @@ export async function GET() {
       status: workerProductions.status,
       units: workerProductions.units,
       createdAt: workerProductions.createdAt,
-      workProductName: productionProducts.name,
+      workProductName: productionParts.name,
       productionProcessName: productionProcesses.name,
     })
     .from(workerProductions)
-    .innerJoin(productionProducts, eq(workerProductions.productionProductId, productionProducts.id))
-    .innerJoin(productionProcesses, eq(productionProducts.productionProcessId, productionProcesses.id))
+    .innerJoin(productionParts, eq(workerProductions.productionPartId, productionParts.id))
+    .innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id))
     .where(eq(workerProductions.userId, session.user.id))
     .orderBy(workerProductions.createdAt);
 
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   const [production] = await db
     .insert(workerProductions)
     .values({
-      productionProductId: result.data.productionProductId,
+      productionPartId: result.data.productionPartId,
       productionStationId: result.data.productionStationId ?? null,
       units: result.data.units ?? null,
       shift: result.data.shift ?? null,

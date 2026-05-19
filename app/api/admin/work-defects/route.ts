@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { productionDefects, productionComponents, productionProducts } from "@/lib/db/schema";
+import { productionDefects, productionComponents, productionParts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -19,7 +19,7 @@ const componentBodySchema = z.object({
 
 const unitBodySchema = z.object({
   name: z.string().min(1),
-  productionProductId: z.string().min(1),
+  productionPartId: z.string().min(1),
 });
 
 export async function GET(request: NextRequest) {
@@ -34,18 +34,18 @@ export async function GET(request: NextRequest) {
       id: productionDefects.id,
       name: productionDefects.name,
       type: productionDefects.type,
-      productionProductId: productionDefects.productionProductId,
+      productionPartId: productionDefects.productionPartId,
       productionComponentId: productionDefects.productionComponentId,
       componentName: productionComponents.name,
-      workProductName: productionProducts.name,
+      workProductName: productionParts.name,
       createdAt: productionDefects.createdAt,
       updatedAt: productionDefects.updatedAt,
     })
     .from(productionDefects)
     .leftJoin(productionComponents, eq(productionDefects.productionComponentId, productionComponents.id))
-    .leftJoin(productionProducts, eq(productionDefects.productionProductId, productionProducts.id))
+    .leftJoin(productionParts, eq(productionDefects.productionPartId, productionParts.id))
     .where(type ? eq(productionDefects.type, type) : undefined)
-    .orderBy(productionProducts.name, productionComponents.name, productionDefects.name);
+    .orderBy(productionParts.name, productionComponents.name, productionDefects.name);
 
   return NextResponse.json(componentRows);
 }
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       .values({
         name: result.data.name,
         type: "unit",
-        productionProductId: result.data.productionProductId,
+        productionPartId: result.data.productionPartId,
         productionComponentId: null,
       })
       .returning();
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
   }
 
   const component = await db
-    .select({ productionProductId: productionComponents.productionProductId })
+    .select({ productionPartId: productionComponents.productionPartId })
     .from(productionComponents)
     .where(eq(productionComponents.id, result.data.productionComponentId))
     .limit(1);
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       name: result.data.name,
       type: "component",
       productionComponentId: result.data.productionComponentId,
-      productionProductId: component[0].productionProductId,
+      productionPartId: component[0].productionPartId,
     })
     .returning();
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { productionProducts } from "@/lib/db/schema";
+import { productionParts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -33,9 +33,9 @@ export async function PATCH(
   }
 
   const [updated] = await db
-    .update(productionProducts)
+    .update(productionParts)
     .set({ ...result.data, updatedAt: new Date() })
-    .where(eq(productionProducts.id, id))
+    .where(eq(productionParts.id, id))
     .returning();
 
   if (!updated) {
@@ -57,9 +57,9 @@ export async function DELETE(
 
   try {
     const [deleted] = await db
-      .delete(productionProducts)
-      .where(eq(productionProducts.id, id))
-      .returning({ id: productionProducts.id });
+      .delete(productionParts)
+      .where(eq(productionParts.id, id))
+      .returning({ id: productionParts.id });
 
     if (!deleted) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -8,7 +8,7 @@ import Link from "next/link";
 
 type WorkerProduction = {
   id: string;
-  productionProductId: string;
+  productionPartId: string;
   productionStationId: string | null;
   units: number | null;
   shift: number | null;
@@ -20,11 +20,11 @@ type WorkerProduction = {
   userEmail: string;
 };
 
-type ProductionProduct = { id: string; name: string; productionProcessId: string };
+type ProductionPart = { id: string; name: string; productionProcessId: string };
 type ProductionProcess = { id: string; name: string };
-type ProductionStation = { id: string; name: string; productionProductId: string };
-type ProductionComponent = { id: string; name: string; productionProductId: string };
-type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionProductId: string; productionComponentId: string | null };
+type ProductionStation = { id: string; name: string; productionPartId: string };
+type ProductionComponent = { id: string; name: string; productionPartId: string };
+type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionPartId: string; productionComponentId: string | null };
 type ExistingDefect = { productionDefectId: string; units: number };
 
 export default function EditWorkerProductionPage() {
@@ -33,7 +33,7 @@ export default function EditWorkerProductionPage() {
 
   const [production, setProduction] = useState<WorkerProduction | null>(null);
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
-  const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
+  const [productionParts, setProductionParts] = useState<ProductionPart[]>([]);
   const [productionProcesses, setProductionProcesses] = useState<ProductionProcess[]>([]);
   const [stations, setStations] = useState<ProductionStation[]>([]);
   const [components, setComponents] = useState<ProductionComponent[]>([]);
@@ -60,7 +60,7 @@ export default function EditWorkerProductionPage() {
   }, [id, router]);
 
   useEffect(() => {
-    fetch("/api/work-products").then((r) => r.json()).then(setProductionProducts);
+    fetch("/api/work-products").then((r) => r.json()).then(setProductionParts);
   }, []);
 
   useEffect(() => {
@@ -80,10 +80,10 @@ export default function EditWorkerProductionPage() {
   }, []);
 
   useEffect(() => {
-    if (production && productionProducts.length && productionProcesses.length && stations.length && components.length && productionDefects.length) {
+    if (production && productionParts.length && productionProcesses.length && stations.length && components.length && productionDefects.length) {
       setLoading(false);
     }
-  }, [production, productionProducts, productionProcesses, stations, components, productionDefects]);
+  }, [production, productionParts, productionProcesses, stations, components, productionDefects]);
 
   if (notFound) {
     return (
@@ -112,7 +112,7 @@ export default function EditWorkerProductionPage() {
         <WorkerProductionForm
           production={{ ...production!, createdAt: new Date(production!.createdAt), updatedAt: new Date(production!.updatedAt) }}
           productionProcesses={productionProcesses}
-          productionProducts={productionProducts}
+          productionParts={productionParts}
           productionStations={stations}
           productionComponents={components}
           productionDefects={productionDefects}

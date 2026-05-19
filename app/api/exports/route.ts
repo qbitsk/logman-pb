@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, users, productionProducts, productionStations, workerProductionDefects, productionComponents, productionDefects } from "@/lib/db/schema";
+import { workerProductions, users, productionParts, productionStations, workerProductionDefects, productionComponents, productionDefects } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const rows = await db
     .select({
       id: workerProductions.id,
-      workProductName: productionProducts.name,
+      workProductName: productionParts.name,
       workStationName: productionStations.name,
       units: workerProductions.units,
       shift: workerProductions.shift,
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     })
     .from(workerProductions)
     .leftJoin(users, eq(workerProductions.userId, users.id))
-    .leftJoin(productionProducts, eq(workerProductions.productionProductId, productionProducts.id))
+    .leftJoin(productionParts, eq(workerProductions.productionPartId, productionParts.id))
     .leftJoin(productionStations, eq(workerProductions.productionStationId, productionStations.id))
     .orderBy(workerProductions.createdAt);
 

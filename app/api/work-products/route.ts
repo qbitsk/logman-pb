@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { productionProducts } from "@/lib/db/schema";
+import { productionParts } from "@/lib/db/schema";
 import { headers } from "next/headers";
 
 // GET /api/work-products — list all work products (any authenticated user)
@@ -13,8 +13,8 @@ export async function GET() {
 
   const rows = await db
     .select()
-    .from(productionProducts)
-    .orderBy(productionProducts.name);
+    .from(productionParts)
+    .orderBy(productionParts.name);
 
   return NextResponse.json(rows);
 }

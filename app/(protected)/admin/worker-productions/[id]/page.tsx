@@ -19,7 +19,7 @@ export default function AdminWorkerProductionDetailPage() {
       })
       .then((data) => {
         if (!data) return;
-        const { existingDefects: _ignored, productionProductId: _wp, productionStationId: _ws, userId: _uid, ...rest } = data;
+        const { existingDefects: _ignored, productionPartId: _wp, productionStationId: _ws, userId: _uid, ...rest } = data;
         setProduction(rest);
       })
       .finally(() => setLoading(false));

@@ -6,7 +6,7 @@ export const workerProductionDefectSchema = z.object({
 });
 
 export const workerProductionSchema = z.object({
-  productionProductId: z.string().min(1, "Please select a product"),
+  productionPartId: z.string().min(1, "Please select a product"),
   productionStationId: z.string().optional().nullable(),
   units: z.number().int().positive("Units must be a positive number").optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),

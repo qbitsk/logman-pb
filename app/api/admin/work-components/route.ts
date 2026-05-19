@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { productionComponents, productionProducts } from "@/lib/db/schema";
+import { productionComponents, productionParts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,7 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1),
-  productionProductId: z.string().min(1),
+  productionPartId: z.string().min(1),
 });
 
 export async function GET() {
@@ -26,14 +26,14 @@ export async function GET() {
     .select({
       id: productionComponents.id,
       name: productionComponents.name,
-      productionProductId: productionComponents.productionProductId,
-      workProductName: productionProducts.name,
+      productionPartId: productionComponents.productionPartId,
+      workProductName: productionParts.name,
       createdAt: productionComponents.createdAt,
       updatedAt: productionComponents.updatedAt,
     })
     .from(productionComponents)
-    .innerJoin(productionProducts, eq(productionComponents.productionProductId, productionProducts.id))
-    .orderBy(productionProducts.name, productionComponents.name);
+    .innerJoin(productionParts, eq(productionComponents.productionPartId, productionParts.id))
+    .orderBy(productionParts.name, productionComponents.name);
 
   return NextResponse.json(rows);
 }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
   const [created] = await db
     .insert(productionComponents)
-    .values({ name: result.data.name, productionProductId: result.data.productionProductId })
+    .values({ name: result.data.name, productionPartId: result.data.productionPartId })
     .returning();
 
   return NextResponse.json(created, { status: 201 });

@@ -1,5 +1,5 @@
 {
-  "id": "d2feac38-1ced-4a0b-a3f8-35bcb8aa650f",
+  "id": "9a9aa6c3-d596-4062-a40e-95bcc4e2db0f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -366,8 +366,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.production_products": {
-      "name": "production_products",
+    "public.production_parts": {
+      "name": "production_parts",
       "schema": "",
       "columns": {
         "id": {
@@ -405,9 +405,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "production_products_production_process_id_production_processes_id_fk": {
-          "name": "production_products_production_process_id_production_processes_id_fk",
-          "tableFrom": "production_products",
+        "production_parts_production_process_id_production_processes_id_fk": {
+          "name": "production_parts_production_process_id_production_processes_id_fk",
+          "tableFrom": "production_parts",
           "tableTo": "production_processes",
           "columnsFrom": [
             "production_process_id"
@@ -441,8 +441,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "production_product_id": {
-          "name": "production_product_id",
+        "production_part_id": {
+          "name": "production_part_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -464,12 +464,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "production_stations_production_product_id_production_products_id_fk": {
-          "name": "production_stations_production_product_id_production_products_id_fk",
+        "production_stations_production_part_id_production_parts_id_fk": {
+          "name": "production_stations_production_part_id_production_parts_id_fk",
           "tableFrom": "production_stations",
-          "tableTo": "production_products",
+          "tableTo": "production_parts",
           "columnsFrom": [
-            "production_product_id"
+            "production_part_id"
           ],
           "columnsTo": [
             "id"
@@ -500,8 +500,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "production_product_id": {
-          "name": "production_product_id",
+        "production_part_id": {
+          "name": "production_part_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -523,12 +523,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "production_components_production_product_id_production_products_id_fk": {
-          "name": "production_components_production_product_id_production_products_id_fk",
+        "production_components_production_part_id_production_parts_id_fk": {
+          "name": "production_components_production_part_id_production_parts_id_fk",
           "tableFrom": "production_components",
-          "tableTo": "production_products",
+          "tableTo": "production_parts",
           "columnsFrom": [
-            "production_product_id"
+            "production_part_id"
           ],
           "columnsTo": [
             "id"
@@ -566,8 +566,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "production_product_id": {
-          "name": "production_product_id",
+        "production_part_id": {
+          "name": "production_part_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -595,12 +595,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "production_defects_production_product_id_production_products_id_fk": {
-          "name": "production_defects_production_product_id_production_products_id_fk",
+        "production_defects_production_part_id_production_parts_id_fk": {
+          "name": "production_defects_production_part_id_production_parts_id_fk",
           "tableFrom": "production_defects",
-          "tableTo": "production_products",
+          "tableTo": "production_parts",
           "columnsFrom": [
-            "production_product_id"
+            "production_part_id"
           ],
           "columnsTo": [
             "id"
@@ -644,8 +644,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "production_product_id": {
-          "name": "production_product_id",
+        "production_part_id": {
+          "name": "production_part_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -712,12 +712,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "worker_productions_production_product_id_production_products_id_fk": {
-          "name": "worker_productions_production_product_id_production_products_id_fk",
+        "worker_productions_production_part_id_production_parts_id_fk": {
+          "name": "worker_productions_production_part_id_production_parts_id_fk",
           "tableFrom": "worker_productions",
-          "tableTo": "production_products",
+          "tableTo": "production_parts",
           "columnsFrom": [
-            "production_product_id"
+            "production_part_id"
           ],
           "columnsTo": [
             "id"

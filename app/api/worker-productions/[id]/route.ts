@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, productionDefects, productionComponents, productionProducts, productionStations, users, productionProcesses } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionDefects, productionComponents, productionParts, productionStations, users, productionProcesses } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { workerProductionDefectSchema } from "@/lib/validations/worker-production";
 
 const patchSchema = z.object({
-  productionProductId: z.string().min(1).optional(),
+  productionPartId: z.string().min(1).optional(),
   productionStationId: z.string().optional().nullable(),
   units: z.number().int().positive().optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
@@ -31,7 +31,7 @@ export async function GET(
   const [row] = await db
     .select({
       id: workerProductions.id,
-      productionProductId: workerProductions.productionProductId,
+      productionPartId: workerProductions.productionPartId,
       productionStationId: workerProductions.productionStationId,
       units: workerProductions.units,
       shift: workerProductions.shift,
@@ -70,7 +70,7 @@ export async function GET(
       .innerJoin(productionDefects, eq(workerProductionDefects.productionDefectId, productionDefects.id))
       .leftJoin(productionComponents, eq(productionDefects.productionComponentId, productionComponents.id))
       .where(eq(workerProductionDefects.workerProductionId, id)),
-    db.select({ name: productionProducts.name, productionProcessName: productionProcesses.name }).from(productionProducts).innerJoin(productionProcesses, eq(productionProducts.productionProcessId, productionProcesses.id)).where(eq(productionProducts.id, row.productionProductId)).limit(1),
+    db.select({ name: productionParts.name, productionProcessName: productionProcesses.name }).from(productionParts).innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id)).where(eq(productionParts.id, row.productionPartId)).limit(1),
     row.productionStationId
       ? db.select({ name: productionStations.name }).from(productionStations).where(eq(productionStations.id, row.productionStationId)).limit(1)
       : Promise.resolve([]),

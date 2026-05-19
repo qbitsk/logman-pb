@@ -5,14 +5,14 @@ import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-type ProductionProduct = { id: string; name: string; productionProcessId: string };
+type ProductionPart = { id: string; name: string; productionProcessId: string };
 type ProductionProcess = { id: string; name: string };
-type ProductionStation = { id: string; name: string; productionProductId: string };
-type ProductionComponent = { id: string; name: string; productionProductId: string };
-type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionProductId: string; productionComponentId: string | null };
+type ProductionStation = { id: string; name: string; productionPartId: string };
+type ProductionComponent = { id: string; name: string; productionPartId: string };
+type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionPartId: string; productionComponentId: string | null };
 
 export default function NewWorkerProductionPage() {
-  const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
+  const [productionParts, setProductionParts] = useState<ProductionPart[]>([]);
   const [productionProcesses, setProductionProcesses] = useState<ProductionProcess[]>([]);
   const [stations, setStations] = useState<ProductionStation[]>([]);
   const [components, setComponents] = useState<ProductionComponent[]>([]);
@@ -23,7 +23,7 @@ export default function NewWorkerProductionPage() {
   function done() { setLoaded((n) => n + 1); }
 
   useEffect(() => {
-    fetch("/api/work-products").then((r) => r.json()).then(setProductionProducts).finally(done);
+    fetch("/api/work-products").then((r) => r.json()).then(setProductionParts).finally(done);
   }, []);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function NewWorkerProductionPage() {
         <div className="card max-w-2xl">
           <WorkerProductionForm
             productionProcesses={productionProcesses}
-            productionProducts={productionProducts}
+            productionParts={productionParts}
             productionStations={stations}
             productionComponents={components}
             productionDefects={productionDefects}
