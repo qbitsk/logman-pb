@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { clsx } from "clsx";
+import { useToast } from "@/components/ui/toast";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -45,7 +46,15 @@ type UnitDefect = {
   createdAt: string;
 };
 
-type Tab = "categories" | "products" | "components" | "defects" | "unitdefects";
+type ProductionStation = {
+  id: string;
+  name: string;
+  productionProductId: string;
+  workProductName: string;
+  createdAt: string;
+};
+
+type Tab = "categories" | "products" | "components" | "defects" | "unitdefects" | "stations";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "categories", label: "Categories" },
@@ -53,6 +62,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "components", label: "Components" },
   { id: "unitdefects", label: "Product Defects" },
   { id: "defects", label: "Component Defects" },
+  { id: "stations", label: "Stations" },
 ];
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -85,6 +95,7 @@ function Modal({
 
 export default function WorkCategoriesPage() {
   const [activeTab, setActiveTab] = useState<Tab>("categories");
+  const { error: toastError } = useToast();
 
   // ── Categories state ──
   const [categories, setCategories] = useState<Category[]>([]);
@@ -125,6 +136,14 @@ export default function WorkCategoriesPage() {
   const [unitDefForm, setUnitDefForm] = useState({ name: "", productionProductId: "" });
   const [unitDefError, setUnitDefError] = useState<string | null>(null);
   const [unitDefSaving, setUnitDefSaving] = useState(false);
+
+  // ── Stations state ──
+  const [stations, setStations] = useState<ProductionStation[]>([]);
+  const [stationLoading, setStationLoading] = useState(true);
+  const [stationModal, setStationModal] = useState<{ open: boolean; editing: ProductionStation | null }>({ open: false, editing: null });
+  const [stationForm, setStationForm] = useState({ name: "", productionProductId: "" });
+  const [stationError, setStationError] = useState<string | null>(null);
+  const [stationSaving, setStationSaving] = useState(false);
 
   // ── Fetch ──
   useEffect(() => {
@@ -170,6 +189,13 @@ export default function WorkCategoriesPage() {
         )
       )
       .finally(() => setUnitDefLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/work-stations")
+      .then((r) => r.json())
+      .then(setStations)
+      .finally(() => setStationLoading(false));
   }, []);
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -223,6 +249,9 @@ export default function WorkCategoriesPage() {
     const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setCategories((prev) => prev.filter((c) => c.id !== id));
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toastError(err?.error ?? "Failed to delete.");
     }
   }
 
@@ -278,6 +307,9 @@ export default function WorkCategoriesPage() {
     const res = await fetch(`/api/admin/work-products/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setProductionProducts((prev) => prev.filter((p) => p.id !== id));
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toastError(err?.error ?? "Failed to delete.");
     }
   }
 
@@ -333,6 +365,9 @@ export default function WorkCategoriesPage() {
     const res = await fetch(`/api/admin/work-components/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setComponents((prev) => prev.filter((c) => c.id !== id));
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toastError(err?.error ?? "Failed to delete.");
     }
   }
 
@@ -389,6 +424,9 @@ export default function WorkCategoriesPage() {
     const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setDefects((prev) => prev.filter((d) => d.id !== id));
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toastError(err?.error ?? "Failed to delete.");
     }
   }
 
@@ -454,6 +492,67 @@ export default function WorkCategoriesPage() {
     const res = await fetch(`/api/admin/work-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setUnitDefects((prev) => prev.filter((d) => d.id !== id));
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toastError(err?.error ?? "Failed to delete.");
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Stations handlers
+  // ───────────────────────────────────────────────────────────────────────────
+
+  function openStationCreate() {
+    setStationForm({ name: "", productionProductId: productionProducts[0]?.id ?? "" });
+    setStationError(null);
+    setStationModal({ open: true, editing: null });
+  }
+
+  function openStationEdit(station: ProductionStation) {
+    setStationForm({ name: station.name, productionProductId: station.productionProductId });
+    setStationError(null);
+    setStationModal({ open: true, editing: station });
+  }
+
+  async function submitStation(e: React.FormEvent) {
+    e.preventDefault();
+    setStationError(null);
+    setStationSaving(true);
+
+    const isEdit = !!stationModal.editing;
+    const url = isEdit
+      ? `/api/admin/work-stations/${stationModal.editing!.id}`
+      : "/api/admin/work-stations";
+
+    const res = await fetch(url, {
+      method: isEdit ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(stationForm),
+    });
+
+    if (res.ok) {
+      const saved = await res.json();
+      const productName = productionProducts.find((p) => p.id === saved.productionProductId)?.name ?? "";
+      const enriched: ProductionStation = { ...saved, workProductName: productName };
+      setStations((prev) =>
+        isEdit ? prev.map((s) => (s.id === enriched.id ? enriched : s)) : [...prev, enriched]
+      );
+      setStationModal({ open: false, editing: null });
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setStationError(err?.error ?? "Failed to save");
+    }
+    setStationSaving(false);
+  }
+
+  async function deleteStation(id: string) {
+    if (!confirm("Delete this station? This may affect existing data.")) return;
+    const res = await fetch(`/api/admin/work-stations/${id}`, { method: "DELETE" });
+    if (res.ok || res.status === 204) {
+      setStations((prev) => prev.filter((s) => s.id !== id));
+    } else {
+      const err = await res.json().catch(() => ({}));
+      toastError(err?.error ?? "Failed to delete.");
     }
   }
 
@@ -680,6 +779,54 @@ export default function WorkCategoriesPage() {
         </div>
       )}
 
+      {/* ── Stations tab ── */}
+      {activeTab === "stations" && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-gray-500 dark:text-gray-400">{stations.length} stations</span>
+            <button onClick={openStationCreate} className="btn-primary flex items-center gap-2" disabled={productionProducts.length === 0}>
+              <Plus className="w-4 h-4" />
+              Station
+            </button>
+          </div>
+          {stationLoading ? (
+            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+          ) : stations.length === 0 ? (
+            <div className="card text-center py-12 text-gray-400 text-sm">No stations yet.</div>
+          ) : (
+            <div className="card p-0 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
+                    <th className="px-5 py-3" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {stations.map((station) => (
+                    <tr key={station.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{station.name}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{station.workProductName}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => openStationEdit(station)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => deleteStation(station.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Unit Defects tab ── */}
       {activeTab === "unitdefects" && (
         <div>
@@ -885,6 +1032,50 @@ export default function WorkCategoriesPage() {
               </button>
               <button type="submit" disabled={defSaving} className="btn-primary">
                 {defSaving ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* ── Station Modal ── */}
+      {stationModal.open && (
+        <Modal
+          title={stationModal.editing ? "Edit Station" : "New Station"}
+          onClose={() => setStationModal({ open: false, editing: null })}
+        >
+          <form onSubmit={submitStation} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <input
+                className="input w-full"
+                value={stationForm.name}
+                onChange={(e) => setStationForm((f) => ({ ...f, name: e.target.value }))}
+                required
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Product</label>
+              <select
+                className="input w-full"
+                value={stationForm.productionProductId}
+                onChange={(e) => setStationForm((f) => ({ ...f, productionProductId: e.target.value }))}
+                required
+              >
+                <option value="">— Select Product —</option>
+                {productionProducts.map((prod) => (
+                  <option key={prod.id} value={prod.id}>{prod.name}</option>
+                ))}
+              </select>
+            </div>
+            {stationError && <p className="text-sm text-red-600">{stationError}</p>}
+            <div className="flex justify-end gap-3 pt-1">
+              <button type="button" onClick={() => setStationModal({ open: false, editing: null })} className="btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" disabled={stationSaving} className="btn-primary">
+                {stationSaving ? "Saving…" : "Save"}
               </button>
             </div>
           </form>

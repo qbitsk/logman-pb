@@ -85,7 +85,10 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await db.delete(productionDefects).where(eq(productionDefects.id, id));
-
-  return new NextResponse(null, { status: 204 });
+  try {
+    await db.delete(productionDefects).where(eq(productionDefects.id, id));
+    return new NextResponse(null, { status: 204 });
+  } catch {
+    return NextResponse.json({ error: "Failed to delete defect." }, { status: 500 });
+  }
 }

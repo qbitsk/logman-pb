@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { productionProducts } from "@/lib/db/schema";
+import { productionStations } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
@@ -14,7 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
-  categoryId: z.string().min(1).optional(),
+  productionProductId: z.string().min(1).optional(),
 });
 
 export async function PATCH(
@@ -33,9 +33,9 @@ export async function PATCH(
   }
 
   const [updated] = await db
-    .update(productionProducts)
+    .update(productionStations)
     .set({ ...result.data, updatedAt: new Date() })
-    .where(eq(productionProducts.id, id))
+    .where(eq(productionStations.id, id))
     .returning();
 
   if (!updated) {
@@ -57,9 +57,9 @@ export async function DELETE(
 
   try {
     const [deleted] = await db
-      .delete(productionProducts)
-      .where(eq(productionProducts.id, id))
-      .returning({ id: productionProducts.id });
+      .delete(productionStations)
+      .where(eq(productionStations.id, id))
+      .returning();
 
     if (!deleted) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -67,6 +67,6 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 });
   } catch {
-    return NextResponse.json({ error: "Failed to delete product." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete station." }, { status: 500 });
   }
 }

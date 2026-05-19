@@ -55,14 +55,18 @@ export async function DELETE(
 
   const { id } = await params;
 
-  const [deleted] = await db
-    .delete(categories)
-    .where(eq(categories.id, id))
-    .returning({ id: categories.id });
+  try {
+    const [deleted] = await db
+      .delete(categories)
+      .where(eq(categories.id, id))
+      .returning({ id: categories.id });
 
-  if (!deleted) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!deleted) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    return new NextResponse(null, { status: 204 });
+  } catch {
+    return NextResponse.json({ error: "Failed to delete category." }, { status: 500 });
   }
-
-  return new NextResponse(null, { status: 204 });
 }

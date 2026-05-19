@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/toast";
 
 export const metadata: Metadata = {
   title: "Logman PB",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-dvh bg-brand-50 dark:bg-gray-950 antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
+        <Toaster>
+          <ThemeProvider>{children}</ThemeProvider>
+        </Toaster>
       </body>
     </html>
   );
