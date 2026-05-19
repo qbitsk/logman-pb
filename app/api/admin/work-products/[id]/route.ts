@@ -14,7 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
-  categoryId: z.string().min(1).optional(),
+  productionProcessId: z.string().min(1).optional(),
 });
 
 export async function PATCH(

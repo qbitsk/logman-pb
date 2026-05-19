@@ -61,7 +61,7 @@ CREATE TABLE "categories" (
 CREATE TABLE "production_products" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"category_id" text NOT NULL,
+	"production_process_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -114,9 +114,16 @@ CREATE TABLE "worker_production_defects" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "production_processes" (
+	"id" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "production_products" ADD CONSTRAINT "production_products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "production_products" ADD CONSTRAINT "production_products_production_process_id_production_processes_id_fk" FOREIGN KEY ("production_process_id") REFERENCES "public"."production_processes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "production_stations" ADD CONSTRAINT "production_stations_production_product_id_production_products_id_fk" FOREIGN KEY ("production_product_id") REFERENCES "public"."production_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "production_components" ADD CONSTRAINT "production_components_production_product_id_production_products_id_fk" FOREIGN KEY ("production_product_id") REFERENCES "public"."production_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "production_defects" ADD CONSTRAINT "production_defects_production_product_id_production_products_id_fk" FOREIGN KEY ("production_product_id") REFERENCES "public"."production_products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

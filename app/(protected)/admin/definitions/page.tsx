@@ -13,11 +13,17 @@ type Category = {
   createdAt: string;
 };
 
+type ProductionProcess = {
+  id: string;
+  name: string;
+  createdAt: string;
+};
+
 type ProductionProduct = {
   id: string;
   name: string;
-  categoryId: string;
-  categoryName: string;
+  productionProcessId: string;
+  productionProcessName: string;
   createdAt: string;
 };
 
@@ -105,11 +111,14 @@ export default function WorkCategoriesPage() {
   const [catError, setCatError] = useState<string | null>(null);
   const [catSaving, setCatSaving] = useState(false);
 
+  // ── Production Processes state ──
+  const [productionProcesses, setProductionProcesses] = useState<ProductionProcess[]>([]);
+
   // ── Work Products state ──
   const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
   const [prodLoading, setProdLoading] = useState(true);
   const [prodModal, setProdModal] = useState<{ open: boolean; editing: ProductionProduct | null }>({ open: false, editing: null });
-  const [prodForm, setProdForm] = useState({ name: "", categoryId: "" });
+  const [prodForm, setProdForm] = useState({ name: "", productionProcessId: "" });
   const [prodError, setProdError] = useState<string | null>(null);
   const [prodSaving, setProdSaving] = useState(false);
 
@@ -151,6 +160,12 @@ export default function WorkCategoriesPage() {
       .then((r) => r.json())
       .then(setCategories)
       .finally(() => setCatLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/production-processes")
+      .then((r) => r.json())
+      .then(setProductionProcesses);
   }, []);
 
   useEffect(() => {
@@ -260,13 +275,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openProdCreate() {
-    setProdForm({ name: "", categoryId: categories[0]?.id ?? "" });
+    setProdForm({ name: "", productionProcessId: productionProcesses[0]?.id ?? "" });
     setProdError(null);
     setProdModal({ open: true, editing: null });
   }
 
   function openProdEdit(prod: ProductionProduct) {
-    setProdForm({ name: prod.name, categoryId: prod.categoryId });
+    setProdForm({ name: prod.name, productionProcessId: prod.productionProcessId });
     setProdError(null);
     setProdModal({ open: true, editing: prod });
   }
@@ -289,8 +304,8 @@ export default function WorkCategoriesPage() {
 
     if (res.ok) {
       const saved = await res.json();
-      const catName = categories.find((c) => c.id === saved.categoryId)?.name ?? "";
-      const enriched: ProductionProduct = { ...saved, categoryName: catName };
+      const processName = productionProcesses.find((p) => p.id === saved.productionProcessId)?.name ?? "";
+      const enriched: ProductionProduct = { ...saved, productionProcessName: processName };
       setProductionProducts((prev) =>
         isEdit ? prev.map((p) => (p.id === enriched.id ? enriched : p)) : [...prev, enriched]
       );
@@ -636,7 +651,7 @@ export default function WorkCategoriesPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">{productionProducts.length} products</span>
-            <button onClick={openProdCreate} className="btn-primary flex items-center gap-2" disabled={categories.length === 0}>
+            <button onClick={openProdCreate} className="btn-primary flex items-center gap-2" disabled={productionProcesses.length === 0}>
               <Plus className="w-4 h-4" />
               Product
             </button>
@@ -651,7 +666,7 @@ export default function WorkCategoriesPage() {
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -659,7 +674,7 @@ export default function WorkCategoriesPage() {
                   {productionProducts.map((prod) => (
                     <tr key={prod.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{prod.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{prod.categoryName}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{prod.productionProcessName}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openProdEdit(prod)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
@@ -923,16 +938,16 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Category</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Process</label>
               <select
                 className="input w-full"
-                value={prodForm.categoryId}
-                onChange={(e) => setProdForm((f) => ({ ...f, categoryId: e.target.value }))}
+                value={prodForm.productionProcessId}
+                onChange={(e) => setProdForm((f) => ({ ...f, productionProcessId: e.target.value }))}
                 required
               >
-                <option value="">— Select Category —</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <option value="">— Select Process —</option>
+                {productionProcesses.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
             </div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, productionProducts, categories } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionProducts, productionProcesses } from "@/lib/db/schema";
 import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -21,11 +21,11 @@ export async function GET() {
       units: workerProductions.units,
       createdAt: workerProductions.createdAt,
       workProductName: productionProducts.name,
-      categoryName: categories.name,
+      productionProcessName: productionProcesses.name,
     })
     .from(workerProductions)
     .innerJoin(productionProducts, eq(workerProductions.productionProductId, productionProducts.id))
-    .innerJoin(categories, eq(productionProducts.categoryId, categories.id))
+    .innerJoin(productionProcesses, eq(productionProducts.productionProcessId, productionProcesses.id))
     .where(eq(workerProductions.userId, session.user.id))
     .orderBy(workerProductions.createdAt);
 

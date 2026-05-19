@@ -9,7 +9,7 @@ import { clsx } from "clsx";
 type WorkerProduction = {
   id: string;
   workProductName: string;
-  categoryName: string;
+  productionProcessName: string;
   status: string;
   units: number | null;
   createdAt: string;
@@ -55,7 +55,7 @@ export default function AdminWorkerProductionsPage() {
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Date</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Units</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Status</th>
@@ -71,7 +71,7 @@ export default function AdminWorkerProductionsPage() {
                       {new Date(s.createdAt).toLocaleDateString()}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.categoryName}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionProcessName}</td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.workProductName}</td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{s.units ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
                   <td className="px-5 py-3">

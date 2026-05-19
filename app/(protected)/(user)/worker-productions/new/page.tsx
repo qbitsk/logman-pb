@@ -5,15 +5,15 @@ import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-type ProductionProduct = { id: string; name: string; categoryId: string };
-type Category = { id: string; name: string };
+type ProductionProduct = { id: string; name: string; productionProcessId: string };
+type ProductionProcess = { id: string; name: string };
 type ProductionStation = { id: string; name: string; productionProductId: string };
 type ProductionComponent = { id: string; name: string; productionProductId: string };
 type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionProductId: string; productionComponentId: string | null };
 
 export default function NewWorkerProductionPage() {
   const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [productionProcesses, setProductionProcesses] = useState<ProductionProcess[]>([]);
   const [stations, setStations] = useState<ProductionStation[]>([]);
   const [components, setComponents] = useState<ProductionComponent[]>([]);
   const [productionDefects, setProductionDefects] = useState<ProductionDefect[]>([]);
@@ -27,7 +27,7 @@ export default function NewWorkerProductionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/categories?type=product").then((r) => r.json()).then(setCategories).finally(done);
+    fetch("/api/production-processes").then((r) => r.json()).then(setProductionProcesses).finally(done);
   }, []);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function NewWorkerProductionPage() {
       ) : (
         <div className="card max-w-2xl">
           <WorkerProductionForm
-            categories={categories}
+            productionProcesses={productionProcesses}
             productionProducts={productionProducts}
             productionStations={stations}
             productionComponents={components}

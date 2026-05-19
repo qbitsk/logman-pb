@@ -38,10 +38,10 @@ type WorkerProduction = {
 type ProductionProduct = {
   id: string;
   name: string;
-  categoryId: string;
+  productionProcessId: string;
 };
 
-type Category = {
+type ProductionProcess = {
   id: string;
   name: string;
 };
@@ -78,7 +78,7 @@ type DefectEntry = {
 
 type Props = {
   production?: WorkerProduction;
-  categories: Category[];
+  productionProcesses: ProductionProcess[];
   productionProducts: ProductionProduct[];
   productionStations: ProductionStation[];
   productionComponents: ProductionComponent[];
@@ -89,18 +89,18 @@ type Props = {
   allowStatusChange?: boolean;
 };
 
-export function WorkerProductionForm({ production, categories, productionProducts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
+export function WorkerProductionForm({ production, productionProcesses, productionProducts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
   const router = useRouter();
   const isEdit = !!production;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/worker-productions" : "/worker-productions");
 
-  const [categoryId, setCategoryId] = useState(() => {
+  const [productionProcessId, setProductionProcessId] = useState(() => {
     const initialProductId = production?.productionProductId ?? productionProducts[0]?.id ?? "";
     const product = productionProducts.find((p) => p.id === initialProductId);
-    return product?.categoryId ?? categories[0]?.id ?? "";
+    return product?.productionProcessId ?? productionProcesses[0]?.id ?? "";
   });
 
-  const filteredProducts = productionProducts.filter((p) => p.categoryId === categoryId);
+  const filteredProducts = productionProducts.filter((p) => p.productionProcessId === productionProcessId);
 
   const [form, setForm] = useState({
     productionProductId: production?.productionProductId ?? (productionProducts[0]?.id ?? ""),
@@ -131,9 +131,9 @@ export function WorkerProductionForm({ production, categories, productionProduct
     (ws) => ws.productionProductId === form.productionProductId
   );
 
-  function handleCategoryChange(newCategoryId: string) {
-    setCategoryId(newCategoryId);
-    const firstProduct = productionProducts.find((p) => p.categoryId === newCategoryId);
+  function handleProductionProcessChange(newProcessId: string) {
+    setProductionProcessId(newProcessId);
+    const firstProduct = productionProducts.find((p) => p.productionProcessId === newProcessId);
     set("productionProductId", firstProduct?.id ?? "");
   }
 
@@ -291,16 +291,16 @@ export function WorkerProductionForm({ production, categories, productionProduct
         )}
 
         <div>
-          <label className="label" htmlFor="categoryId">Category{!isEdit && " *"}</label>
+          <label className="label" htmlFor="productionProcessId">Process{!isEdit && " *"}</label>
           <select
-            id="categoryId"
-            value={categoryId}
-            onChange={(e) => handleCategoryChange(e.target.value)}
+            id="productionProcessId"
+            value={productionProcessId}
+            onChange={(e) => handleProductionProcessChange(e.target.value)}
             className="input"
           >
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
+            {productionProcesses.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
               </option>
             ))}
           </select>

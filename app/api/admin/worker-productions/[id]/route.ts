@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, users, workerProductionDefects, productionDefects, productionComponents, productionProducts, productionStations, categories } from "@/lib/db/schema";
+import { workerProductions, users, workerProductionDefects, productionDefects, productionComponents, productionProducts, productionStations, productionProcesses } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -75,7 +75,7 @@ export async function GET(
       .innerJoin(productionDefects, eq(workerProductionDefects.productionDefectId, productionDefects.id))
       .leftJoin(productionComponents, eq(productionDefects.productionComponentId, productionComponents.id))
       .where(eq(workerProductionDefects.workerProductionId, id)),
-    db.select({ name: productionProducts.name, categoryName: categories.name }).from(productionProducts).innerJoin(categories, eq(productionProducts.categoryId, categories.id)).where(eq(productionProducts.id, row.productionProductId)).limit(1),
+    db.select({ name: productionProducts.name, productionProcessName: productionProcesses.name }).from(productionProducts).innerJoin(productionProcesses, eq(productionProducts.productionProcessId, productionProcesses.id)).where(eq(productionProducts.id, row.productionProductId)).limit(1),
     row.productionStationId
       ? db.select({ name: productionStations.name }).from(productionStations).where(eq(productionStations.id, row.productionStationId)).limit(1)
       : Promise.resolve([]),
@@ -84,7 +84,7 @@ export async function GET(
   return NextResponse.json({
     ...row,
     workProductName: categoryRow[0]?.name ?? null,
-    categoryName: categoryRow[0]?.categoryName ?? null,
+    productionProcessName: categoryRow[0]?.productionProcessName ?? null,
     stationName: (stationRow as { name: string }[])[0]?.name ?? null,
     existingDefects,
     defects: defectsDisplay,

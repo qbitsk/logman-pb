@@ -20,8 +20,8 @@ type WorkerProduction = {
   userEmail: string;
 };
 
-type ProductionProduct = { id: string; name: string; categoryId: string };
-type Category = { id: string; name: string };
+type ProductionProduct = { id: string; name: string; productionProcessId: string };
+type ProductionProcess = { id: string; name: string };
 type ProductionStation = { id: string; name: string; productionProductId: string };
 type ProductionComponent = { id: string; name: string; productionProductId: string };
 type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionProductId: string; productionComponentId: string | null };
@@ -34,7 +34,7 @@ export default function EditWorkerProductionPage() {
   const [production, setProduction] = useState<WorkerProduction | null>(null);
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
   const [productionProducts, setProductionProducts] = useState<ProductionProduct[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [productionProcesses, setProductionProcesses] = useState<ProductionProcess[]>([]);
   const [stations, setStations] = useState<ProductionStation[]>([]);
   const [components, setComponents] = useState<ProductionComponent[]>([]);
   const [productionDefects, setProductionDefects] = useState<ProductionDefect[]>([]);
@@ -64,7 +64,7 @@ export default function EditWorkerProductionPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/categories?type=product").then((r) => r.json()).then(setCategories);
+    fetch("/api/production-processes").then((r) => r.json()).then(setProductionProcesses);
   }, []);
 
   useEffect(() => {
@@ -80,10 +80,10 @@ export default function EditWorkerProductionPage() {
   }, []);
 
   useEffect(() => {
-    if (production && productionProducts.length && categories.length && stations.length && components.length && productionDefects.length) {
+    if (production && productionProducts.length && productionProcesses.length && stations.length && components.length && productionDefects.length) {
       setLoading(false);
     }
-  }, [production, productionProducts, stations, components, productionDefects]);
+  }, [production, productionProducts, productionProcesses, stations, components, productionDefects]);
 
   if (notFound) {
     return (
@@ -111,7 +111,7 @@ export default function EditWorkerProductionPage() {
       ) : (
         <WorkerProductionForm
           production={{ ...production!, createdAt: new Date(production!.createdAt), updatedAt: new Date(production!.updatedAt) }}
-          categories={categories}
+          productionProcesses={productionProcesses}
           productionProducts={productionProducts}
           productionStations={stations}
           productionComponents={components}

@@ -1,5 +1,5 @@
 {
-  "id": "13100b7a-01eb-43e0-97aa-f91428fc229d",
+  "id": "d2feac38-1ced-4a0b-a3f8-35bcb8aa650f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -382,8 +382,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "category_id": {
-          "name": "category_id",
+        "production_process_id": {
+          "name": "production_process_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -405,12 +405,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "production_products_category_id_categories_id_fk": {
-          "name": "production_products_category_id_categories_id_fk",
+        "production_products_production_process_id_production_processes_id_fk": {
+          "name": "production_products_production_process_id_production_processes_id_fk",
           "tableFrom": "production_products",
-          "tableTo": "categories",
+          "tableTo": "production_processes",
           "columnsFrom": [
-            "category_id"
+            "production_process_id"
           ],
           "columnsTo": [
             "id"
@@ -817,6 +817,45 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.production_processes": {
+      "name": "production_processes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

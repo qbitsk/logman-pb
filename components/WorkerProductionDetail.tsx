@@ -13,6 +13,7 @@ export type WorkerProductionDetailData = {
   updatedAt: string;
   workProductName: string | null;
   categoryName: string | null;
+  productionProcessName: string | null;
   stationName: string | null;
   defects: { workDefectName?: string | null; workDefectType?: string | null; workComponentName?: string | null; units: number }[];
   userName?: string;
@@ -70,10 +71,10 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
 
       <div className="card space-y-5">
 
-        {production.categoryName && (
+        {production.productionProcessName && (
           <div>
-            <p className="label">Category</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{production.categoryName}</p>
+            <p className="label">Process</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{production.productionProcessName}</p>
           </div>
         )}
 
