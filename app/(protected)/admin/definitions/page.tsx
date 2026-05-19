@@ -834,7 +834,7 @@ export default function WorkCategoriesPage() {
             <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} part defects</span>
             <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={productionParts.length === 0}>
               <Plus className="w-4 h-4" />
-              Product Defect
+              Part Defect
             </button>
           </div>
           {unitDefLoading ? (
