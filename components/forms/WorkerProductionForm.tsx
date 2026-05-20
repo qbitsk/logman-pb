@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
+import { signOut } from "@/lib/auth/client";
 import { workerProductionSchema, type WorkerProductionInput } from "@/lib/validations/worker-production";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, CheckCircle2 } from "lucide-react";
 
 function generateKey(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -129,6 +130,8 @@ export function WorkerProductionForm({ production, productionProcesses, producti
   const [errors, setErrors] = useState<Partial<Record<keyof WorkerProductionInput, string>>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showLogoffModal, setShowLogoffModal] = useState(false);
+  const [loggingOff, setLoggingOff] = useState(false);
 
   const filteredStations = productionStations.filter(
     (ws) => ws.productionPartId === form.productionPartId
@@ -238,7 +241,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
         setSuccess(true);
         router.push(resolvedBackUrl);
       } else {
-        router.push("/worker-productions");
+        setShowLogoffModal(true);
       }
     } catch {
       setServerError("Network error. Please try again.");
@@ -247,8 +250,47 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     }
   }
 
+  async function handleLogoff() {
+    setLoggingOff(true);
+    await signOut();
+    router.push("/login");
+  }
+
   return (
     <div className={isEdit ? "max-w-2xl" : undefined}>
+      {showLogoffModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 max-w-sm w-full mx-4 flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-3">
+              <CheckCircle2 className="w-12 h-12 text-emerald-500" strokeWidth={1.5} />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Production submitted!
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                Do you want to sign out?
+              </p>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button
+                type="button"
+                onClick={handleLogoff}
+                disabled={loggingOff}
+                className="btn-primary"
+              >
+                {loggingOff ? "Signing out…" : "Sign out"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowLogoffModal(false); router.push("/worker-productions"); }}
+                disabled={loggingOff}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {isEdit && (
         <div className="mb-6 flex items-center gap-3 flex-wrap">
           {(() => {
