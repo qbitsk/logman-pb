@@ -10,9 +10,11 @@ type WorkerProduction = {
   id: string;
   status: string;
   units: number | null;
+  shift: number | null;
   createdAt: string;
   productionPartName: string;
   productionProcessName: string;
+  stationName: string | null;
 };
 
 const statusStyles: Record<string, string> = {
@@ -60,6 +62,8 @@ export default function WorkerProductionsPage() {
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Date</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Station</th>
+                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Shift</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Units</th>
                 <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Status</th>
                 <th className="px-5 py-3"></th>
@@ -75,6 +79,8 @@ export default function WorkerProductionsPage() {
                   </td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionProcessName}</td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionPartName}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{s.shift ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
                   <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{s.units ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
                   <td className="px-5 py-3">
                     <span className={clsx("badge capitalize", statusStyles[s.status])}>

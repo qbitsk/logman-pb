@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, productionParts, productionProcesses, getWorkerProductionStatus } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionParts, productionProcesses, productionStations, getWorkerProductionStatus } from "@/lib/db/schema";
 import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
-import { eq } from "drizzle-orm";
+import { eq, leftJoin } from "drizzle-orm";
 import { headers } from "next/headers";
 
 // GET /api/worker-productions — list worker productions for the current user
@@ -18,13 +18,16 @@ export async function GET() {
     .select({
       id: workerProductions.id,
       units: workerProductions.units,
+      shift: workerProductions.shift,
       createdAt: workerProductions.createdAt,
       productionPartName: productionParts.name,
       productionProcessName: productionProcesses.name,
+      stationName: productionStations.name,
     })
     .from(workerProductions)
     .innerJoin(productionParts, eq(workerProductions.productionPartId, productionParts.id))
     .innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id))
+    .leftJoin(productionStations, eq(workerProductions.productionStationId, productionStations.id))
     .where(eq(workerProductions.userId, session.user.id))
     .orderBy(workerProductions.createdAt);
 

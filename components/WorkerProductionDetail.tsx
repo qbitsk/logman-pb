@@ -8,6 +8,7 @@ export type WorkerProductionDetailData = {
   id: string;
   status: string;
   units: number | null;
+  shift: number | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -85,6 +86,13 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
           <div>
             <p className="label">Work Station</p>
             <p className="text-sm text-gray-800 dark:text-gray-200">{production.stationName}</p>
+          </div>
+        )}
+
+        {production.shift != null && (
+          <div>
+            <p className="label">Shift</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200">{production.shift}</p>
           </div>
         )}
 
