@@ -1,10 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import { users, accounts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { headers } from "next/headers";
+import { scryptAsync } from "@noble/hashes/scrypt.js";
+
+function toHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const saltBytes = new Uint8Array(16);
+  crypto.getRandomValues(saltBytes);
+  const salt = toHex(saltBytes);
+  const key = await scryptAsync(password.normalize("NFKC"), salt, {
+    N: 16384,
+    r: 16,
+    p: 1,
+    dkLen: 64,
+    maxmem: 128 * 16384 * 16 * 2,
+  });
+  return `${salt}:${toHex(key)}`;
+}
 
 // POST /api/admin/users — create a new user
 const createUserSchema = z.object({
@@ -28,24 +49,35 @@ export async function POST(request: NextRequest) {
 
   const { name, email, password, role } = result.data;
 
-  // Use better-auth to create the user (handles password hashing + account row)
-  const signUpRes = await auth.api.signUpEmail({
-    body: { name, email, password },
-    asResponse: true,
+  // Check for duplicate email
+  const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
+  if (existing) {
+    return NextResponse.json({ error: "Email already in use" }, { status: 409 });
+  }
+
+  const now = new Date();
+  const userId = crypto.randomUUID();
+  const hashedPassword = await hashPassword(password);
+
+  await db.insert(users).values({
+    id: userId,
+    name,
+    email,
+    emailVerified: true,
+    role,
+    createdAt: now,
+    updatedAt: now,
   });
 
-  if (!signUpRes.ok) {
-    const err = await signUpRes.json().catch(() => ({ error: "Failed to create user" }));
-    return NextResponse.json(err, { status: signUpRes.status });
-  }
-
-  const created = await signUpRes.json();
-  const userId: string = created?.user?.id ?? created?.id;
-
-  // Set role if not default
-  if (role !== "user") {
-    await db.update(users).set({ role, updatedAt: new Date() }).where(eq(users.id, userId));
-  }
+  await db.insert(accounts).values({
+    id: crypto.randomUUID(),
+    accountId: email,
+    providerId: "credential",
+    userId,
+    password: hashedPassword,
+    createdAt: now,
+    updatedAt: now,
+  });
 
   const [newUser] = await db
     .select({ id: users.id, name: users.name, email: users.email, role: users.role, createdAt: users.createdAt })

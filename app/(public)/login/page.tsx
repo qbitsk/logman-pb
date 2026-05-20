@@ -18,14 +18,13 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    try {
-      await signIn.email({ email, password });
-      router.push("/dashboard");
-    } catch {
+    const { error } = await signIn.email({ email, password });
+    if (error) {
       setError("Invalid email or password.");
-    } finally {
-      setLoading(false);
+    } else {
+      router.push("/dashboard");
     }
+    setLoading(false);
   }
 
   return (

@@ -25,7 +25,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    disableSignUp: true,
+    disableSignUp: true, // Public sign-up disabled; admins create users via /api/admin/users
     requireEmailVerification: false, // Set true in production with Resend
   },
 
