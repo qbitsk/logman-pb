@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { WorkerProductionDetail, type WorkerProductionDetailData } from "@/components/WorkerProductionDetail";
+import { useTranslation } from "@/lib/i18n";
 
 export default function UserWorkerProductionDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
 
   const [production, setProduction] = useState<WorkerProductionDetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ export default function UserWorkerProductionDetailPage() {
   if (loading) {
     return (
       <div className="max-w-2xl card text-center py-16">
-        <p className="text-gray-400">Loading…</p>
+        <p className="text-gray-400">{t.common.loading}</p>
       </div>
     );
   }
@@ -32,7 +34,7 @@ export default function UserWorkerProductionDetailPage() {
   if (notFound || !production) {
     return (
       <div className="max-w-2xl card text-center py-16">
-        <p className="text-gray-400">Production not found.</p>
+        <p className="text-gray-400">{t.workerProductionDetail.notFound}</p>
       </div>
     );
   }

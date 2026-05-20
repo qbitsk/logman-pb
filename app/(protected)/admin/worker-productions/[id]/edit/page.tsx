@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
+import { useTranslation } from "@/lib/i18n";
 
 type WorkerProduction = {
   id: string;
@@ -26,6 +27,7 @@ type ExistingDefect = { productionDefectId: string; units: number };
 
 export default function AdminWorkerProductionEditPage() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
 
   const [production, setProduction] = useState<WorkerProduction | null>(null);
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
@@ -82,7 +84,7 @@ export default function AdminWorkerProductionEditPage() {
   if (notFound) {
     return (
       <div className="card text-center py-16">
-        <p className="text-gray-400">Production not found.</p>
+        <p className="text-gray-400">{t.workerProductionDetail.notFound}</p>
       </div>
     );
   }
@@ -90,13 +92,13 @@ export default function AdminWorkerProductionEditPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">Edit Production</h1>
+        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">{t.workerProductionForm.editTitle}</h1>
         {production && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">#{production.id}</p>}
       </div>
 
       {loading || !production ? (
         <div className="card text-center py-16">
-          <p className="text-gray-400">Loading…</p>
+          <p className="text-gray-400">{t.common.loading}</p>
         </div>
       ) : (
         <WorkerProductionForm

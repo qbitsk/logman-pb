@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/lib/i18n";
 
 type ProductionPart = { id: string; name: string; productionProcessId: string };
 type ProductionProcess = { id: string; name: string };
@@ -14,6 +15,7 @@ type ProductionDefect = { id: string; name: string; type: "unit" | "component"; 
 
 export default function NewWorkerProductionPage() {
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const initialPartId = searchParams.get("partId") ?? undefined;
 
   const [productionParts, setProductionParts] = useState<ProductionPart[]>([]);
@@ -48,12 +50,12 @@ export default function NewWorkerProductionPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-1">New Production</h1>
-      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Fill in the form below and submit your data.</p>
+      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-1">{t.workerProductions.newProduction}</h1>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t.workerProductionForm.newSubtitle}</p>
 
       {loading ? (
         <div className="card max-w-2xl text-center py-16">
-          <p className="text-gray-400">Loading…</p>
+          <p className="text-gray-400">{t.common.loading}</p>
         </div>
       ) : (
         <div className="card max-w-2xl">

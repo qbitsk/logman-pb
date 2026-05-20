@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/lib/i18n";
 
 type WorkerProduction = {
   id: string;
@@ -29,6 +30,7 @@ type ExistingDefect = { productionDefectId: string; units: number };
 export default function EditWorkerProductionPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [production, setProduction] = useState<WorkerProduction | null>(null);
   const [existingDefects, setExistingDefects] = useState<ExistingDefect[]>([]);
@@ -89,7 +91,7 @@ export default function EditWorkerProductionPage() {
   if (notFound) {
     return (
       <div className="card text-center py-16">
-        <p className="text-gray-400">Production not found.</p>
+        <p className="text-gray-400">{t.workerProductionDetail.notFound}</p>
       </div>
     );
   }
@@ -101,13 +103,13 @@ export default function EditWorkerProductionPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back
+        {t.common.back}
       </Link>
-      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-6">Edit Production</h1>
+      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-6">{t.workerProductionForm.editTitle}</h1>
 
       {loading ? (
         <div className="card text-center py-16">
-          <p className="text-gray-400">Loading…</p>
+          <p className="text-gray-400">{t.common.loading}</p>
         </div>
       ) : (
         <WorkerProductionForm

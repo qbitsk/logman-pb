@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useSession } from "@/lib/auth/client";
 import { authClient } from "@/lib/auth/client";
+import { useTranslation } from "@/lib/i18n";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -20,7 +22,7 @@ export default function ProfilePage() {
     setSuccess(false);
 
     if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
+      setError(t.profile.passwordMismatch);
       return;
     }
 
@@ -32,7 +34,7 @@ export default function ProfilePage() {
     });
 
     if (res.error) {
-      setError(res.error.message ?? "Failed to change password.");
+      setError(res.error.message ?? t.profile.updateFailed);
     } else {
       setSuccess(true);
       setCurrentPassword("");
@@ -44,20 +46,20 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-6">Profile</h1>
+      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-6">{t.profile.title}</h1>
 
       <div className="card max-w-lg space-y-6">
         {/* Account info */}
         <div className="space-y-1">
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t.profile.name}</p>
           <p className="text-gray-900 dark:text-gray-100 font-medium">{session?.user.name}</p>
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t.profile.email}</p>
           <p className="text-gray-900 dark:text-gray-100">{session?.user.email}</p>
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Role</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t.profile.role}</p>
           <p className="text-gray-900 dark:text-gray-100 capitalize">{session?.user.role as string}</p>
         </div>
 
@@ -65,10 +67,10 @@ export default function ProfilePage() {
 
         {/* Change password */}
         <div>
-          <h2 className="text-base font-semibold text-brand-950 dark:text-white mb-4">Change Password</h2>
+          <h2 className="text-base font-semibold text-brand-950 dark:text-white mb-4">{t.profile.changePassword}</h2>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
-              <label className="label">Current Password</label>
+              <label className="label">{t.profile.currentPassword}</label>
               <input
                 type="password"
                 className="input"
@@ -78,7 +80,7 @@ export default function ProfilePage() {
               />
             </div>
             <div>
-              <label className="label">New Password</label>
+              <label className="label">{t.profile.newPassword}</label>
               <input
                 type="password"
                 className="input"
@@ -89,7 +91,7 @@ export default function ProfilePage() {
               />
             </div>
             <div>
-              <label className="label">Confirm New Password</label>
+              <label className="label">{t.profile.confirmPassword}</label>
               <input
                 type="password"
                 className="input"
@@ -101,10 +103,10 @@ export default function ProfilePage() {
             </div>
 
             {error && <p className="text-sm text-red-600">{error}</p>}
-            {success && <p className="text-sm text-emerald-600">Password changed successfully.</p>}
+            {success && <p className="text-sm text-emerald-600">{t.profile.passwordChanged}</p>}
 
             <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "Updating…" : "Update Password"}
+              {loading ? t.profile.updating : t.profile.updatePassword}
             </button>
           </form>
         </div>
@@ -112,3 +114,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

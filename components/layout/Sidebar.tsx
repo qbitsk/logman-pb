@@ -6,28 +6,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "@/lib/auth/client";
 import {
   LayoutDashboard, FileText, Users, Download,
-  LogOut, ShieldCheck, Menu, X,
+  LogOut, Menu, X,
   Layers,
-  Triangle,
 } from "lucide-react";
 import { useState } from "react";
 import { clsx } from "clsx";
 import { ThemeToggle } from "./ThemeToggle";
-
-const userNavItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/worker-productions", label: "My Productions", icon: FileText },
-];
-
-const operatorNavItems = [
-  { href: "/admin/worker-productions", label: "Productions", icon: FileText },
-];
-
-const adminNavItems = [
-  { href: "/admin/definitions", label: "Definitions", icon: Layers },
-  { href: "/admin/exports", label: "Exports", icon: Download },
-  { href: "/admin/users", label: "Users", icon: Users },
-];
+import { useTranslation } from "@/lib/i18n";
 
 const roleRank: Record<string, number> = { user: 1, operator: 2, admin: 3 };
 
@@ -79,6 +64,23 @@ function NavContent({
   onNavigate: () => void;
   onSignOut: () => void;
 }) {
+  const { t } = useTranslation();
+
+  const userNavItems = [
+    { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard },
+    { href: "/worker-productions", label: t.nav.myProductions, icon: FileText },
+  ];
+
+  const operatorNavItems = [
+    { href: "/admin/worker-productions", label: t.nav.productions, icon: FileText },
+  ];
+
+  const adminNavItems = [
+    { href: "/admin/definitions", label: t.nav.definitions, icon: Layers },
+    { href: "/admin/exports", label: t.nav.exports, icon: Download },
+    { href: "/admin/users", label: t.nav.users, icon: Users },
+  ];
+
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
@@ -100,7 +102,7 @@ function NavContent({
           <>
             <div className="pt-4 pb-1 px-3">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-600">
-                Operator
+                {t.nav.operator}
               </span>
             </div>
             {operatorNavItems.map((item) => (
@@ -113,7 +115,7 @@ function NavContent({
           <>
             <div className="pt-4 pb-1 px-3">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-600">
-                Admin
+                {t.nav.admin}
               </span>
             </div>
             {adminNavItems.map((item) => (
@@ -142,7 +144,7 @@ function NavContent({
             className="flex items-center gap-2 flex-1 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:hover:text-red-400 rounded-lg transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            Sign out
+            {t.common.signOut}
           </button>
           <ThemeToggle />
         </div>
@@ -197,3 +199,4 @@ export function Sidebar() {
     </>
   );
 }
+

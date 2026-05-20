@@ -5,10 +5,11 @@ import { signIn } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Triangle } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
     const { error } = await signIn.email({ email, password });
     if (error) {
-      setError("Invalid email or password.");
+      setError(t.auth.invalidCredentials);
     } else {
       router.push("/dashboard");
     }
@@ -46,7 +47,7 @@ export default function LoginPage() {
               </div>
             )}
             <div>
-              <label className="label" htmlFor="email">Email</label>
+              <label className="label" htmlFor="email">{t.auth.email}</label>
               <input
                 id="email" type="email" required
                 value={email} onChange={(e) => setEmail(e.target.value)}
@@ -54,7 +55,7 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="label" htmlFor="password">Password</label>
+              <label className="label" htmlFor="password">{t.auth.password}</label>
               <input
                 id="password" type="password" required
                 value={password} onChange={(e) => setPassword(e.target.value)}
@@ -62,18 +63,19 @@ export default function LoginPage() {
               />
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full">
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? t.auth.signingIn : t.auth.signIn}
             </button>
           </form>
         </div>
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-          Don&apos;t have an account?{" "}
+          {t.auth.noAccount}{" "}
           <Link href="/register" className="text-brand-600 font-medium hover:underline">
-            Register
+            {t.auth.register}
           </Link>
         </p>
       </div>
     </div>
   );
 }
+

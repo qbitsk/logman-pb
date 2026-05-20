@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { clsx } from "clsx";
 import { useToast } from "@/components/ui/toast";
+import { useTranslation } from "@/lib/i18n";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -56,15 +57,7 @@ type ProductionStation = {
 
 type Tab = "processes" | "parts" | "components" | "defects" | "unitdefects" | "stations";
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "processes", label: "Processes" },
-  { id: "parts", label: "Parts" },
-  { id: "components", label: "Components" },
-  { id: "stations", label: "Stations" },
-  { id: "unitdefects", label: "Part Defects" },
-  { id: "defects", label: "Component Defects" },
-  
-];
+const TAB_IDS: Tab[] = ["processes", "parts", "components", "stations", "unitdefects", "defects"];
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
@@ -97,6 +90,16 @@ function Modal({
 export default function WorkCategoriesPage() {
   const [activeTab, setActiveTab] = useState<Tab>("processes");
   const { error: toastError } = useToast();
+  const { t } = useTranslation();
+
+  const TABS: { id: Tab; label: string }[] = [
+    { id: "processes", label: t.definitions.tabs.processes },
+    { id: "parts", label: t.definitions.tabs.parts },
+    { id: "components", label: t.definitions.tabs.components },
+    { id: "stations", label: t.definitions.tabs.stations },
+    { id: "unitdefects", label: t.definitions.tabs.unitDefects },
+    { id: "defects", label: t.definitions.tabs.defects },
+  ];
 
   // ── Production Processes state ──
   const [productionProcesses, setProductionProcesses] = useState<ProductionProcess[]>([]);
@@ -245,13 +248,13 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteProcess(id: string) {
-    if (!confirm("Delete this process? This may affect existing data.")) return;
+    if (!confirm(t.definitions.deleteProcessConfirm)) return;
     const res = await fetch(`/api/admin/production-processes/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setProductionProcesses((prev) => prev.filter((p) => p.id !== id));
     } else {
       const err = await res.json().catch(() => ({}));
-      toastError(err?.error ?? "Failed to delete.");
+      toastError(err?.error ?? t.common.failedToDelete);
     }
   }
 
@@ -303,13 +306,13 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteProd(id: string) {
-    if (!confirm("Delete this part? This may affect existing data.")) return;
+    if (!confirm(t.definitions.deletePartConfirm)) return;
     const res = await fetch(`/api/admin/production-parts/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setProductionParts((prev) => prev.filter((p) => p.id !== id));
     } else {
       const err = await res.json().catch(() => ({}));
-      toastError(err?.error ?? "Failed to delete.");
+      toastError(err?.error ?? t.common.failedToDelete);
     }
   }
 
@@ -361,13 +364,13 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteComp(id: string) {
-    if (!confirm("Delete this work component? This may affect existing data.")) return;
+    if (!confirm(t.definitions.deleteComponentConfirm)) return;
     const res = await fetch(`/api/admin/production-components/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setComponents((prev) => prev.filter((c) => c.id !== id));
     } else {
       const err = await res.json().catch(() => ({}));
-      toastError(err?.error ?? "Failed to delete.");
+      toastError(err?.error ?? t.common.failedToDelete);
     }
   }
 
@@ -420,13 +423,13 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteDef(id: string) {
-    if (!confirm("Delete this component defect?")) return;
+    if (!confirm(t.definitions.deleteDefectConfirm)) return;
     const res = await fetch(`/api/admin/production-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setDefects((prev) => prev.filter((d) => d.id !== id));
     } else {
       const err = await res.json().catch(() => ({}));
-      toastError(err?.error ?? "Failed to delete.");
+      toastError(err?.error ?? t.common.failedToDelete);
     }
   }
 
@@ -488,13 +491,13 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteUnitDef(id: string) {
-    if (!confirm("Delete this part defect?")) return;
+    if (!confirm(t.definitions.deleteUnitDefectConfirm)) return;
     const res = await fetch(`/api/admin/production-defects/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setUnitDefects((prev) => prev.filter((d) => d.id !== id));
     } else {
       const err = await res.json().catch(() => ({}));
-      toastError(err?.error ?? "Failed to delete.");
+      toastError(err?.error ?? t.common.failedToDelete);
     }
   }
 
@@ -546,13 +549,13 @@ export default function WorkCategoriesPage() {
   }
 
   async function deleteStation(id: string) {
-    if (!confirm("Delete this station? This may affect existing data.")) return;
+    if (!confirm(t.definitions.deleteStationConfirm)) return;
     const res = await fetch(`/api/admin/production-stations/${id}`, { method: "DELETE" });
     if (res.ok || res.status === 204) {
       setStations((prev) => prev.filter((s) => s.id !== id));
     } else {
       const err = await res.json().catch(() => ({}));
-      toastError(err?.error ?? "Failed to delete.");
+      toastError(err?.error ?? t.common.failedToDelete);
     }
   }
 
@@ -563,8 +566,8 @@ export default function WorkCategoriesPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-950  dark:text-white">Definitions</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage processes, components and defects.</p>
+        <h1 className="text-2xl font-bold text-brand-950  dark:text-white">{t.definitions.title}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.definitions.subtitle}</p>
       </div>
 
       {/* Tabs */}
@@ -589,22 +592,22 @@ export default function WorkCategoriesPage() {
       {activeTab === "processes" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{productionProcesses.length} processes</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{t.definitions.countProcesses(productionProcesses.length)}</span>
             <button onClick={openProcessCreate} className="btn-primary flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Process
+              {t.definitions.addProcess}
             </button>
           </div>
           {processLoading ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.common.loading}</div>
           ) : productionProcesses.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No processes yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noProcesses}</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -635,23 +638,23 @@ export default function WorkCategoriesPage() {
       {activeTab === "parts" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{productionParts.length} parts</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{t.definitions.countParts(productionParts.length)}</span>
             <button onClick={openProdCreate} className="btn-primary flex items-center gap-2" disabled={productionProcesses.length === 0}>
               <Plus className="w-4 h-4" />
-              Part
+              {t.definitions.addPart}
             </button>
           </div>
           {prodLoading ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.common.loading}</div>
           ) : productionParts.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No parts yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noParts}</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -683,24 +686,24 @@ export default function WorkCategoriesPage() {
       {activeTab === "components" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{components.length} components</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{t.definitions.countComponents(components.length)}</span>
             <button onClick={openCompCreate} className="btn-primary flex items-center gap-2" disabled={productionParts.length === 0}>
               <Plus className="w-4 h-4" />
-              Component
+              {t.definitions.addComponent}
             </button>
           </div>
           {compLoading ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.common.loading}</div>
           ) : components.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No components yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noComponents}</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Part</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.part}</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -733,25 +736,25 @@ export default function WorkCategoriesPage() {
       {activeTab === "defects" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{defects.length} component defects</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{t.definitions.countDefects(defects.length)}</span>
             <button onClick={openDefCreate} className="btn-primary flex items-center gap-2" disabled={components.length === 0}>
               <Plus className="w-4 h-4" />
-              Component Defect
+              {t.definitions.addDefect}
             </button>
           </div>
           {defLoading ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.common.loading}</div>
           ) : defects.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No component defects yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noDefects}</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Part</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Component</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.part}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.component}</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -785,24 +788,24 @@ export default function WorkCategoriesPage() {
       {activeTab === "stations" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{stations.length} stations</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{t.definitions.countStations(stations.length)}</span>
             <button onClick={openStationCreate} className="btn-primary flex items-center gap-2" disabled={productionParts.length === 0}>
               <Plus className="w-4 h-4" />
-              Station
+              {t.definitions.addStation}
             </button>
           </div>
           {stationLoading ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.common.loading}</div>
           ) : stations.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No stations yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noStations}</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Part</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.part}</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -835,24 +838,24 @@ export default function WorkCategoriesPage() {
       {activeTab === "unitdefects" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{unitDefects.length} part defects</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{t.definitions.countUnitDefects(unitDefects.length)}</span>
             <button onClick={openUnitDefCreate} className="btn-primary flex items-center gap-2" disabled={productionParts.length === 0}>
               <Plus className="w-4 h-4" />
-              Part Defect
+              {t.definitions.addUnitDefect}
             </button>
           </div>
           {unitDefLoading ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">Loading…</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.common.loading}</div>
           ) : unitDefects.length === 0 ? (
-            <div className="card text-center py-12 text-gray-400 text-sm">No part defects yet.</div>
+            <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noUnitDefects}</div>
           ) : (
             <div className="card p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Name</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Part</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.part}</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
@@ -884,12 +887,12 @@ export default function WorkCategoriesPage() {
       {/* ── Process Modal ── */}
       {processModal.open && (
         <Modal
-          title={processModal.editing ? "Edit Process" : "New Process"}
+          title={processModal.editing ? t.definitions.modalEditProcess : t.definitions.modalNewProcess}
           onClose={() => setProcessModal({ open: false, editing: null })}
         >
           <form onSubmit={submitProcess} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.common.name}</label>
               <input
                 className="input w-full"
                 value={processForm.name}
@@ -901,10 +904,10 @@ export default function WorkCategoriesPage() {
             {processError && <p className="text-sm text-red-600">{processError}</p>}
             <div className="flex justify-end gap-3 pt-1">
               <button type="button" onClick={() => setProcessModal({ open: false, editing: null })} className="btn-secondary">
-                Cancel
+                {t.common.cancel}
               </button>
               <button type="submit" disabled={processSaving} className="btn-primary">
-                {processSaving ? "Saving…" : "Save"}
+                {processSaving ? t.workerProductionForm.saving : t.common.save}
               </button>
             </div>
           </form>
@@ -914,12 +917,12 @@ export default function WorkCategoriesPage() {
       {/* ── Work Product Modal ── */}
       {prodModal.open && (
         <Modal
-          title={prodModal.editing ? "Edit Part" : "New Part"}
+          title={prodModal.editing ? t.definitions.modalEditPart : t.definitions.modalNewPart}
           onClose={() => setProdModal({ open: false, editing: null })}
         >
           <form onSubmit={submitProd} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.common.name}</label>
               <input
                 className="input w-full"
                 value={prodForm.name}
@@ -929,14 +932,14 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Process</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.workerProductions.process}</label>
               <select
                 className="input w-full"
                 value={prodForm.productionProcessId}
                 onChange={(e) => setProdForm((f) => ({ ...f, productionProcessId: e.target.value }))}
                 required
               >
-                <option value="">— Select Process —</option>
+                <option value="">— {t.definitions.selectProcess} —</option>
                 {productionProcesses.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
@@ -945,10 +948,10 @@ export default function WorkCategoriesPage() {
             {prodError && <p className="text-sm text-red-600">{prodError}</p>}
             <div className="flex justify-end gap-3 pt-1">
               <button type="button" onClick={() => setProdModal({ open: false, editing: null })} className="btn-secondary">
-                Cancel
+                {t.common.cancel}
               </button>
               <button type="submit" disabled={prodSaving} className="btn-primary">
-                {prodSaving ? "Saving…" : "Save"}
+                {prodSaving ? t.workerProductionForm.saving : t.common.save}
               </button>
             </div>
           </form>
@@ -958,12 +961,12 @@ export default function WorkCategoriesPage() {
       {/* ── Component Modal ── */}
       {compModal.open && (
         <Modal
-          title={compModal.editing ? "Edit Work Component" : "New Work Component"}
+          title={compModal.editing ? t.definitions.modalEditComponent : t.definitions.modalNewComponent}
           onClose={() => setCompModal({ open: false, editing: null })}
         >
           <form onSubmit={submitComp} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.common.name}</label>
               <input
                 className="input w-full"
                 value={compForm.name}
@@ -973,14 +976,14 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Part</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.workerProductionDetail.part}</label>
               <select
                 className="input w-full"
                 value={compForm.productionPartId}
                 onChange={(e) => setCompForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
-                <option value="">— Select Part —</option>
+                <option value="">— {t.definitions.selectPart} —</option>
                 {productionParts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
                 ))}
@@ -989,10 +992,10 @@ export default function WorkCategoriesPage() {
             {compError && <p className="text-sm text-red-600">{compError}</p>}
             <div className="flex justify-end gap-3 pt-1">
               <button type="button" onClick={() => setCompModal({ open: false, editing: null })} className="btn-secondary">
-                Cancel
+                {t.common.cancel}
               </button>
               <button type="submit" disabled={compSaving} className="btn-primary">
-                {compSaving ? "Saving…" : "Save"}
+                {compSaving ? t.workerProductionForm.saving : t.common.save}
               </button>
             </div>
           </form>
@@ -1002,12 +1005,12 @@ export default function WorkCategoriesPage() {
       {/* ── Defect Category Modal ── */}
       {defModal.open && (
         <Modal
-          title={defModal.editing ? "Edit Component Defect" : "New Component Defect"}
+          title={defModal.editing ? t.definitions.modalEditDefect : t.definitions.modalNewDefect}
           onClose={() => setDefModal({ open: false, editing: null })}
         >
           <form onSubmit={submitDef} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.common.name}</label>
               <input
                 className="input w-full"
                 value={defForm.name}
@@ -1017,14 +1020,14 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Component</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.workerProductionDetail.component}</label>
               <select
                 className="input w-full"
                 value={defForm.productionComponentId}
                 onChange={(e) => setDefForm((f) => ({ ...f, productionComponentId: e.target.value }))}
                 required
               >
-                <option value="">— Select Component —</option>
+                <option value="">— {t.definitions.selectComponent} —</option>
                 {components.map((comp) => {
                   const part = productionParts.find((p) => p.id === comp.productionPartId);
                   const label = part
@@ -1037,10 +1040,10 @@ export default function WorkCategoriesPage() {
             {defError && <p className="text-sm text-red-600">{defError}</p>}
             <div className="flex justify-end gap-3 pt-1">
               <button type="button" onClick={() => setDefModal({ open: false, editing: null })} className="btn-secondary">
-                Cancel
+                {t.common.cancel}
               </button>
               <button type="submit" disabled={defSaving} className="btn-primary">
-                {defSaving ? "Saving…" : "Save"}
+                {defSaving ? t.workerProductionForm.saving : t.common.save}
               </button>
             </div>
           </form>
@@ -1050,12 +1053,12 @@ export default function WorkCategoriesPage() {
       {/* ── Station Modal ── */}
       {stationModal.open && (
         <Modal
-          title={stationModal.editing ? "Edit Station" : "New Station"}
+          title={stationModal.editing ? t.definitions.modalEditStation : t.definitions.modalNewStation}
           onClose={() => setStationModal({ open: false, editing: null })}
         >
           <form onSubmit={submitStation} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.common.name}</label>
               <input
                 className="input w-full"
                 value={stationForm.name}
@@ -1065,14 +1068,14 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Part</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.workerProductionDetail.part}</label>
               <select
                 className="input w-full"
                 value={stationForm.productionPartId}
                 onChange={(e) => setStationForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
-                <option value="">— Select Part —</option>
+                <option value="">— {t.definitions.selectPart} —</option>
                 {productionParts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
                 ))}
@@ -1081,10 +1084,10 @@ export default function WorkCategoriesPage() {
             {stationError && <p className="text-sm text-red-600">{stationError}</p>}
             <div className="flex justify-end gap-3 pt-1">
               <button type="button" onClick={() => setStationModal({ open: false, editing: null })} className="btn-secondary">
-                Cancel
+                {t.common.cancel}
               </button>
               <button type="submit" disabled={stationSaving} className="btn-primary">
-                {stationSaving ? "Saving…" : "Save"}
+                {stationSaving ? t.workerProductionForm.saving : t.common.save}
               </button>
             </div>
           </form>
@@ -1094,12 +1097,12 @@ export default function WorkCategoriesPage() {
       {/* ── Unit Defect Modal ── */}
       {unitDefModal.open && (
         <Modal
-          title={unitDefModal.editing ? "Edit Part Defect" : "New Part Defect"}
+          title={unitDefModal.editing ? t.definitions.modalEditUnitDefect : t.definitions.modalNewUnitDefect}
           onClose={() => setUnitDefModal({ open: false, editing: null })}
         >
           <form onSubmit={submitUnitDef} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.common.name}</label>
               <input
                 className="input w-full"
                 value={unitDefForm.name}
@@ -1109,14 +1112,14 @@ export default function WorkCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Part</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.workerProductionDetail.part}</label>
               <select
                 className="input w-full"
                 value={unitDefForm.productionPartId}
                 onChange={(e) => setUnitDefForm((f) => ({ ...f, productionPartId: e.target.value }))}
                 required
               >
-                <option value="">— Select Part —</option>
+                <option value="">— {t.definitions.selectPart} —</option>
                 {productionParts.map((prod) => (
                   <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
                 ))}
@@ -1125,10 +1128,10 @@ export default function WorkCategoriesPage() {
             {unitDefError && <p className="text-sm text-red-600">{unitDefError}</p>}
             <div className="flex justify-end gap-3 pt-1">
               <button type="button" onClick={() => setUnitDefModal({ open: false, editing: null })} className="btn-secondary">
-                Cancel
+                {t.common.cancel}
               </button>
               <button type="submit" disabled={unitDefSaving} className="btn-primary">
-                {unitDefSaving ? "Saving…" : "Save"}
+                {unitDefSaving ? t.workerProductionForm.saving : t.common.save}
               </button>
             </div>
           </form>

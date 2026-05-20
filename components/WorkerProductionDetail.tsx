@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { clsx } from "clsx";
 import { ArrowLeft, Pencil } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export type WorkerProductionDetailData = {
   id: string;
@@ -32,6 +33,7 @@ const statusStyles: Record<string, string> = {
 };
 
 export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) {
+  const { t } = useTranslation();
   const defectedComponents = production.defects.filter((d) => d.workDefectType === "component").reduce((sum, d) => sum + d.units, 0);
   const defectedProducts = production.defects.filter((d) => d.workDefectType === "unit").reduce((sum, d) => sum + d.units, 0);
   const wasUpdated = new Date(production.updatedAt) > new Date(production.createdAt);
@@ -44,7 +46,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
           className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          {t.common.back}
         </Link>
         {editUrl && (
           <Link
@@ -52,7 +54,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
           >
             <Pencil className="w-4 h-4" />
-            Edit
+            {t.common.edit}
           </Link>
         )}
       </div>
@@ -60,7 +62,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
       <div className="mb-6">
         <div className="flex items-center gap-3 mt-2">
           <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[production.status])}>
-            {production.status}
+            {t.status[production.status as keyof typeof t.status] ?? production.status}
           </span>
           <span className="text-sm text-gray-400 dark:text-gray-500">
             {new Date(production.createdAt).toLocaleDateString()}
@@ -72,33 +74,33 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
         <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4 text-sm">
           {production.productionProcessName && (
             <div>
-              <dt className="text-xs text-gray-400 dark:text-gray-500">Process</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.process}</dt>
               <dd className="text-gray-700 dark:text-gray-300 capitalize">{production.productionProcessName}</dd>
             </div>
           )}
 
           <div>
-            <dt className="text-xs text-gray-400 dark:text-gray-500">Part</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.part}</dt>
             <dd className="text-gray-700 dark:text-gray-300 capitalize">{production.productionPartName}</dd>
           </div>
 
           {production.stationName && (
             <div>
-              <dt className="text-xs text-gray-400 dark:text-gray-500">Station</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.station}</dt>
               <dd className="text-gray-700 dark:text-gray-300 capitalize">{production.stationName}</dd>
             </div>
           )}
 
           {production.shift != null && (
             <div>
-              <dt className="text-xs text-gray-400 dark:text-gray-500">Shift</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.shift}</dt>
               <dd className="text-gray-700 dark:text-gray-300">{production.shift}</dd>
             </div>
           )}
 
           {production.units != null && (
             <div>
-              <dt className="text-xs text-gray-400 dark:text-gray-500">Units</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.units}</dt>
               <dd className="text-emerald-600 font-medium">{production.units}</dd>
             </div>
           )}
@@ -106,11 +108,11 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
           {production.units != null && production.defects.length > 0 && (
             <>
               <div>
-                <dt className="text-xs text-gray-400 dark:text-gray-500">Defected Parts</dt>
+                <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.defectedParts}</dt>
                 <dd className="text-red-600 font-medium">{defectedProducts}</dd>
               </div>
               <div>
-                <dt className="text-xs text-gray-400 dark:text-gray-500">Defected Components</dt>
+                <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.defectedComponents}</dt>
                 <dd className="text-red-500 font-medium">{defectedComponents}</dd>
               </div>
             </>
@@ -118,19 +120,19 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
 
           {production.userName && (
             <div>
-              <dt className="text-xs text-gray-400 dark:text-gray-500">User</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.user}</dt>
               <dd className="text-gray-700 dark:text-gray-300">{production.userName}</dd>
             </div>
           )}
 
           <div>
-            <dt className="text-xs text-gray-400 dark:text-gray-500">Submitted</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.submitted}</dt>
             <dd className="text-gray-500 dark:text-gray-400">{new Date(production.createdAt).toLocaleString()}</dd>
           </div>
 
           {wasUpdated && (
             <div>
-              <dt className="text-xs text-gray-400 dark:text-gray-500">Last updated</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.lastUpdated}</dt>
               <dd className="text-gray-500 dark:text-gray-400">{new Date(production.updatedAt).toLocaleString()}</dd>
             </div>
           )}
@@ -138,7 +140,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
 
         {production.notes && (
           <div className="mt-4">
-            <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">Notes</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">{t.workerProductionDetail.notes}</p>
             <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{production.notes}</p>
           </div>
         )}
@@ -148,8 +150,8 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
           <div className="mt-4 border-t border-gray-100 dark:border-gray-700 pt-4">
             <div className="divide-y divide-gray-100 dark:divide-gray-700 border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden">
               <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                <span>Defect</span>
-                <span>Component</span>
+                <span>{t.workerProductionDetail.defect}</span>
+                <span>{t.workerProductionDetail.component}</span>
                 <span className="text-right">Units</span>
               </div>
               {production.defects.map((d, i) => (

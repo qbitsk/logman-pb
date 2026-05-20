@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth/client";
 import Link from "next/link";
 import { Plus, FileText, CheckCircle, Clock } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 type Stats = { total: number; new: number; completed: number };
 type ProductionProcess = { id: string; name: string };
@@ -11,6 +12,7 @@ type ProductionPart = { id: string; name: string; productionProcessId: string };
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<Stats | null>(null);
   const [processes, setProcesses] = useState<ProductionProcess[]>([]);
   const [parts, setParts] = useState<ProductionPart[]>([]);
@@ -28,9 +30,9 @@ export default function DashboardPage() {
   }, []);
 
   const statCards = [
-    { label: "Total", value: stats?.total, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
-    { label: "New", value: stats?.new, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
-    { label: "Completed", value: stats?.completed, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
+    { label: t.dashboard.total, value: stats?.total, icon: FileText, color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20" },
+    { label: t.dashboard.new, value: stats?.new, icon: Clock, color: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
+    { label: t.dashboard.completed, value: stats?.completed, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
   ];
 
   return (
@@ -38,13 +40,13 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-brand-950 dark:text-white">
-            Hello, {session?.user.name?.split(" ")[0]} 👋
+            {t.dashboard.hello}, {session?.user.name?.split(" ")[0]} 👋
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Here&apos;s an overview of your activity</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t.dashboard.overview}</p>
         </div>
         <Link href="/worker-productions/new" className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          New Production
+          {t.dashboard.newProduction}
         </Link>
       </div>
 
@@ -70,7 +72,7 @@ export default function DashboardPage() {
 
       {/* Quick actions */}
       <div className="mb-2">
-        <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Quick actions</h2>
+        <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">{t.dashboard.quickActions}</h2>
         {processes.length > 0 ? (
           <div className="columns-2xs gap-4">
             {processes.map((process) => {
@@ -104,10 +106,10 @@ export default function DashboardPage() {
         ) : (
           <div className="card flex flex-wrap gap-3">
             <Link href="/worker-productions/new" className="btn-primary">
-              New production
+              {t.dashboard.newProductionBtn}
             </Link>
             <Link href="/worker-productions" className="btn-secondary">
-              View all productions
+              {t.dashboard.viewAllProductions}
             </Link>
           </div>
         )}

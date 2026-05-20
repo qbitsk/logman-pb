@@ -6,6 +6,7 @@ import { clsx } from "clsx";
 import { signOut } from "@/lib/auth/client";
 import { workerProductionSchema, type WorkerProductionInput } from "@/lib/validations/worker-production";
 import { Trash2, Plus, CheckCircle2 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 function generateKey(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -97,6 +98,7 @@ type Props = {
 
 export function WorkerProductionForm({ production, productionProcesses, productionParts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl, initialPartId }: Props) {
   const router = useRouter();
+  const { t } = useTranslation();
   const isEdit = !!production;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/worker-productions" : "/worker-productions");
 
@@ -265,10 +267,10 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             <div className="flex flex-col items-center gap-3">
               <CheckCircle2 className="w-12 h-12 text-emerald-500" strokeWidth={1.5} />
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                Production submitted!
+                {t.workerProductionForm.submitSuccess}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                Do you want to sign out?
+                {t.workerProductionForm.signOutQuestion}
               </p>
             </div>
             <div className="flex gap-3 justify-center">
@@ -278,7 +280,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
                 disabled={loggingOff}
                 className="btn-primary"
               >
-                {loggingOff ? "Signing out…" : "Sign out"}
+                {loggingOff ? t.common.signingOut : t.common.signOut}
               </button>
               <button
                 type="button"
@@ -286,7 +288,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
                 disabled={loggingOff}
                 className="btn-secondary"
               >
-                Cancel
+                {t.common.cancel}
               </button>
             </div>
           </div>
@@ -298,7 +300,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             const status = getWorkerProductionStatus(production!.createdAt);
             return (
               <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[status])}>
-                {status}
+                {t.status[status] ?? status}
               </span>
             );
           })()}
@@ -306,7 +308,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             by <span className="font-medium text-gray-700 dark:text-gray-300">{production!.userName}</span>
           </span>
           <span className="text-sm text-gray-400 dark:text-gray-500 ml-auto">
-            Updated {new Date(production!.updatedAt).toLocaleString()}
+            {t.workerProductionForm.updatedAt} {new Date(production!.updatedAt).toLocaleString()}
           </span>
         </div>
       )}
@@ -319,7 +321,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
         )}
 
         <div>
-          <label className="label" htmlFor="productionProcessId">Process{!isEdit && " *"}</label>
+          <label className="label" htmlFor="productionProcessId">{t.workerProductionForm.process}{!isEdit && " *"}</label>
           <select
             id="productionProcessId"
             value={productionProcessId}
@@ -335,7 +337,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
         </div>
 
         <div>
-          <label className="label" htmlFor="productionPartId">Part{!isEdit && " *"}</label>
+          <label className="label" htmlFor="productionPartId">{t.workerProductionForm.part}{!isEdit && " *"}</label>
           <select
             id="productionPartId"
             name="productionPartId"
@@ -354,7 +356,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
         <div>
           <label className="label">
-            Shift <span className="text-gray-400 font-normal">(optional)</span>
+            {t.workerProductionForm.shift} <span className="text-gray-400 font-normal">({t.common.optional})</span>
           </label>
           <div className="flex gap-2 mt-1">
             {([1, 2, 3] as const).map((s) => (
@@ -377,7 +379,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
         <div>
           <label className="label" htmlFor="productionStationId">
-            Work Station <span className="text-gray-400 font-normal">(optional)</span>
+            {t.workerProductionForm.workStation} <span className="text-gray-400 font-normal">({t.common.optional})</span>
           </label>
           <select
             id="productionStationId"
@@ -386,7 +388,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             onChange={(e) => set("productionStationId", e.target.value)}
             className="input"
           >
-            <option value="">— None —</option>
+            <option value="">{t.workerProductionForm.none}</option>
             {filteredStations.map((ws) => (
               <option key={ws.id} value={ws.id}>
                 {ws.name}
@@ -397,7 +399,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
         <div>
           <label className="label" htmlFor="units">
-            Units <span className="text-gray-400 font-normal">(optional)</span>
+            {t.workerProductionForm.units} <span className="text-gray-400 font-normal">({t.common.optional})</span>
           </label>
           <input
             id="units"
@@ -414,7 +416,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
         <div>
           <label className="label" htmlFor="notes">
-            Notes <span className="text-gray-400 font-normal">(optional)</span>
+            {t.workerProductionForm.notes} <span className="text-gray-400 font-normal">({t.common.optional})</span>
           </label>
           <textarea
             id="notes"
@@ -431,18 +433,18 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="label">Defects</label>
+            <label className="label">{t.workerProductionForm.defects}</label>
             <div className="flex gap-2">
               <button type="button" onClick={() => addDefect("unit")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
-                <Plus className="w-3 h-3" /> Part <span className="hidden sm:block">Defect</span>
+                <Plus className="w-3 h-3" /> {t.workerProductionForm.addPartDefect}
               </button>
               <button type="button" onClick={() => addDefect("component")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
-                <Plus className="w-3 h-3" /> Component <span className="hidden sm:block">Defect</span>
+                <Plus className="w-3 h-3" /> {t.workerProductionForm.addComponentDefect}
               </button>
             </div>
           </div>
           {defects.length === 0 && (
-            <p className="text-sm text-gray-400 dark:text-gray-500 italic">No defects added.</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 italic">{t.workerProductionForm.noDefects}</p>
           )}
           <div className="space-y-2">
             {defects.map((defect) => {
@@ -466,7 +468,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
                       onChange={(e) => setDefect(defect._key, "productionComponentId", e.target.value)}
                       className="input flex-1 min-w-[140px]"
                     >
-                      <option value="">— Component —</option>
+                      <option value="">{t.workerProductionForm.componentOption}</option>
                       {filteredComponents.map((wc) => (
                         <option key={wc.id} value={wc.id}>{wc.name}</option>
                       ))}
@@ -477,7 +479,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
                     onChange={(e) => setDefect(defect._key, "productionDefectId", e.target.value)}
                     className="input flex-1 min-w-[140px]"
                   >
-                    <option value="">— Defect —</option>
+                    <option value="">{t.workerProductionForm.defectOption}</option>
                     {filteredDefects.map((wd) => (
                       <option key={wd.id} value={wd.id}>{wd.name}</option>
                     ))}
@@ -503,25 +505,25 @@ export function WorkerProductionForm({ production, productionProcesses, producti
           </div>
         </div>
 
-        {success && <p className="text-sm text-emerald-600">Changes saved.</p>}
+        {success && <p className="text-sm text-emerald-600">{t.workerProductionForm.changesSaved}</p>}
 
         <div className={clsx("flex gap-3 pt-2", isEdit && "justify-end")}>
           {isEdit ? (
             <>
               <button type="button" onClick={() => router.push(resolvedBackUrl)} className="btn-secondary">
-                Back
+                {t.common.back}
               </button>
               <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? "Saving…" : "Save changes"}
+                {loading ? t.workerProductionForm.saving : t.workerProductionForm.saveChanges}
               </button>
             </>
           ) : (
             <>
               <button type="submit" disabled={loading} className="btn-primary">
-                {loading ? "Submitting…" : "Submit"}
+                {loading ? t.workerProductionForm.submitting : t.workerProductionForm.submit}
               </button>
               <button type="button" onClick={() => router.back()} className="btn-secondary">
-                Cancel
+                {t.common.cancel}
               </button>
             </>
           )}

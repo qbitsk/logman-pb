@@ -13,6 +13,7 @@ import {
   type ColumnFiltersState,
   type FilterFn,
 } from "@tanstack/react-table";
+import { useTranslation } from "@/lib/i18n";
 
 type WorkerProduction = {
   id: string;
@@ -59,13 +60,14 @@ function RowActions({
   row: WorkerProduction;
   onDeleted: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   if (row.status !== "new") return null;
   return (
     <div className="flex items-center justify-end gap-1">
       <Link
         href={`/worker-productions/${row.id}/edit`}
         className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors"
-        aria-label="Edit production"
+        aria-label={t.workerProductions.editProduction}
       >
         <Pencil className="w-4 h-4" />
       </Link>
@@ -79,6 +81,7 @@ function RowActions({
 }
 
 export default function WorkerProductionsPage() {
+  const { t } = useTranslation();
   const [productions, setProductions] = useState<WorkerProduction[]>([]);
   const [loading, setLoading] = useState(true);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -153,22 +156,22 @@ export default function WorkerProductionsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">My Productions</h1>
+        <h1 className="text-2xl font-bold text-brand-950 dark:text-white">{t.workerProductions.title}</h1>
         <Link href="/worker-productions/new" className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          New Production
+          {t.workerProductions.newProduction}
         </Link>
       </div>
 
       {loading ? (
         <div className="card text-center py-16">
-          <p className="text-gray-400">Loading…</p>
+          <p className="text-gray-400">{t.common.loading}</p>
         </div>
       ) : productions.length === 0 ? (
         <div className="card text-center py-16">
-          <p className="text-gray-400 mb-4">No productions yet.</p>
+          <p className="text-gray-400 mb-4">{t.workerProductions.noProductions}</p>
           <Link href="/worker-productions/new" className="btn-primary inline-flex">
-            Create your first production
+            {t.workerProductions.createFirst}
           </Link>
         </div>
       ) : (
@@ -179,14 +182,14 @@ export default function WorkerProductionsPage() {
               <input
                 type="date"
                 className="input text-sm h-10 flex-1 min-w-[140px]"
-                aria-label="From date"
+                aria-label={t.workerProductions.dateFrom}
                 value={getDateRange()[0]}
                 onChange={setDateFilter(0)}
               />
               <input
                 type="date"
                 className="input text-sm h-10 flex-1 min-w-[140px]"
-                aria-label="To date"
+                aria-label={t.workerProductions.dateTo}
                 value={getDateRange()[1]}
                 onChange={setDateFilter(1)}
               />
@@ -195,7 +198,7 @@ export default function WorkerProductionsPage() {
                 value={getFilter("process")}
                 onChange={setFilter("process")}
               >
-                <option value="">All processes</option>
+                <option value="">{t.workerProductions.process}</option>
                 {processOptions.map((o) => (
                   <option key={o} value={o} className="capitalize">{o}</option>
                 ))}
@@ -205,7 +208,7 @@ export default function WorkerProductionsPage() {
                 value={getFilter("product")}
                 onChange={setFilter("product")}
               >
-                <option value="">All products</option>
+                <option value="">{t.workerProductions.product}</option>
                 {productOptions.map((o) => (
                   <option key={o} value={o} className="capitalize">{o}</option>
                 ))}
@@ -215,7 +218,7 @@ export default function WorkerProductionsPage() {
                 value={getFilter("station")}
                 onChange={setFilter("station")}
               >
-                <option value="">All stations</option>
+                <option value="">{t.workerProductions.station}</option>
                 {stationOptions.map((o) => (
                   <option key={o} value={o} className="capitalize">{o}</option>
                 ))}
@@ -225,9 +228,9 @@ export default function WorkerProductionsPage() {
                 value={getFilter("status")}
                 onChange={setFilter("status")}
               >
-                <option value="">All statuses</option>
-                <option value="new">New</option>
-                <option value="completed">Completed</option>
+                <option value="">{t.workerProductions.status}</option>
+                <option value="new">{t.status.new}</option>
+                <option value="completed">{t.status.completed}</option>
               </select>
               {hasFilters && (
                 <button
@@ -235,7 +238,7 @@ export default function WorkerProductionsPage() {
                   onClick={() => setColumnFilters([])}
                 >
                   <X className="w-3.5 h-3.5" />
-                  Clear
+                  {t.workerProductions.clearFilters}
                 </button>
               )}
             </div>
@@ -243,7 +246,7 @@ export default function WorkerProductionsPage() {
 
           {filteredRows.length === 0 ? (
             <div className="card text-center py-12">
-              <p className="text-gray-400">No results match your filters.</p>
+              <p className="text-gray-400">{t.workerProductions.noProductions}</p>
             </div>
           ) : (
             <>
@@ -252,7 +255,7 @@ export default function WorkerProductionsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                      {["Date", "Process", "Product", "Station", "Shift", "Units", "Status", ""].map((h) => (
+                      {[t.workerProductions.date, t.workerProductions.process, t.workerProductions.product, t.workerProductions.station, t.workerProductions.shift, t.workerProductions.units, t.workerProductions.status, ""].map((h) => (
                         <th
                           key={h}
                           className="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap"
@@ -282,7 +285,7 @@ export default function WorkerProductionsPage() {
                         <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{s.shift ?? <Dash />}</td>
                         <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{s.units ?? <Dash />}</td>
                         <td className="px-3 py-2 text-center">
-                          <span className={clsx("badge capitalize", statusStyles[s.status])}>{s.status}</span>
+                          <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
                         </td>
                         <td className="pe-3 py-2 text-end">
                           <RowActions row={s} onDeleted={handleDeleted} />
@@ -305,18 +308,18 @@ export default function WorkerProductionsPage() {
                         >
                           {new Date(s.createdAt).toLocaleDateString()}
                         </Link>
-                        <span className={clsx("badge capitalize", statusStyles[s.status])}>{s.status}</span>
+                        <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
                       </div>
                      <RowActions row={s} onDeleted={handleDeleted} />
                     </div>
                     <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
                       {(
                         [
-                          ["Process", s.productionProcessName, true],
-                          ["Product", s.productionPartName, true],
-                          ["Station", s.stationName, true],
-                          ["Shift", s.shift, false],
-                          ["Units", s.units, false],
+                          [t.workerProductions.process, s.productionProcessName, true],
+                          [t.workerProductions.product, s.productionPartName, true],
+                          [t.workerProductions.station, s.stationName, true],
+                          [t.workerProductions.shift, s.shift, false],
+                          [t.workerProductions.units, s.units, false],
                         ] as [string, string | number | null, boolean][]
                       ).map(([label, value, cap]) => (
                         <div key={label}>

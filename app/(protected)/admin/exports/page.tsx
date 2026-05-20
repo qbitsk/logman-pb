@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Download, FileText } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export default function ExportsPage() {
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   async function downloadCSV() {
     setLoading(true);
@@ -28,9 +30,9 @@ export default function ExportsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-2">Data Exports</h1>
+      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-2">{t.exports.title}</h1>
       <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
-        Download all submission data. Exports include all fields and user information.
+        {t.exports.subtitle}
       </p>
 
       <div className="max-w-2xl">
@@ -39,9 +41,9 @@ export default function ExportsPage() {
             <FileText className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-semibold text-gray-800 dark:text-gray-200">CSV (.csv)</p>
+            <p className="font-semibold text-gray-800 dark:text-gray-200">{t.exports.csvTitle}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Plain separated-values file, compatible with any spreadsheet or data tool. Delimiter is auto-detected from your browser locale.
+              {t.exports.csvDescription}
             </p>
           </div>
           <button
@@ -50,7 +52,7 @@ export default function ExportsPage() {
             className="btn-primary flex items-center gap-2 mt-auto self-start"
           >
             <Download className="w-4 h-4" />
-            {loading ? "Generating…" : "Download"}
+            {loading ? t.exports.generating : t.exports.download}
           </button>
         </div>
       </div>
