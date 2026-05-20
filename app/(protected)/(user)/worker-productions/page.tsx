@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, X } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  type ColumnDef,
+  type ColumnFiltersState,
+  type FilterFn,
+} from "@tanstack/react-table";
 
 type WorkerProduction = {
   id: string;
@@ -22,9 +30,58 @@ const statusStyles: Record<string, string> = {
   completed: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
 };
 
+// Handles nullable string columns — null values never match an active filter.
+const nullableIncludesString: FilterFn<WorkerProduction> = (row, columnId, filterValue: string) => {
+  const val = row.getValue<string | null>(columnId);
+  if (val == null) return false;
+  return val.toLowerCase().includes(filterValue.toLowerCase());
+};
+
+// Filters by a [from, to] date range (both optional). Compares calendar day only.
+const dateRangeFilter: FilterFn<WorkerProduction> = (row, columnId, filterValue: [string, string]) => {
+  const [from, to] = filterValue;
+  const raw = row.getValue<string>(columnId);
+  const d = new Date(raw);
+  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  if (from && day < new Date(from).getTime()) return false;
+  if (to   && day > new Date(to).getTime())   return false;
+  return true;
+};
+
+function Dash() {
+  return <span className="text-gray-300 dark:text-gray-600">—</span>;
+}
+
+function RowActions({
+  row,
+  onDeleted,
+}: {
+  row: WorkerProduction;
+  onDeleted: (id: string) => void;
+}) {
+  if (row.status !== "new") return null;
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <Link
+        href={`/worker-productions/${row.id}/edit`}
+        className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors"
+        aria-label="Edit production"
+      >
+        <Pencil className="w-4 h-4" />
+      </Link>
+      <DeleteWorkerProductionButton
+        id={row.id}
+        apiPath="/api/worker-productions"
+        onDeleted={onDeleted}
+      />
+    </div>
+  );
+}
+
 export default function WorkerProductionsPage() {
   const [productions, setProductions] = useState<WorkerProduction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   useEffect(() => {
     fetch("/api/worker-productions")
@@ -32,6 +89,66 @@ export default function WorkerProductionsPage() {
       .then(setProductions)
       .finally(() => setLoading(false));
   }, []);
+
+  const columns = useMemo<ColumnDef<WorkerProduction>[]>(
+    () => [
+      { accessorKey: "createdAt",             id: "date",    filterFn: dateRangeFilter   },
+      { accessorKey: "productionProcessName", id: "process", filterFn: "equals" },
+      { accessorKey: "productionPartName",    id: "product", filterFn: "equals" },
+      { accessorKey: "stationName",           id: "station", filterFn: "equals"  },
+      { accessorKey: "status",                id: "status",  filterFn: "equals" },
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: productions,
+    columns,
+    state: { columnFilters },
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+
+  const processOptions = useMemo(
+    () => [...new Set(productions.map((p) => p.productionProcessName))].sort(),
+    [productions],
+  );
+  const productOptions = useMemo(
+    () => [...new Set(productions.map((p) => p.productionPartName))].sort(),
+    [productions],
+  );
+  const stationOptions = useMemo(
+    () => [...new Set(productions.map((p) => p.stationName).filter((s): s is string => s != null))].sort(),
+    [productions],
+  );
+
+  const filteredRows = table.getFilteredRowModel().rows;
+  const hasFilters = columnFilters.length > 0;
+
+  const getFilter = (id: string) =>
+    (table.getColumn(id)?.getFilterValue() as string) ?? "";
+
+  const getDateRange = () =>
+    (table.getColumn("date")?.getFilterValue() as [string, string]) ?? ["", ""];
+
+  const setDateFilter = (index: 0 | 1) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const next = [...getDateRange()] as [string, string];
+    next[index] = e.target.value;
+    if (!next[0] && !next[1]) {
+      table.getColumn("date")?.setFilterValue(undefined);
+    } else {
+      table.getColumn("date")?.setFilterValue(next);
+    }
+  };
+
+  const setFilter =
+    (id: string) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      table.getColumn(id)?.setFilterValue(e.target.value || undefined);
+
+  const handleDeleted = (id: string) =>
+    setProductions((prev) => prev.filter((x) => x.id !== id));
 
   return (
     <div>
@@ -55,55 +172,180 @@ export default function WorkerProductionsPage() {
           </Link>
         </div>
       ) : (
-        <div className="card p-0 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Date</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Process</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Product</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Station</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Shift</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Units</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">Status</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {productions.map((s) => (
-                <tr key={s.id} className="border-b border-gray-50 hover:bg-brand-50/40 dark:border-gray-700/50 dark:hover:bg-brand-900/10 transition-colors">
-                  <td className="px-5 py-3 text-gray-400 dark:text-gray-500">
-                    <Link href={`/worker-productions/${s.id}`} className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                      {new Date(s.createdAt).toLocaleDateString()}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionProcessName}</td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionPartName}</td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{s.shift ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{s.units ?? <span className="text-gray-300 dark:text-gray-600">—</span>}</td>
-                  <td className="px-5 py-3">
-                    <span className={clsx("badge capitalize", statusStyles[s.status])}>
-                      {s.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-end">
-                    <div className="flex items-center justify-end gap-1">
-                      {s.status === "new" && (
-                        <Link href={`/worker-productions/${s.id}/edit`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors" aria-label="Edit production">
-                          <Pencil className="w-4 h-4" />
-                        </Link>
-                      )}
-                      {s.status === "new" && (
-                        <DeleteWorkerProductionButton id={s.id} apiPath="/api/worker-productions" onDeleted={(id) => setProductions((prev) => prev.filter((x) => x.id !== id))} />
-                      )}
+        <>
+          {/* Filter toolbar */}
+          <div className="card mb-4 p-2">
+            <div className="flex flex-wrap gap-3 items-center">
+              <input
+                type="date"
+                className="input text-sm h-10 flex-1 min-w-[140px]"
+                aria-label="From date"
+                value={getDateRange()[0]}
+                onChange={setDateFilter(0)}
+              />
+              <input
+                type="date"
+                className="input text-sm h-10 flex-1 min-w-[140px]"
+                aria-label="To date"
+                value={getDateRange()[1]}
+                onChange={setDateFilter(1)}
+              />
+              <select
+                className="input text-sm h-10 flex-1 min-w-[150px]"
+                value={getFilter("process")}
+                onChange={setFilter("process")}
+              >
+                <option value="">All processes</option>
+                {processOptions.map((o) => (
+                  <option key={o} value={o} className="capitalize">{o}</option>
+                ))}
+              </select>
+              <select
+                className="input text-sm h-10 flex-1 min-w-[150px]"
+                value={getFilter("product")}
+                onChange={setFilter("product")}
+              >
+                <option value="">All products</option>
+                {productOptions.map((o) => (
+                  <option key={o} value={o} className="capitalize">{o}</option>
+                ))}
+              </select>
+              <select
+                className="input text-sm h-10 flex-1 min-w-[140px]"
+                value={getFilter("station")}
+                onChange={setFilter("station")}
+              >
+                <option value="">All stations</option>
+                {stationOptions.map((o) => (
+                  <option key={o} value={o} className="capitalize">{o}</option>
+                ))}
+              </select>
+              <select
+                className="input text-sm h-10 flex-1 min-w-[140px]"
+                value={getFilter("status")}
+                onChange={setFilter("status")}
+              >
+                <option value="">All statuses</option>
+                <option value="new">New</option>
+                <option value="completed">Completed</option>
+              </select>
+              {hasFilters && (
+                <button
+                  className="btn-secondary flex items-center gap-1.5 h-10 px-3 whitespace-nowrap"
+                  onClick={() => setColumnFilters([])}
+                >
+                  <X className="w-3.5 h-3.5" />
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          {filteredRows.length === 0 ? (
+            <div className="card text-center py-12">
+              <p className="text-gray-400">No results match your filters.</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop table */}
+              <div className="card p-0 overflow-x-auto hidden md:block">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                      {["Date", "Process", "Product", "Station", "Shift", "Units", "Status", ""].map((h) => (
+                        <th
+                          key={h}
+                          className="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap"
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRows.map(({ original: s }) => (
+                      <tr
+                        key={s.id}
+                        className="border-b border-gray-50 hover:bg-brand-50/40 dark:border-gray-700/50 dark:hover:bg-brand-900/10 transition-colors"
+                      >
+                        <td className="px-3 py-2 text-gray-400 dark:text-gray-500">
+                          <Link
+                            href={`/worker-productions/${s.id}`}
+                            className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                          >
+                            {new Date(s.createdAt).toLocaleDateString()}
+                          </Link>
+                        </td>
+                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.productionProcessName}</td>
+                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.productionPartName}</td>
+                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <Dash />}</td>
+                        <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{s.shift ?? <Dash />}</td>
+                        <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{s.units ?? <Dash />}</td>
+                        <td className="px-3 py-2 text-center">
+                          <span className={clsx("badge capitalize", statusStyles[s.status])}>{s.status}</span>
+                        </td>
+                        <td className="pe-3 py-2 text-end">
+                          <RowActions row={s} onDeleted={handleDeleted} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile card list */}
+              <div className="flex flex-col gap-3 md:hidden">
+                {filteredRows.map(({ original: s }) => (
+                  <div key={s.id} className="card p-4">
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <Link
+                        href={`/worker-productions/${s.id}`}
+                        className="text-sm font-semibold text-brand-600 dark:text-brand-400 hover:underline"
+                      >
+                        {new Date(s.createdAt).toLocaleDateString()}
+                      </Link>
+                      <span className={clsx("badge capitalize", statusStyles[s.status])}>{s.status}</span>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      {(
+                        [
+                          ["Process", s.productionProcessName, true],
+                          ["Product", s.productionPartName, true],
+                          ["Station", s.stationName, true],
+                          ["Shift", s.shift, false],
+                          ["Units", s.units, false],
+                        ] as [string, string | number | null, boolean][]
+                      ).map(([label, value, cap]) => (
+                        <div key={label}>
+                          <dt className="text-xs text-gray-400 dark:text-gray-500">{label}</dt>
+                          <dd className={clsx("text-gray-700 dark:text-gray-300", cap && "capitalize")}>
+                            {value ?? <Dash />}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                    {s.status === "new" && (
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                        <Link
+                          href={`/worker-productions/${s.id}/edit`}
+                          className="btn-secondary flex items-center gap-1.5 py-1.5 px-3 text-xs"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          Edit
+                        </Link>
+                        <DeleteWorkerProductionButton
+                          id={s.id}
+                          apiPath="/api/worker-productions"
+                          onDeleted={handleDeleted}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
       )}
     </div>
   );

@@ -8,7 +8,7 @@ export default function ProtectedLayout({
   return (
     <div className="flex min-h-dvh overflow-x-hidden">
       <Sidebar />
-      <main className="flex-1 min-w-0 p-4 pt-16 md:p-8 md:pt-8 max-w-5xl">{children}</main>
+      <main className="flex-1 min-w-0 p-4 pt-16 md:p-5 lg:p-8 max-w-5xl">{children}</main>
     </div>
   );
 }
