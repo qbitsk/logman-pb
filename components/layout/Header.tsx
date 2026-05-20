@@ -34,7 +34,7 @@ export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 md:px-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 md:px-6 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
       {/* Left: hamburger */}
       <button
         onClick={onMenuToggle}
