@@ -1,5 +1,4 @@
 CREATE TYPE "public"."production_defect_type" AS ENUM('unit', 'component');--> statement-breakpoint
-CREATE TYPE "public"."worker_production_status" AS ENUM('new', 'approved', 'rejected');--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -91,7 +90,6 @@ CREATE TABLE "worker_productions" (
 	"units" integer,
 	"shift" integer,
 	"notes" text,
-	"status" "worker_production_status" DEFAULT 'new' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );

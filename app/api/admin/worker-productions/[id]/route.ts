@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, users, workerProductionDefects, productionDefects, productionComponents, productionParts, productionStations, productionProcesses } from "@/lib/db/schema";
+import { workerProductions, users, workerProductionDefects, productionDefects, productionComponents, productionParts, productionStations, productionProcesses, getWorkerProductionStatus } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -13,7 +13,6 @@ const patchSchema = z.object({
   units: z.number().int().positive().optional().nullable(),
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
-  status: z.enum(["new", "approved", "rejected"]).optional(),
   workerProductionDefects: z.array(workerProductionDefectSchema).optional(),
 });
 
@@ -42,7 +41,6 @@ export async function GET(
       units: workerProductions.units,
       shift: workerProductions.shift,
       notes: workerProductions.notes,
-      status: workerProductions.status,
       createdAt: workerProductions.createdAt,
       updatedAt: workerProductions.updatedAt,
       userId: workerProductions.userId,
@@ -83,6 +81,7 @@ export async function GET(
 
   return NextResponse.json({
     ...row,
+    status: getWorkerProductionStatus(row.createdAt),
     productionPartName: categoryRow[0]?.name ?? null,
     productionProcessName: categoryRow[0]?.productionProcessName ?? null,
     stationName: (stationRow as { name: string }[])[0]?.name ?? null,

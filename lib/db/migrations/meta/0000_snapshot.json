@@ -1,5 +1,5 @@
 {
-  "id": "e9606312-e6b8-4a02-aab2-42aa4c485816",
+  "id": "a96a13e1-dfaf-4936-a280-d0f5fa6e1c65",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -628,14 +628,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "status": {
-          "name": "status",
-          "type": "worker_production_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'new'"
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -824,15 +816,6 @@
       "values": [
         "unit",
         "component"
-      ]
-    },
-    "public.worker_production_status": {
-      "name": "worker_production_status",
-      "schema": "public",
-      "values": [
-        "new",
-        "approved",
-        "rejected"
       ]
     }
   },

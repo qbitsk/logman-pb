@@ -6,8 +6,6 @@ import { clsx } from "clsx";
 import { workerProductionSchema, type WorkerProductionInput } from "@/lib/validations/worker-production";
 import { Trash2, Plus } from "lucide-react";
 
-const STATUSES = ["new", "approved", "rejected"] as const;
-
 function generateKey(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -16,10 +14,18 @@ function generateKey(): string {
 }
 
 const statusStyles: Record<string, string> = {
-  new:      "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  approved: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  rejected: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+  new:       "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  completed: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
 };
+
+function getWorkerProductionStatus(createdAt: Date): "new" | "completed" {
+  const today = new Date();
+  return (
+    createdAt.getFullYear() === today.getFullYear() &&
+    createdAt.getMonth() === today.getMonth() &&
+    createdAt.getDate() === today.getDate()
+  ) ? "new" : "completed";
+}
 
 type WorkerProduction = {
   id: string;
@@ -28,7 +34,6 @@ type WorkerProduction = {
   units: number | null;
   shift: number | null;
   notes: string | null;
-  status: string;
   createdAt: Date;
   updatedAt: Date;
   userName: string;
@@ -86,10 +91,9 @@ type Props = {
   existingDefects?: { productionDefectId: string; units: number }[];
   editUrl?: string;
   backUrl?: string;
-  allowStatusChange?: boolean;
 };
 
-export function WorkerProductionForm({ production, productionProcesses, productionParts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl, allowStatusChange = false }: Props) {
+export function WorkerProductionForm({ production, productionProcesses, productionParts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl }: Props) {
   const router = useRouter();
   const isEdit = !!production;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/worker-productions" : "/worker-productions");
@@ -108,7 +112,6 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     units: production?.units?.toString() ?? "",
     shift: production?.shift?.toString() ?? "",
     notes: production?.notes ?? "",
-    status: production?.status ?? "new",
   });
   const [defects, setDefects] = useState<DefectEntry[]>(() =>
     (existingDefects ?? []).map((d) => {
@@ -137,7 +140,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     set("productionPartId", firstProduct?.id ?? "");
   }
 
-  function set(key: "productionPartId" | "productionStationId" | "units" | "shift" | "notes" | "status", value: string) {
+  function set(key: "productionPartId" | "productionStationId" | "units" | "shift" | "notes", value: string) {
     setForm((prev) => {
       const next = { ...prev, [key]: value };
       // Reset station when work product changes
@@ -248,9 +251,14 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     <div className={isEdit ? "max-w-2xl" : undefined}>
       {isEdit && (
         <div className="mb-6 flex items-center gap-3 flex-wrap">
-          <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[form.status])}>
-            {form.status}
-          </span>
+          {(() => {
+            const status = getWorkerProductionStatus(production!.createdAt);
+            return (
+              <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[status])}>
+                {status}
+              </span>
+            );
+          })()}
           <span className="text-sm text-gray-500 dark:text-gray-400">
             by <span className="font-medium text-gray-700 dark:text-gray-300">{production!.userName}</span>
           </span>
@@ -264,29 +272,6 @@ export function WorkerProductionForm({ production, productionProcesses, producti
         {serverError && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3">
             {serverError}
-          </div>
-        )}
-
-        {isEdit && allowStatusChange && (
-          <div>
-            <label className="label" htmlFor="status">Status</label>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {STATUSES.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => set("status", s)}
-                  className={clsx(
-                    "px-3 py-1.5 rounded-full text-xs font-semibold capitalize border transition-colors",
-                    form.status === s
-                      ? statusStyles[s] + " border-transparent ring-2 ring-offset-1 ring-brand-400 dark:ring-offset-gray-900"
-                      : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-brand-300"
-                  )}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
           </div>
         )}
 

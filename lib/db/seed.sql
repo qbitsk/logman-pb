@@ -5,7 +5,7 @@ INSERT INTO production_processes (id, name, created_at, updated_at) VALUES
 ('e9001e70-3466-46ee-90df-96fb81f69b24', 'Montáž + Nitovanie', '2026-05-05 07:08:26.077', '2026-05-11 08:28:41.56'),
 ('ac7decee-f94e-45b5-aebb-254130b98b38', 'Montáž polotovar', '2026-05-11 08:29:01.439031', '2026-05-11 08:29:01.439031'),
 ('43525df2-5c45-4334-af90-0d1558a54bab', 'Nitovanie poloautomat', '2026-05-11 08:29:16.923865', '2026-05-11 08:29:16.923865'),
-('129377a6-bb48-41b2-bf84-2145a87ef78c', 'Lepenie+montáž', '2026-05-11 08:58:08.659758', '2026-05-11 08:58:08.659758')
+('129377a6-bb48-41b2-bf84-2145a87ef78c', 'Lepenie + Montáž', '2026-05-11 08:58:08.659758', '2026-05-11 08:58:08.659758')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO production_parts (id, name, production_process_id, created_at, updated_at) VALUES

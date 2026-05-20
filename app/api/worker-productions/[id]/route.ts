@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, productionDefects, productionComponents, productionParts, productionStations, users, productionProcesses } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionDefects, productionComponents, productionParts, productionStations, users, productionProcesses, getWorkerProductionStatus } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -36,7 +36,6 @@ export async function GET(
       units: workerProductions.units,
       shift: workerProductions.shift,
       notes: workerProductions.notes,
-      status: workerProductions.status,
       createdAt: workerProductions.createdAt,
       updatedAt: workerProductions.updatedAt,
       userName: users.name,
@@ -78,6 +77,7 @@ export async function GET(
 
   return NextResponse.json({
     ...row,
+    status: getWorkerProductionStatus(row.createdAt),
     productionPartName: categoryRow[0]?.name ?? null,
     productionProcessName: categoryRow[0]?.productionProcessName ?? null,
     stationName: stationRow[0]?.name ?? null,
@@ -109,15 +109,15 @@ export async function PATCH(
 
   const { workerProductionDefects: defectsPayload, ...productionData } = result.data;
 
-  // Only allow edits when production is in new state
+  // Only allow edits when production is in new state (created today)
   const [existing] = await db
-    .select({ status: workerProductions.status })
+    .select({ createdAt: workerProductions.createdAt })
     .from(workerProductions)
     .where(and(eq(workerProductions.id, id), eq(workerProductions.userId, session.user.id)))
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (existing.status !== "new") {
+  if (getWorkerProductionStatus(existing.createdAt) !== "new") {
     return NextResponse.json({ error: "Worker production cannot be edited in its current status" }, { status: 403 });
   }
 
@@ -156,13 +156,13 @@ export async function DELETE(
   const { id } = await params;
 
   const [existing] = await db
-    .select({ status: workerProductions.status })
+    .select({ createdAt: workerProductions.createdAt })
     .from(workerProductions)
     .where(and(eq(workerProductions.id, id), eq(workerProductions.userId, session.user.id)))
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (existing.status !== "new") {
+  if (getWorkerProductionStatus(existing.createdAt) !== "new") {
     return NextResponse.json({ error: "Worker production cannot be deleted in its current status" }, { status: 403 });
   }
 

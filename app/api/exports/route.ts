@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, users, productionParts, productionProcesses, productionStations, workerProductionDefects, productionComponents, productionDefects } from "@/lib/db/schema";
+import { workerProductions, users, productionParts, productionProcesses, productionStations, workerProductionDefects, productionComponents, productionDefects, getWorkerProductionStatus } from "@/lib/db/schema";
 import { generateSubmissionsCSV } from "@/lib/exports/excel";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -23,7 +23,6 @@ export async function GET(request: NextRequest) {
       units: workerProductions.units,
       shift: workerProductions.shift,
       notes: workerProductions.notes,
-      status: workerProductions.status,
       createdAt: workerProductions.createdAt,
       updatedAt: workerProductions.updatedAt,
       userId: workerProductions.userId,
@@ -42,6 +41,7 @@ export async function GET(request: NextRequest) {
     productionPartName: r.productionPartName ?? "Unknown",
     workStationName: r.workStationName ?? "",
     userName: r.userName ?? "Unknown",
+    status: getWorkerProductionStatus(r.createdAt),
   }));
 
   // Fetch all defects with component name, defect name and type

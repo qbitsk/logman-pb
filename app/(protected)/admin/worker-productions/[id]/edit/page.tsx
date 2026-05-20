@@ -11,7 +11,6 @@ type WorkerProduction = {
   units: number | null;
   shift: number | null;
   notes: string | null;
-  status: string;
   createdAt: string;
   updatedAt: string;
   userName: string;
@@ -35,8 +34,11 @@ export default function AdminWorkerProductionEditPage() {
   const [stations, setStations] = useState<ProductionStation[]>([]);
   const [components, setComponents] = useState<ProductionComponent[]>([]);
   const [productionDefects, setProductionDefects] = useState<ProductionDefect[]>([]);
+  const [loadedCount, setLoadedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  const markLoaded = () => setLoadedCount((c) => c + 1);
 
   useEffect(() => {
     fetch(`/api/admin/worker-productions/${id}`)
@@ -49,34 +51,33 @@ export default function AdminWorkerProductionEditPage() {
         const { existingDefects: defects, ...prod } = data;
         setProduction(prod);
         setExistingDefects(defects ?? []);
+        markLoaded();
       });
   }, [id]);
 
   useEffect(() => {
-    fetch("/api/production-parts").then((r) => r.json()).then(setProductionParts);
+    fetch("/api/production-parts").then((r) => r.json()).then((d) => { setProductionParts(d); markLoaded(); });
   }, []);
 
   useEffect(() => {
-    fetch("/api/production-processes").then((r) => r.json()).then(setProductionProcesses);
+    fetch("/api/production-processes").then((r) => r.json()).then((d) => { setProductionProcesses(d); markLoaded(); });
   }, []);
 
   useEffect(() => {
-    fetch("/api/production-stations").then((r) => r.json()).then(setStations);
+    fetch("/api/production-stations").then((r) => r.json()).then((d) => { setStations(d); markLoaded(); });
   }, []);
 
   useEffect(() => {
-    fetch("/api/production-components").then((r) => r.json()).then(setComponents);
+    fetch("/api/production-components").then((r) => r.json()).then((d) => { setComponents(d); markLoaded(); });
   }, []);
 
   useEffect(() => {
-    fetch("/api/production-defects").then((r) => r.json()).then(setProductionDefects);
+    fetch("/api/production-defects").then((r) => r.json()).then((d) => { setProductionDefects(d); markLoaded(); });
   }, []);
 
   useEffect(() => {
-    if (production && productionParts.length && productionProcesses.length && stations.length && components.length && productionDefects.length) {
-      setLoading(false);
-    }
-  }, [production, productionParts, productionProcesses, stations, components, productionDefects]);
+    if (loadedCount >= 6) setLoading(false);
+  }, [loadedCount]);
 
   if (notFound) {
     return (
@@ -107,7 +108,6 @@ export default function AdminWorkerProductionEditPage() {
           productionDefects={productionDefects}
           existingDefects={existingDefects}
           backUrl="/admin/worker-productions"
-          allowStatusChange
         />
       )}
     </div>

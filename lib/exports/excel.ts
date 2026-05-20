@@ -13,7 +13,6 @@ export async function generateSubmissionsExcel(
   // Column definitions
   sheet.columns = [
     { header: "ID", key: "id", width: 38 },
-    { header: "Status", key: "status", width: 12 },
     { header: "Submitted By", key: "userName", width: 20 },
     { header: "Email", key: "userEmail", width: 30 },
     { header: "Notes", key: "notes", width: 30 },

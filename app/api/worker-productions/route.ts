@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, productionParts, productionProcesses } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionParts, productionProcesses, getWorkerProductionStatus } from "@/lib/db/schema";
 import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
 import { eq } from "drizzle-orm";
@@ -17,7 +17,6 @@ export async function GET() {
   const userProductions = await db
     .select({
       id: workerProductions.id,
-      status: workerProductions.status,
       units: workerProductions.units,
       createdAt: workerProductions.createdAt,
       productionPartName: productionParts.name,
@@ -29,7 +28,7 @@ export async function GET() {
     .where(eq(workerProductions.userId, session.user.id))
     .orderBy(workerProductions.createdAt);
 
-  return NextResponse.json(userProductions);
+  return NextResponse.json(userProductions.map((p) => ({ ...p, status: getWorkerProductionStatus(p.createdAt) })));
 }
 
 // POST /api/worker-productions — create a new worker production
@@ -58,7 +57,6 @@ export async function POST(request: NextRequest) {
       shift: result.data.shift ?? null,
       notes: result.data.notes,
       userId: session.user.id,
-      status: "new",
     })
     .returning();
 
