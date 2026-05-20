@@ -6,15 +6,25 @@ import Link from "next/link";
 import { Plus, FileText, CheckCircle, Clock } from "lucide-react";
 
 type Stats = { total: number; new: number; completed: number };
+type ProductionProcess = { id: string; name: string };
+type ProductionPart = { id: string; name: string; productionProcessId: string };
 
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [processes, setProcesses] = useState<ProductionProcess[]>([]);
+  const [parts, setParts] = useState<ProductionPart[]>([]);
 
   useEffect(() => {
     fetch("/api/stats")
       .then((r) => r.json())
       .then(setStats);
+    fetch("/api/production-processes")
+      .then((r) => r.json())
+      .then(setProcesses);
+    fetch("/api/production-parts")
+      .then((r) => r.json())
+      .then(setParts);
   }, []);
 
   const statCards = [
@@ -61,11 +71,44 @@ export default function DashboardPage() {
       {/* Quick actions */}
       <div className="card">
         <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Quick actions</h2>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/worker-productions/new" className="btn-primary">
-            New production
-          </Link>
-          <Link href="/worker-productions" className="btn-secondary">
+        {processes.length > 0 ? (
+          <div className="space-y-4">
+            {processes.map((process) => {
+              const processParts = parts.filter((p) => p.productionProcessId === process.id);
+              if (processParts.length === 0) return null;
+              return (
+                <div key={process.id}>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+                    {process.name}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {processParts.map((part) => (
+                      <Link
+                        key={part.id}
+                        href={`/worker-productions/new?partId=${part.id}`}
+                        className="btn-primary flex items-center gap-1.5 text-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        {part.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-3">
+            <Link href="/worker-productions/new" className="btn-primary">
+              New production
+            </Link>
+            <Link href="/worker-productions" className="btn-secondary">
+              View all productions
+            </Link>
+          </div>
+        )}
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <Link href="/worker-productions" className="btn-secondary text-sm">
             View all productions
           </Link>
         </div>

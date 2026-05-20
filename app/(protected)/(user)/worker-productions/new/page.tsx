@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -12,6 +13,9 @@ type ProductionComponent = { id: string; name: string; productionPartId: string 
 type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionPartId: string; productionComponentId: string | null };
 
 export default function NewWorkerProductionPage() {
+  const searchParams = useSearchParams();
+  const initialPartId = searchParams.get("partId") ?? undefined;
+
   const [productionParts, setProductionParts] = useState<ProductionPart[]>([]);
   const [productionProcesses, setProductionProcesses] = useState<ProductionProcess[]>([]);
   const [stations, setStations] = useState<ProductionStation[]>([]);
@@ -66,6 +70,7 @@ export default function NewWorkerProductionPage() {
             productionStations={stations}
             productionComponents={components}
             productionDefects={productionDefects}
+            initialPartId={initialPartId}
           />
         </div>
       )}

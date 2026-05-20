@@ -92,15 +92,16 @@ type Props = {
   existingDefects?: { productionDefectId: string; units: number }[];
   editUrl?: string;
   backUrl?: string;
+  initialPartId?: string;
 };
 
-export function WorkerProductionForm({ production, productionProcesses, productionParts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl }: Props) {
+export function WorkerProductionForm({ production, productionProcesses, productionParts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl, initialPartId }: Props) {
   const router = useRouter();
   const isEdit = !!production;
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/worker-productions" : "/worker-productions");
 
   const [productionProcessId, setProductionProcessId] = useState(() => {
-    const initialProductId = production?.productionPartId ?? productionParts[0]?.id ?? "";
+    const initialProductId = production?.productionPartId ?? initialPartId ?? productionParts[0]?.id ?? "";
     const product = productionParts.find((p) => p.id === initialProductId);
     return product?.productionProcessId ?? productionProcesses[0]?.id ?? "";
   });
@@ -108,7 +109,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
   const filteredProducts = productionParts.filter((p) => p.productionProcessId === productionProcessId);
 
   const [form, setForm] = useState({
-    productionPartId: production?.productionPartId ?? (productionParts[0]?.id ?? ""),
+    productionPartId: production?.productionPartId ?? initialPartId ?? (productionParts[0]?.id ?? ""),
     productionStationId: production?.productionStationId ?? "",
     units: production?.units?.toString() ?? "",
     shift: production?.shift?.toString() ?? "",
