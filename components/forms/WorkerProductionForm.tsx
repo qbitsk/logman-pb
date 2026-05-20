@@ -399,7 +399,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
         <div>
           <label className="label" htmlFor="units">
-            {t.workerProductionForm.units} <span className="text-gray-400 font-normal">({t.common.optional})</span>
+            {t.workerProductionForm.okParts} <span className="text-gray-400 font-normal">({t.common.optional})</span>
           </label>
           <input
             id="units"

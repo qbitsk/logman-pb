@@ -100,7 +100,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
 
           {production.units != null && (
             <div>
-              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.units}</dt>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.okParts}</dt>
               <dd className="text-emerald-600 font-medium">{production.units}</dd>
             </div>
           )}
@@ -152,7 +152,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
               <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 <span>{t.workerProductionDetail.defect}</span>
                 <span>{t.workerProductionDetail.component}</span>
-                <span className="text-right">Units</span>
+                <span className="text-right">{t.workerProductionDetail.units}</span>
               </div>
               {production.defects.map((d, i) => (
                 <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-x-4 px-3 py-2 text-sm text-gray-800 dark:text-gray-200">
