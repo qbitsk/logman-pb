@@ -68,85 +68,85 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
         </div>
       </div>
 
-      <div className="card space-y-5">
-
-        {production.productionProcessName && (
-          <div>
-            <p className="label">Process</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{production.productionProcessName}</p>
-          </div>
-        )}
-
-        <div>
-          <p className="label">Part</p>
-          <p className="text-sm text-gray-800 dark:text-gray-200">{production.productionPartName}</p>
-        </div>
-
-        {production.stationName && (
-          <div>
-            <p className="label">Work Station</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{production.stationName}</p>
-          </div>
-        )}
-
-        {production.shift != null && (
-          <div>
-            <p className="label">Shift</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{production.shift}</p>
-          </div>
-        )}
-
-        {production.units != null && (
-          <>
+      <div className="card">
+        <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4 text-sm">
+          {production.productionProcessName && (
             <div>
-              <p className="label">Units</p>
-              <p className="text-sm text-emerald-600">{production.units}</p>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">Process</dt>
+              <dd className="text-gray-700 dark:text-gray-300 capitalize">{production.productionProcessName}</dd>
             </div>
-            {production.defects.length > 0 && (
-              <>
-                <div>
-                  <p className="label">Defected Parts</p>
-                  <p className="text-sm text-red-600 font-medium">{defectedProducts}</p>
-                </div>
-                <div>
-                  <p className="label">Defected Components</p>
-                  <p className="text-sm text-red-500 font-medium">{defectedComponents}</p>
-                </div>
-              </>
-            )}
-          </>
-        )}
+          )}
+
+          <div>
+            <dt className="text-xs text-gray-400 dark:text-gray-500">Part</dt>
+            <dd className="text-gray-700 dark:text-gray-300 capitalize">{production.productionPartName}</dd>
+          </div>
+
+          {production.stationName && (
+            <div>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">Station</dt>
+              <dd className="text-gray-700 dark:text-gray-300 capitalize">{production.stationName}</dd>
+            </div>
+          )}
+
+          {production.shift != null && (
+            <div>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">Shift</dt>
+              <dd className="text-gray-700 dark:text-gray-300">{production.shift}</dd>
+            </div>
+          )}
+
+          {production.units != null && (
+            <div>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">Units</dt>
+              <dd className="text-emerald-600 font-medium">{production.units}</dd>
+            </div>
+          )}
+
+          {production.units != null && production.defects.length > 0 && (
+            <>
+              <div>
+                <dt className="text-xs text-gray-400 dark:text-gray-500">Defected Parts</dt>
+                <dd className="text-red-600 font-medium">{defectedProducts}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-400 dark:text-gray-500">Defected Components</dt>
+                <dd className="text-red-500 font-medium">{defectedComponents}</dd>
+              </div>
+            </>
+          )}
+
+          {production.userName && (
+            <div>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">User</dt>
+              <dd className="text-gray-700 dark:text-gray-300">{production.userName}</dd>
+            </div>
+          )}
+
+          <div>
+            <dt className="text-xs text-gray-400 dark:text-gray-500">Submitted</dt>
+            <dd className="text-gray-500 dark:text-gray-400">{new Date(production.createdAt).toLocaleString()}</dd>
+          </div>
+
+          {wasUpdated && (
+            <div>
+              <dt className="text-xs text-gray-400 dark:text-gray-500">Last updated</dt>
+              <dd className="text-gray-500 dark:text-gray-400">{new Date(production.updatedAt).toLocaleString()}</dd>
+            </div>
+          )}
+        </dl>
 
         {production.notes && (
-          <div>
-            <p className="label">Notes</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{production.notes}</p>
-          </div>
-        )}
-
-        {production.userName && (
-          <div>
-            <p className="label">User</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">{production.userName}</p>
-          </div>
-        )}
-
-        <div>
-          <p className="label">Submitted</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(production.createdAt).toLocaleString()}</p>
-        </div>
-
-        {wasUpdated && (
-          <div>
-            <p className="label">Last updated</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(production.updatedAt).toLocaleString()}</p>
+          <div className="mt-4">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">Notes</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{production.notes}</p>
           </div>
         )}
 
         {production.defects.length > 0 && (
-          <div>
-            <p className="label">Defects</p>
-            <div className="mt-1 divide-y divide-gray-100 dark:divide-gray-700 border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden">
+
+          <div className="mt-4 border-t border-gray-100 dark:border-gray-700 pt-4">
+            <div className="divide-y divide-gray-100 dark:divide-gray-700 border border-gray-100 dark:border-gray-700 rounded-lg overflow-hidden">
               <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 <span>Defect</span>
                 <span>Component</span>
