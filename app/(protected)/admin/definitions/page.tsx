@@ -568,13 +568,13 @@ export default function WorkCategoriesPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] -mx-4 px-4 sm:mx-0 sm:px-0">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={clsx(
-              "px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors",
+              "shrink-0 px-3 py-2.5 text-xs sm:px-4 sm:text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap",
               activeTab === tab.id
                 ? "border-brand-600 text-brand-700 dark:text-brand-400"
                 : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
