@@ -19,8 +19,11 @@ const userNavItems = [
   { href: "/worker-productions", label: "My Productions", icon: FileText },
 ];
 
-const adminNavItems = [
+const operatorNavItems = [
   { href: "/admin/worker-productions", label: "Productions", icon: FileText },
+];
+
+const adminNavItems = [
   { href: "/admin/definitions", label: "Definitions", icon: Layers },
   { href: "/admin/exports", label: "Exports", icon: Download },
   { href: "/admin/users", label: "Users", icon: Users },
@@ -63,6 +66,7 @@ function NavContent({
   pathname,
   session,
   userRole,
+  isOperator,
   isAdmin,
   onNavigate,
   onSignOut,
@@ -70,6 +74,7 @@ function NavContent({
   pathname: string;
   session: ReturnType<typeof useSession>["data"];
   userRole: string;
+  isOperator: boolean;
   isAdmin: boolean;
   onNavigate: () => void;
   onSignOut: () => void;
@@ -90,6 +95,19 @@ function NavContent({
         {userNavItems.map((item) => (
           <NavLink key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} />
         ))}
+
+        {isOperator && (
+          <>
+            <div className="pt-4 pb-1 px-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-600">
+                Operator
+              </span>
+            </div>
+            {operatorNavItems.map((item) => (
+              <NavLink key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} />
+            ))}
+          </>
+        )}
 
         {isAdmin && (
           <>
@@ -140,13 +158,14 @@ export function Sidebar() {
   const [open, setOpen] = useState(false);
   const userRole = session?.user?.role ?? "user";
 
+  const isOperator = roleRank[userRole] >= roleRank["operator"];
   const isAdmin = roleRank[userRole] >= roleRank["admin"];
 
   const handleNavigate = () => setOpen(false);
   const handleSignOut = () =>
     signOut({ fetchOptions: { onSuccess: () => router.push("/login") } });
 
-  const navProps = { pathname, session, userRole, isAdmin, onNavigate: handleNavigate, onSignOut: handleSignOut };
+  const navProps = { pathname, session, userRole, isOperator, isAdmin, onNavigate: handleNavigate, onSignOut: handleSignOut };
 
   return (
     <>
