@@ -2,16 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { signOut, useSession } from "@/lib/auth/client";
+import { usePathname } from "next/navigation";
+import { useSession } from "@/lib/auth/client";
 import {
   LayoutDashboard, FileText, Users, Download,
-  LogOut, Menu, X,
   Layers,
 } from "lucide-react";
-import { useState } from "react";
 import { clsx } from "clsx";
-import { ThemeToggle } from "./ThemeToggle";
 import { useTranslation } from "@/lib/i18n";
 
 const roleRank: Record<string, number> = { user: 1, operator: 2, admin: 3 };
@@ -49,20 +46,14 @@ function NavLink({
 
 function NavContent({
   pathname,
-  session,
-  userRole,
   isOperator,
   isAdmin,
   onNavigate,
-  onSignOut,
 }: {
   pathname: string;
-  session: ReturnType<typeof useSession>["data"];
-  userRole: string;
   isOperator: boolean;
   isAdmin: boolean;
   onNavigate: () => void;
-  onSignOut: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -84,16 +75,16 @@ function NavContent({
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-brand-100 dark:border-gray-800">
-        <div className="flex items-center gap-2 pl-10 md:pl-0">
-          <Image src="/images/logo.png" alt="Logman Triangle" width={100} height={100} style={{ width: "auto", height: "30px" }} loading="eager" />
-          <Image src="/images/logo-brand.webp" alt="Logman PB" width={100} height={24} style={{ width: "auto", height: "32px" }} className="dark:hidden" />
-          <Image src="/images/logo-white.webp" alt="Logman PB" width={100} height={24} style={{ width: "auto", height: "32px" }} className="hidden dark:block" />
+      <div className="py-4 px-5 flex items-center justify-left">
+        <div className="flex items-center gap-2 me-2">
+          <Image src="/images/logo.png" alt="Logman Triangle" width={100} height={100} style={{ width: "auto", height: "27px" }} loading="eager" />
+          <Image src="/images/logo-brand.webp" alt="Logman PB" width={100} height={24} style={{ width: "auto", height: "30px" }} className="dark:hidden" />
+          <Image src="/images/logo-white.webp" alt="Logman PB" width={100} height={24} style={{ width: "auto", height: "30px" }} className="hidden dark:block" />
         </div>
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {userNavItems.map((item) => (
           <NavLink key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} />
         ))}
@@ -124,75 +115,42 @@ function NavContent({
           </>
         )}
       </nav>
-
-      {/* User + logout */}
-      <div className="border-t border-brand-100 dark:border-gray-800 p-4">
-        <Link href="/profile" onClick={onNavigate} className="flex items-center gap-3 px-2 mb-3 rounded-lg hover:bg-brand-50 dark:hover:bg-gray-800 transition-colors py-1">
-          <div className="w-8 h-8 rounded-full bg-brand-200 dark:bg-brand-900 flex items-center justify-center text-brand-700 dark:text-brand-300 font-bold text-sm shrink-0">
-            {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-              {session?.user?.name}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{userRole}</p>
-          </div>
-        </Link>
-        <div className="flex items-center justify-between">
-          <button
-            onClick={onSignOut}
-            className="flex items-center gap-2 flex-1 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:hover:text-red-400 rounded-lg transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            {t.common.signOut}
-          </button>
-          <ThemeToggle />
-        </div>
-      </div>
     </div>
   );
 }
 
-export function Sidebar() {
+export function Sidebar({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
   const userRole = session?.user?.role ?? "user";
 
   const isOperator = roleRank[userRole] >= roleRank["operator"];
   const isAdmin = roleRank[userRole] >= roleRank["admin"];
 
-  const handleNavigate = () => setOpen(false);
-  const handleSignOut = () =>
-    signOut({ fetchOptions: { onSuccess: () => router.push("/login") } });
-
-  const navProps = { pathname, session, userRole, isOperator, isAdmin, onNavigate: handleNavigate, onSignOut: handleSignOut };
+  const navProps = { pathname, isOperator, isAdmin, onNavigate: onClose };
 
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-50 shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 min-h-dvh">
-        <NavContent {...navProps} />
+      <aside className="hidden md:flex w-50 shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 h-dvh sticky top-0">
+        <NavContent {...navProps} onNavigate={() => {}} />
       </aside>
-
-      {/* Mobile toggle */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-100 dark:border-gray-800"
-        onClick={() => setOpen(!open)}
-      >
-        {open ? <X className="w-5 h-5 dark:text-gray-300" /> : <Menu className="w-5 h-5 dark:text-gray-300" />}
-      </button>
 
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden fixed inset-0 z-40 flex">
-          <div className="w-50 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col">
+          <div className="w-56 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col">
             <NavContent {...navProps} />
           </div>
           <div
             className="flex-1 bg-black/30"
-            onClick={() => setOpen(false)}
+            onClick={onClose}
           />
         </div>
       )}
