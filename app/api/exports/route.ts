@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
 import { workerProductions, users, productionParts, productionProcesses, productionStations, workerProductionDefects, productionComponents, productionDefects, getWorkerProductionStatus } from "@/lib/db/schema";
-import { generateSubmissionsCSV } from "@/lib/exports/excel";
+import { generateProductionsCSV } from "@/lib/exports/csv";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
@@ -65,7 +65,14 @@ export async function GET(request: NextRequest) {
     units: d.units,
   }));
 
-  const csv = await generateSubmissionsCSV(typedRows, typedDefectRows);
+  // Detect CSV delimiter from browser locale via Accept-Language header.
+  // European locales use "," as decimal separator, so Excel/Calc expect ";" as the field delimiter.
+  const reqHeaders = await headers();
+  const acceptLanguage = reqHeaders.get("accept-language") ?? "";
+  const primaryLang = acceptLanguage.split(",")[0].split(";")[0].trim().toLowerCase();
+  const csvDelimiter: "," | ";" = primaryLang.startsWith("en") ? "," : ";";
+
+  const csv = await generateProductionsCSV(typedRows, typedDefectRows, csvDelimiter);
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv",

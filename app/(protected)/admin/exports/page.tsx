@@ -41,7 +41,7 @@ export default function ExportsPage() {
           <div>
             <p className="font-semibold text-gray-800 dark:text-gray-200">CSV (.csv)</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Plain comma-separated file, compatible with any spreadsheet or data tool.
+              Plain separated-values file, compatible with any spreadsheet or data tool. Delimiter is auto-detected from your browser locale.
             </p>
           </div>
           <button
