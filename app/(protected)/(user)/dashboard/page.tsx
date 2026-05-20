@@ -69,27 +69,29 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <div className="card">
+      <div className="mb-8">
         <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Quick actions</h2>
         {processes.length > 0 ? (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             {processes.map((process) => {
               const processParts = parts.filter((p) => p.productionProcessId === process.id);
               if (processParts.length === 0) return null;
               return (
-                <div key={process.id}>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
-                    {process.name}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
+                <div key={process.id} className="card p-0">
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 rounded-t-[inherit]">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      {process.name}
+                    </p>
+                  </div>
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
                     {processParts.map((part) => (
                       <Link
                         key={part.id}
                         href={`/worker-productions/new?partId=${part.id}`}
-                        className="btn-primary flex items-center gap-1.5 text-sm"
+                        className="flex items-center px-4 py-2.5 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors group"
                       >
-                        <Plus className="w-3.5 h-3.5" />
-                        {part.name}
+                        <Plus className="w-4 h-4 me-2.5 text-brand-400 dark:text-brand-500" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-brand-700 dark:group-hover:text-brand-400">{part.name}</span> 
                       </Link>
                     ))}
                   </div>
@@ -98,7 +100,7 @@ export default function DashboardPage() {
             })}
           </div>
         ) : (
-          <div className="flex flex-wrap gap-3">
+          <div className="card flex flex-wrap gap-3">
             <Link href="/worker-productions/new" className="btn-primary">
               New production
             </Link>
@@ -107,11 +109,6 @@ export default function DashboardPage() {
             </Link>
           </div>
         )}
-        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-          <Link href="/worker-productions" className="btn-secondary text-sm">
-            View all productions
-          </Link>
-        </div>
       </div>
     </div>
   );

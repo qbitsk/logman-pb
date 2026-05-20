@@ -94,13 +94,13 @@ export default function AdminWorkerProductionEditPage() {
         {production && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">#{production.id}</p>}
       </div>
 
-      {loading ? (
+      {loading || !production ? (
         <div className="card text-center py-16">
           <p className="text-gray-400">Loading…</p>
         </div>
       ) : (
         <WorkerProductionForm
-          production={{ ...production!, createdAt: new Date(production!.createdAt), updatedAt: new Date(production!.updatedAt) }}
+          production={{ ...production, createdAt: new Date(production.createdAt), updatedAt: new Date(production.updatedAt) }}
           productionProcesses={productionProcesses}
           productionParts={productionParts}
           productionStations={stations}
