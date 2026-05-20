@@ -5,10 +5,10 @@ import { workerProductions, users, productionParts, productionProcesses, getWork
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-// GET /api/admin/worker-productions — list all worker productions with user info (admin only)
+// GET /api/admin/worker-productions — list all worker productions with user info (admin/operator)
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") {
+  if (!session || !(["admin", "operator"] as string[]).includes(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -16,9 +16,9 @@ const patchSchema = z.object({
   workerProductionDefects: z.array(workerProductionDefectSchema).optional(),
 });
 
-async function requireAdmin() {
+async function requireAdminOrOperator() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") return null;
+  if (!session || !(["admin", "operator"] as string[]).includes(session.user.role)) return null;
   return session;
 }
 
@@ -27,7 +27,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await requireAdmin())) {
+  if (!(await requireAdminOrOperator())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -95,7 +95,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await requireAdmin())) {
+  if (!(await requireAdminOrOperator())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -139,7 +139,7 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await requireAdmin())) {
+  if (!(await requireAdminOrOperator())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
