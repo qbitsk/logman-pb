@@ -296,17 +296,20 @@ export default function WorkerProductionsPage() {
               {/* Mobile card list */}
               <div className="flex flex-col gap-3 md:hidden">
                 {filteredRows.map(({ original: s }) => (
-                  <div key={s.id} className="card p-4">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <Link
-                        href={`/worker-productions/${s.id}`}
-                        className="text-sm font-semibold text-brand-600 dark:text-brand-400 hover:underline"
-                      >
-                        {new Date(s.createdAt).toLocaleDateString()}
-                      </Link>
-                      <span className={clsx("badge capitalize", statusStyles[s.status])}>{s.status}</span>
+                  <div key={s.id} className="card px-3 py-2">
+                    <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/worker-productions/${s.id}`}
+                          className="text-sm font-medium text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                        >
+                          {new Date(s.createdAt).toLocaleDateString()}
+                        </Link>
+                        <span className={clsx("badge capitalize", statusStyles[s.status])}>{s.status}</span>
+                      </div>
+                     <RowActions row={s} onDeleted={handleDeleted} />
                     </div>
-                    <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
                       {(
                         [
                           ["Process", s.productionProcessName, true],
@@ -324,22 +327,6 @@ export default function WorkerProductionsPage() {
                         </div>
                       ))}
                     </dl>
-                    {s.status === "new" && (
-                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                        <Link
-                          href={`/worker-productions/${s.id}/edit`}
-                          className="btn-secondary flex items-center gap-1.5 py-1.5 px-3 text-xs"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                          Edit
-                        </Link>
-                        <DeleteWorkerProductionButton
-                          id={s.id}
-                          apiPath="/api/worker-productions"
-                          onDeleted={handleDeleted}
-                        />
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
