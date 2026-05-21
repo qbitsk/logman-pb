@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, X, Filter } from "lucide-react";
+import { Plus, Pencil, X, Filter, Search } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
 import {
@@ -91,6 +91,7 @@ export default function WorkerProductionsPage() {
   const [loading, setLoading] = useState(true);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [partSearch, setPartSearch] = useState("");
   const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -144,7 +145,16 @@ export default function WorkerProductionsPage() {
     [productions],
   );
 
-  const filteredRows = table.getFilteredRowModel().rows;
+  const normalize = (s: string) =>
+    s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+
+  const filteredRows = useMemo(() => {
+    const rows = table.getFilteredRowModel().rows;
+    if (!partSearch.trim()) return rows;
+    const q = normalize(partSearch);
+    return rows.filter((r) => normalize(r.original.productionPartName).includes(q));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productions, columnFilters, partSearch]);
   const hasFilters = columnFilters.length > 0;
 
   const getFilter = (id: string) =>
@@ -173,7 +183,7 @@ export default function WorkerProductionsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-brand-950 dark:text-white">{t.workerProductions.title}</h1>
         <Link href="/worker-productions/new" className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />
@@ -195,14 +205,24 @@ export default function WorkerProductionsPage() {
       ) : (
         <>
           {/* Filter toolbar */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center justify-end gap-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                type="search"
+                className="input h-10 pl-9 text-sm w-full"
+                placeholder={t.workerProductions.searchPart}
+                value={partSearch}
+                onChange={(e) => setPartSearch(e.target.value)}
+              />
+            </div>
             <div className="relative" ref={filterRef}>
               <button
                 className="btn-secondary flex items-center gap-2 h-10 px-3"
                 onClick={() => setFilterOpen((v) => !v)}
               >
                 <Filter className="w-4 h-4" />
-                {t.workerProductions.filter}
+                {/* {t.workerProductions.filter} */}
                 {hasFilters && (
                   <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-brand-600 text-white">
                     {columnFilters.length}
@@ -211,7 +231,7 @@ export default function WorkerProductionsPage() {
               </button>
 
               {filterOpen && (
-                <div className="absolute left-0 top-full mt-1 z-20 w-80 card p-4 shadow-lg">
+                <div className="absolute right-0 top-full mt-1 z-20 w-80 card p-4 shadow-lg">
                   <div className="flex flex-col gap-3">
                     <div className="grid grid-cols-2 gap-2">
                       <input
@@ -290,11 +310,7 @@ export default function WorkerProductionsPage() {
           ) : (
             <>
               {/* Desktop table */}
-              <div className="card p-5 hidden sm:block">
-                <div className="mb-4">
-                  <h5 className="text-lg font-semibold">Worker Productions</h5>
-                  {/* <p className="text-xs font-medium text-gray-400 dark:text-gray-400">Overview of product performance</p> */}
-                </div>
+              <div className="card px-5 py-3 hidden sm:block">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>

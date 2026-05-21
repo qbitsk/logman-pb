@@ -70,6 +70,7 @@ export const en = {
     dateTo: "To date",
     clearFilters: "Clear",
     filter: "Filter",
+    searchPart: "Search part…",
     process: "Process",
     product: "Product",
     station: "Station",
