@@ -297,7 +297,7 @@ export default function WorkerProductionsPage() {
                           </td>
                           <td className="px-2 py-3 capitalize">
                             <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">{s.productionPartName}</span>
-                            <span className="mt-0.5 block text-xs leading-tight text-gray-400 dark:text-gray-500">{s.productionProcessName}</span>
+                            <span className="mt-0.5 block text-xs leading-tight text-gray-400 dark:text-gray-400">{s.productionProcessName}</span>
                           </td>
                           <td className="px-2 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <Dash />}</td>
                           <td className="px-2 py-3 text-center tabular-nums text-gray-500 dark:text-gray-400">{s.shift ?? <Dash />}</td>
