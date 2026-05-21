@@ -603,19 +603,19 @@ export default function WorkCategoriesPage() {
           ) : productionProcesses.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noProcesses}</div>
           ) : (
-            <div className="card p-0 overflow-x-auto">
+            <div className="card px-5 py-3 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
-                    <th className="px-5 py-3" />
+                  <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    <th className="pe-2 py-3 font-semibold">{t.common.name}</th>
+                    <th className="px-2 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {productionProcesses.map((process) => (
-                    <tr key={process.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{process.name}</td>
-                      <td className="px-5 py-3">
+                    <tr key={process.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+                      <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{process.name}</td>
+                      <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openProcessEdit(process)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
@@ -649,21 +649,21 @@ export default function WorkCategoriesPage() {
           ) : productionParts.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noParts}</div>
           ) : (
-            <div className="card p-0 overflow-x-auto">
+            <div className="card px-5 py-3 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
-                    <th className="px-5 py-3" />
+                  <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    <th className="pe-2 py-3 font-semibold">{t.common.name}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductions.process}</th>
+                    <th className="px-2 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {productionParts.map((prod) => (
-                    <tr key={prod.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{prod.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{prod.productionProcessName}</td>
-                      <td className="px-5 py-3">
+                    <tr key={prod.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+                      <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{prod.name}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{prod.productionProcessName}</td>
+                      <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openProdEdit(prod)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
@@ -697,23 +697,23 @@ export default function WorkCategoriesPage() {
           ) : components.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noComponents}</div>
           ) : (
-            <div className="card p-0 overflow-x-auto">
+            <div className="card px-5 py-3 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.part}</th>
-                    <th className="px-5 py-3" />
+                  <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    <th className="pe-2 py-3 font-semibold">{t.common.name}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductions.process}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductionDetail.part}</th>
+                    <th className="px-2 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {components.map((comp) => (
-                    <tr key={comp.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{comp.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === comp.productionPartId)?.productionProcessName ?? "—"}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{comp.productionPartName}</td>
-                      <td className="px-5 py-3">
+                    <tr key={comp.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+                      <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{comp.name}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === comp.productionPartId)?.productionProcessName ?? "—"}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{comp.productionPartName}</td>
+                      <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
@@ -747,25 +747,25 @@ export default function WorkCategoriesPage() {
           ) : defects.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noDefects}</div>
           ) : (
-            <div className="card p-0 overflow-x-auto">
+            <div className="card px-5 py-3 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.part}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.component}</th>
-                    <th className="px-5 py-3" />
+                  <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    <th className="pe-2 py-3 font-semibold">{t.common.name}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductions.process}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductionDetail.part}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductionDetail.component}</th>
+                    <th className="px-2 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {defects.map((def) => (
-                    <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{(() => { const comp = components.find((c) => c.id === def.productionComponentId); return comp ? (productionParts.find((p) => p.id === comp.productionPartId)?.productionProcessName ?? "—") : "—"; })()}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.productionPartName ?? "—"}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{def.componentName ?? "—"}</td>
-                      <td className="px-5 py-3">
+                    <tr key={def.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+                      <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{def.name}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{(() => { const comp = components.find((c) => c.id === def.productionComponentId); return comp ? (productionParts.find((p) => p.id === comp.productionPartId)?.productionProcessName ?? "—") : "—"; })()}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{def.productionPartName ?? "—"}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{def.componentName ?? "—"}</td>
+                      <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
@@ -799,23 +799,23 @@ export default function WorkCategoriesPage() {
           ) : stations.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noStations}</div>
           ) : (
-            <div className="card p-0 overflow-x-auto">
+            <div className="card px-5 py-3 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.part}</th>
-                    <th className="px-5 py-3" />
+                  <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    <th className="pe-2 py-3 font-semibold">{t.common.name}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductions.process}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductionDetail.part}</th>
+                    <th className="px-2 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {stations.map((station) => (
-                    <tr key={station.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{station.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === station.productionPartId)?.productionProcessName ?? "—"}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{station.productionPartName}</td>
-                      <td className="px-5 py-3">
+                    <tr key={station.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+                      <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{station.name}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === station.productionPartId)?.productionProcessName ?? "—"}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{station.productionPartName}</td>
+                      <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openStationEdit(station)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
@@ -849,23 +849,23 @@ export default function WorkCategoriesPage() {
           ) : unitDefects.length === 0 ? (
             <div className="card text-center py-12 text-gray-400 text-sm">{t.definitions.noUnitDefects}</div>
           ) : (
-            <div className="card p-0 overflow-x-auto">
+            <div className="card px-5 py-3 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.common.name}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductions.process}</th>
-                    <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.workerProductionDetail.part}</th>
-                    <th className="px-5 py-3" />
+                  <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    <th className="pe-2 py-3 font-semibold">{t.common.name}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductions.process}</th>
+                    <th className="px-2 py-3 font-semibold">{t.workerProductionDetail.part}</th>
+                    <th className="px-2 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {unitDefects.map((def) => (
-                    <tr key={def.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{def.name}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === def.productionPartId)?.productionProcessName ?? "—"}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === def.productionPartId)?.name ?? def.productionPartName ?? "—"}</td>
-                      <td className="px-5 py-3">
+                    <tr key={def.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+                      <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{def.name}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === def.productionPartId)?.productionProcessName ?? "—"}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === def.productionPartId)?.name ?? def.productionPartName ?? "—"}</td>
+                      <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openUnitDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
                             <Pencil className="w-4 h-4" />
