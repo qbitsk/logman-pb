@@ -6,6 +6,7 @@ import { signOut, useSession } from "@/lib/auth/client";
 import { Menu, LogOut, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageToggle } from "./LanguageToggle";
 import { useTranslation } from "@/lib/i18n";
 
 const roleRank: Record<string, number> = { user: 1, operator: 2, admin: 3 };
@@ -46,6 +47,7 @@ export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
 
       {/* Right: dark mode + user */}
       <div className="flex items-center gap-2">
+        <LanguageToggle />
         <ThemeToggle />
 
         {/* User dropdown */}
