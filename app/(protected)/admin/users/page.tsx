@@ -120,34 +120,34 @@ export default function AdminUsersPage() {
         </button>
       </div>
 
-      <div className="card p-0 overflow-x-auto">
-        {loading ? (
-          <div className="p-8 text-center text-gray-400 dark:text-gray-500">{t.common.loading}</div>
-        ) : (
+      {loading ? (
+        <div className="card text-center py-12 text-gray-400 text-sm">{t.common.loading}</div>
+      ) : (
+      <div className="card px-5 py-3 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.adminUsers.name}</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.adminUsers.email}</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.adminUsers.role}</th>
-                <th className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400">{t.adminUsers.joined}</th>
-                <th className="px-5 py-3" />
+              <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                <th className="pe-2 py-3 font-semibold">{t.adminUsers.name}</th>
+                <th className="px-2 py-3 font-semibold">{t.adminUsers.email}</th>
+                <th className="px-2 py-3 font-semibold">{t.adminUsers.role}</th>
+                <th className="px-2 py-3 font-semibold">{t.adminUsers.joined}</th>
+                <th className="px-2 py-3" />
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{user.name}</td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{user.email}</td>
-                  <td className="px-5 py-3">
+                <tr key={user.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+                  <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{user.name}</td>
+                  <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{user.email}</td>
+                  <td className="px-2 py-3">
                     <span className={clsx("badge capitalize", roleStyles[user.role])}>
                       {t.roles[user.role] ?? user.role}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-gray-400 dark:text-gray-500">
+                  <td className="px-2 py-3 text-gray-400 dark:text-gray-500">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="py-3 text-end">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEdit(user)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors" aria-label="Edit user">
                         <Pencil className="w-4 h-4" />
@@ -161,8 +161,8 @@ export default function AdminUsersPage() {
               ))}
             </tbody>
           </table>
-        )}
       </div>
+      )}
 
       {/* Create modal */}
       {showCreate && (
