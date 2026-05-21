@@ -2,16 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, X, Filter, Search } from "lucide-react";
+import { Plus, Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
 import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   type ColumnDef,
+  type Column,
   type ColumnFiltersState,
   type FilterFn,
+  type SortingState,
 } from "@tanstack/react-table";
 import { useTranslation } from "@/lib/i18n";
 
@@ -85,11 +88,19 @@ function RowActions({
   );
 }
 
+function SortIcon({ column }: { column: Column<WorkerProduction> }) {
+  const dir = column.getIsSorted();
+  if (dir === "asc")  return <ChevronUp className="w-3 h-3" />;
+  if (dir === "desc") return <ChevronDown className="w-3 h-3" />;
+  return <ChevronsUpDown className="w-3 h-3 opacity-30" />;
+}
+
 export default function WorkerProductionsPage() {
   const { t } = useTranslation();
   const [productions, setProductions] = useState<WorkerProduction[]>([]);
   const [loading, setLoading] = useState(true);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [partSearch, setPartSearch] = useState("");
   const filterRef = useRef<HTMLDivElement>(null);
@@ -119,6 +130,8 @@ export default function WorkerProductionsPage() {
       { accessorKey: "productionPartName",    id: "product", filterFn: "equals" },
       { accessorKey: "stationName",           id: "station", filterFn: "equals"  },
       { accessorKey: "status",                id: "status",  filterFn: "equals" },
+      { accessorKey: "shift",                 id: "shift",   enableColumnFilter: false },
+      { accessorKey: "units",                 id: "units",   enableColumnFilter: false },
     ],
     [],
   );
@@ -126,10 +139,12 @@ export default function WorkerProductionsPage() {
   const table = useReactTable({
     data: productions,
     columns,
-    state: { columnFilters },
+    state: { columnFilters, sorting },
     onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   const processOptions = useMemo(
@@ -149,12 +164,12 @@ export default function WorkerProductionsPage() {
     s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
   const filteredRows = useMemo(() => {
-    const rows = table.getFilteredRowModel().rows;
+    const rows = table.getSortedRowModel().rows;
     if (!partSearch.trim()) return rows;
     const q = normalize(partSearch);
     return rows.filter((r) => normalize(r.original.productionPartName).includes(q));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productions, columnFilters, partSearch]);
+  }, [productions, columnFilters, sorting, partSearch]);
   const hasFilters = columnFilters.length > 0;
 
   const getFilter = (id: string) =>
@@ -316,22 +331,58 @@ export default function WorkerProductionsPage() {
                     <thead>
                       <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                         <th className="pe-2 py-3 font-semibold">
-                          {t.workerProductions.date}
+                          <button
+                            className="flex items-center gap-1 hover:text-brand-600 dark:hover:text-brand-400 transition-colors select-none"
+                            onClick={() => table.getColumn("date")?.toggleSorting()}
+                          >
+                            {t.workerProductions.date}
+                            <SortIcon column={table.getColumn("date")!} />
+                          </button>
                         </th>
                         <th className="px-2 py-3 font-semibold">
-                          {`${t.workerProductions.process} / ${t.workerProductions.product}`}
+                          <button
+                            className="flex items-center gap-1 hover:text-brand-600 dark:hover:text-brand-400 transition-colors select-none"
+                            onClick={() => table.getColumn("product")?.toggleSorting()}
+                          >
+                            {`${t.workerProductions.process} / ${t.workerProductions.product}`}
+                            <SortIcon column={table.getColumn("product")!} />
+                          </button>
                         </th>
                         <th className="px-2 py-3 font-semibold">
-                          {t.workerProductions.station}
+                          <button
+                            className="flex items-center gap-1 hover:text-brand-600 dark:hover:text-brand-400 transition-colors select-none"
+                            onClick={() => table.getColumn("station")?.toggleSorting()}
+                          >
+                            {t.workerProductions.station}
+                            <SortIcon column={table.getColumn("station")!} />
+                          </button>
                         </th>
                         <th className="px-2 py-3 text-center font-semibold">
-                          {t.workerProductions.shift}
+                          <button
+                            className="flex items-center gap-1 hover:text-brand-600 dark:hover:text-brand-400 transition-colors select-none mx-auto"
+                            onClick={() => table.getColumn("shift")?.toggleSorting()}
+                          >
+                            {t.workerProductions.shift}
+                            <SortIcon column={table.getColumn("shift")!} />
+                          </button>
                         </th>
                         <th className="px-2 py-3 text-center font-semibold">
-                          {t.workerProductions.units}
+                          <button
+                            className="flex items-center gap-1 hover:text-brand-600 dark:hover:text-brand-400 transition-colors select-none mx-auto"
+                            onClick={() => table.getColumn("units")?.toggleSorting()}
+                          >
+                            {t.workerProductions.units}
+                            <SortIcon column={table.getColumn("units")!} />
+                          </button>
                         </th>
                         <th className="px-2 py-3 text-center font-semibold">
-                          {t.workerProductions.status}
+                          <button
+                            className="flex items-center gap-1 hover:text-brand-600 dark:hover:text-brand-400 transition-colors select-none mx-auto"
+                            onClick={() => table.getColumn("status")?.toggleSorting()}
+                          >
+                            {t.workerProductions.status}
+                            <SortIcon column={table.getColumn("status")!} />
+                          </button>
                         </th>
                         <th className="px-2 py-3" />
                       </tr>
