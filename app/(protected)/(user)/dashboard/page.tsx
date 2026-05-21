@@ -80,21 +80,21 @@ export default function DashboardPage() {
               if (processParts.length === 0) return null;
               return (
                 <div key={process.id} className="pb-4 break-inside-avoid" >
-                  <div className="card p-0">
-                    <div className="px-5 py-3 border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50 rounded-t-[inherit]">
-                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                  <div className="card px-4 py-2">
+                    <div className="py-3 border-b border-gray-200 dark:border-gray-700">
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
                         {process.name}
                       </p>
                     </div>
-                    <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
+                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
                       {processParts.map((part) => (
                         <Link
                           key={part.id}
                           href={`/worker-productions/new?partId=${part.id}`}
-                          className="flex items-center px-5 py-3 hover:bg-brand-50/40 dark:hover:bg-brand-900/10 transition-colors group"
+                          className="flex items-center py-3 transition-colors group"
                         >
                           <Plus className="w-4 h-4 me-2.5 text-brand-400 dark:text-brand-500" />
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-brand-700 dark:group-hover:text-brand-300">{part.name}</span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-brand-700 dark:group-hover:text-brand-300">{part.name}</span>
                         </Link>
                       ))}
                     </div>
