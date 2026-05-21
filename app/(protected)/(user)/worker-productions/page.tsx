@@ -426,12 +426,12 @@ export default function WorkerProductionsPage() {
               {/* Mobile card list */}
               <div className="flex flex-col gap-3 sm:hidden">
                 {filteredRows.map(({ original: s }) => (
-                  <div key={s.id} className="card px-3 py-2">
+                  <div key={s.id} className="card px-4 py-3">
                     <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/worker-productions/${s.id}`}
-                          className="text-sm font-medium text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                          className="text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                         >
                           {new Date(s.createdAt).toLocaleDateString()}
                         </Link>
