@@ -53,6 +53,11 @@ function Dash() {
   return <span className="text-gray-300 dark:text-gray-600">—</span>;
 }
 
+function fmtDayMonth(value: string) {
+  const d = new Date(value);
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
 function RowActions({
   row,
   onDeleted,
@@ -285,7 +290,7 @@ export default function WorkerProductionsPage() {
           ) : (
             <>
               {/* Desktop table */}
-              <div className="card p-5 hidden md:block">
+              <div className="card p-5 hidden sm:block">
                 <div className="mb-4">
                   <h5 className="text-lg font-semibold">Worker Productions</h5>
                   {/* <p className="text-xs font-medium text-gray-400 dark:text-gray-400">Overview of product performance</p> */}
@@ -293,23 +298,23 @@ export default function WorkerProductionsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left text-xs font-semibold whitespace-nowrap text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                        <th className="pe-2 py-3">
+                      <tr className="text-left text-xs whitespace-nowrap text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                        <th className="pe-2 py-3 font-semibold">
                           {t.workerProductions.date}
                         </th>
-                        <th className="px-2 py-3">
+                        <th className="px-2 py-3 font-semibold">
                           {`${t.workerProductions.process} / ${t.workerProductions.product}`}
                         </th>
-                        <th className="px-2 py-3">
+                        <th className="px-2 py-3 font-semibold">
                           {t.workerProductions.station}
                         </th>
-                        <th className="px-2 py-3 text-center">
+                        <th className="px-2 py-3 text-center font-semibold">
                           {t.workerProductions.shift}
                         </th>
-                        <th className="px-2 py-3 text-center">
+                        <th className="px-2 py-3 text-center font-semibold">
                           {t.workerProductions.units}
                         </th>
-                        <th className="px-2 py-3 text-center">
+                        <th className="px-2 py-3 text-center font-semibold">
                           {t.workerProductions.status}
                         </th>
                         <th className="px-2 py-3" />
@@ -319,14 +324,16 @@ export default function WorkerProductionsPage() {
                       {filteredRows.map(({ original: s }) => (
                         <tr
                           key={s.id}
-                          className="border-b border-gray-200 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          className="border-b border-gray-200 dark:border-gray-700 last:border-0"
                         >
                           <td className="pe-2 py-3 text-gray-400 dark:text-gray-500">
                             <Link
                               href={`/worker-productions/${s.id}`}
-                              className="font-medium hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                              className="font-medium text-sm hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                             >
-                              {new Date(s.createdAt).toLocaleDateString()}
+                              <span className="hidden md:block">{new Date(s.createdAt).toLocaleDateString()}</span>
+                              <span className="md:hidden">{fmtDayMonth(s.createdAt)}</span>
+                              {/* <span className="block text-xs">{new Date(s.createdAt).getFullYear()}</span> */}
                             </Link>
                           </td>
                           <td className="px-2 py-3 capitalize">
@@ -339,7 +346,7 @@ export default function WorkerProductionsPage() {
                           <td className="px-2 py-3 text-center">
                             <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
                           </td>
-                          <td className="ps-5 py-3 text-end">
+                          <td className="py-3 text-end">
                             <RowActions row={s} onDeleted={handleDeleted} />
                           </td>
                         </tr>
@@ -350,7 +357,7 @@ export default function WorkerProductionsPage() {
               </div>
 
               {/* Mobile card list */}
-              <div className="flex flex-col gap-3 md:hidden">
+              <div className="flex flex-col gap-3 sm:hidden">
                 {filteredRows.map(({ original: s }) => (
                   <div key={s.id} className="card px-3 py-2">
                     <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
@@ -365,11 +372,19 @@ export default function WorkerProductionsPage() {
                       </div>
                      <RowActions row={s} onDeleted={handleDeleted} />
                     </div>
-                    <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
+                    <div className="pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
+                      <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">{s.productionPartName}</span>
+                      <span className="mt-0.5 block text-xs leading-tight text-gray-400 dark:text-gray-400">{s.productionProcessName}</span>      
+                    </div>
+                    <dl className="grid grid-cols-3 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm">
+                      {/* <div key={t.workerProductions.product}>
+                          <dd className="text-gray-700 dark:text-gray-300">
+                            <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">{s.productionPartName}</span>
+                            <span className="mt-0.5 block text-xs leading-tight text-gray-400 dark:text-gray-400">{s.productionProcessName}</span>
+                          </dd>
+                        </div> */}
                       {(
                         [
-                          [t.workerProductions.process, s.productionProcessName, true],
-                          [t.workerProductions.product, s.productionPartName, true],
                           [t.workerProductions.station, s.stationName, true],
                           [t.workerProductions.shift, s.shift, false],
                           [t.workerProductions.units, s.units, false],
