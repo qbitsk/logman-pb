@@ -261,11 +261,11 @@ export default function AdminWorkerProductionsPage() {
               <div className="card p-0 overflow-x-auto hidden md:block">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
                       {[t.workerProductions.date, t.workerProductions.process, t.workerProductions.product, t.workerProductions.station, t.workerProductions.shift, t.workerProductions.units, t.workerProductions.status, t.adminUsers.user, ""].map((h) => (
                         <th
                           key={h}
-                          className="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap"
+                          className="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap"
                         >
                           {h}
                         </th>
@@ -276,9 +276,9 @@ export default function AdminWorkerProductionsPage() {
                     {filteredRows.map(({ original: s }) => (
                       <tr
                         key={s.id}
-                        className="border-b border-gray-50 hover:bg-brand-50/40 dark:border-gray-700/50 dark:hover:bg-brand-900/10 transition-colors"
+                        className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                       >
-                        <td className="px-3 py-2 text-gray-400 dark:text-gray-500">
+                        <td className="px-5 py-3 text-gray-400 dark:text-gray-500">
                           <Link
                             href={`/admin/worker-productions/${s.id}`}
                             className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
@@ -286,16 +286,16 @@ export default function AdminWorkerProductionsPage() {
                             {new Date(s.createdAt).toLocaleDateString()}
                           </Link>
                         </td>
-                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.productionProcessName}</td>
-                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.productionPartName}</td>
-                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <Dash />}</td>
-                        <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{s.shift ?? <Dash />}</td>
-                        <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{s.units ?? <Dash />}</td>
-                        <td className="px-3 py-2">
+                        <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionProcessName}</td>
+                        <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.productionPartName}</td>
+                        <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <Dash />}</td>
+                        <td className="px-5 py-3 text-center tabular-nums text-gray-500 dark:text-gray-400">{s.shift ?? <Dash />}</td>
+                        <td className="px-5 py-3 text-center tabular-nums text-gray-500 dark:text-gray-400">{s.units ?? <Dash />}</td>
+                        <td className="px-5 py-3">
                           <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
                         </td>
-                        <td className="px-3 py-2 text-gray-900 dark:text-gray-100">{s.userName}</td>
-                        <td className="pe-3 py-2 text-end">
+                        <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{s.userName}</td>
+                        <td className="pe-5 py-3 text-end">
                           <RowActions row={s} onDeleted={handleDeleted} />
                         </td>
                       </tr>

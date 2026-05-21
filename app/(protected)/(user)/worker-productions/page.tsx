@@ -251,49 +251,68 @@ export default function WorkerProductionsPage() {
           ) : (
             <>
               {/* Desktop table */}
-              <div className="card p-0 overflow-x-auto hidden md:block">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-                      {[t.workerProductions.date, t.workerProductions.process, t.workerProductions.product, t.workerProductions.station, t.workerProductions.shift, t.workerProductions.units, t.workerProductions.status, ""].map((h) => (
-                        <th
-                          key={h}
-                          className="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap"
-                        >
-                          {h}
+              <div className="card p-5 hidden md:block">
+                <div className="mb-4">
+                  <h5 className="text-lg font-semibold">Worker Productions</h5>
+                  {/* <p className="text-xs font-medium text-gray-400 dark:text-gray-400">Overview of product performance</p> */}
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-xs font-semibold whitespace-nowrap text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                        <th className="pe-2 py-3">
+                          {t.workerProductions.date}
                         </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredRows.map(({ original: s }) => (
-                      <tr
-                        key={s.id}
-                        className="border-b border-gray-50 hover:bg-brand-50/40 dark:border-gray-700/50 dark:hover:bg-brand-900/10 transition-colors"
-                      >
-                        <td className="px-3 py-2 text-gray-400 dark:text-gray-500">
-                          <Link
-                            href={`/worker-productions/${s.id}`}
-                            className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
-                          >
-                            {new Date(s.createdAt).toLocaleDateString()}
-                          </Link>
-                        </td>
-                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.productionProcessName}</td>
-                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.productionPartName}</td>
-                        <td className="px-3 py-2 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <Dash />}</td>
-                        <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{s.shift ?? <Dash />}</td>
-                        <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{s.units ?? <Dash />}</td>
-                        <td className="px-3 py-2 text-center">
-                          <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
-                        </td>
-                        <td className="pe-3 py-2 text-end">
-                          <RowActions row={s} onDeleted={handleDeleted} />
-                        </td>
+                        <th className="px-2 py-3">
+                          {`${t.workerProductions.process} / ${t.workerProductions.product}`}
+                        </th>
+                        <th className="px-2 py-3">
+                          {t.workerProductions.station}
+                        </th>
+                        <th className="px-2 py-3 text-center">
+                          {t.workerProductions.shift}
+                        </th>
+                        <th className="px-2 py-3 text-center">
+                          {t.workerProductions.units}
+                        </th>
+                        <th className="px-2 py-3 text-center">
+                          {t.workerProductions.status}
+                        </th>
+                        <th className="px-2 py-3" />
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredRows.map(({ original: s }) => (
+                        <tr
+                          key={s.id}
+                          className="border-b border-gray-200 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                        >
+                          <td className="pe-2 py-3 text-gray-400 dark:text-gray-500">
+                            <Link
+                              href={`/worker-productions/${s.id}`}
+                              className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                            >
+                              {new Date(s.createdAt).toLocaleDateString()}
+                            </Link>
+                          </td>
+                          <td className="px-2 py-3 capitalize">
+                            <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">{s.productionPartName}</span>
+                            <span className="mt-0.5 block text-xs leading-tight text-gray-400 dark:text-gray-500">{s.productionProcessName}</span>
+                          </td>
+                          <td className="px-2 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <Dash />}</td>
+                          <td className="px-2 py-3 text-center tabular-nums text-gray-500 dark:text-gray-400">{s.shift ?? <Dash />}</td>
+                          <td className="px-2 py-3 text-center tabular-nums text-gray-500 dark:text-gray-400">{s.units ?? <Dash />}</td>
+                          <td className="px-2 py-3 text-center">
+                            <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
+                          </td>
+                          <td className="ps-5 py-3 text-end">
+                            <RowActions row={s} onDeleted={handleDeleted} />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Mobile card list */}

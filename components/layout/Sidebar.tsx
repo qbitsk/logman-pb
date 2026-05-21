@@ -160,7 +160,7 @@ export function Sidebar({
       {/* Desktop sidebar */}
       <aside
         className={clsx(
-          "hidden md:flex shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 h-dvh sticky top-0 transition-[width] duration-200 ease-in-out overflow-hidden",
+          "hidden md:flex shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-dvh sticky top-0 transition-[width] duration-200 ease-in-out overflow-hidden",
           collapsed ? "w-14" : "w-50"
         )}
       >
@@ -170,7 +170,7 @@ export function Sidebar({
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden fixed inset-0 z-40 flex">
-          <div className="w-56 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col">
+          <div className="w-56 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
             <NavContent {...navProps} />
           </div>
           <div
