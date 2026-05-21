@@ -69,6 +69,7 @@ export const en = {
     dateFrom: "From date",
     dateTo: "To date",
     clearFilters: "Clear",
+    filter: "Filter",
     process: "Process",
     product: "Product",
     station: "Station",

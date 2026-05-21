@@ -71,6 +71,7 @@ export const sk: Translations = {
     dateFrom: "Dátum od",
     dateTo: "Dátum do",
     clearFilters: "Vymazať",
+    filter: "Filter",
     process: "Proces",
     product: "Diel",
     station: "Pracovisko",

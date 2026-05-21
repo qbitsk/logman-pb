@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, X } from "lucide-react";
+import { Plus, Pencil, X, Filter } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
 import {
@@ -85,6 +85,19 @@ export default function WorkerProductionsPage() {
   const [productions, setProductions] = useState<WorkerProduction[]>([]);
   const [loading, setLoading] = useState(true);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!filterOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [filterOpen]);
 
   useEffect(() => {
     fetch("/api/worker-productions")
@@ -177,69 +190,90 @@ export default function WorkerProductionsPage() {
       ) : (
         <>
           {/* Filter toolbar */}
-          <div className="card mb-4 p-2">
-            <div className="flex flex-wrap gap-3 items-center">
-              <input
-                type="date"
-                className="input text-sm h-10 flex-1 min-w-[140px]"
-                aria-label={t.workerProductions.dateFrom}
-                value={getDateRange()[0]}
-                onChange={setDateFilter(0)}
-              />
-              <input
-                type="date"
-                className="input text-sm h-10 flex-1 min-w-[140px]"
-                aria-label={t.workerProductions.dateTo}
-                value={getDateRange()[1]}
-                onChange={setDateFilter(1)}
-              />
-              <select
-                className="input text-sm h-10 flex-1 min-w-[150px]"
-                value={getFilter("process")}
-                onChange={setFilter("process")}
+          <div className="flex items-center gap-2 mb-4">
+            <div className="relative" ref={filterRef}>
+              <button
+                className="btn-secondary flex items-center gap-2 h-10 px-3"
+                onClick={() => setFilterOpen((v) => !v)}
               >
-                <option value="">{t.workerProductions.process}</option>
-                {processOptions.map((o) => (
-                  <option key={o} value={o} className="capitalize">{o}</option>
-                ))}
-              </select>
-              <select
-                className="input text-sm h-10 flex-1 min-w-[150px]"
-                value={getFilter("product")}
-                onChange={setFilter("product")}
-              >
-                <option value="">{t.workerProductions.product}</option>
-                {productOptions.map((o) => (
-                  <option key={o} value={o} className="capitalize">{o}</option>
-                ))}
-              </select>
-              <select
-                className="input text-sm h-10 flex-1 min-w-[140px]"
-                value={getFilter("station")}
-                onChange={setFilter("station")}
-              >
-                <option value="">{t.workerProductions.station}</option>
-                {stationOptions.map((o) => (
-                  <option key={o} value={o} className="capitalize">{o}</option>
-                ))}
-              </select>
-              <select
-                className="input text-sm h-10 flex-1 min-w-[140px]"
-                value={getFilter("status")}
-                onChange={setFilter("status")}
-              >
-                <option value="">{t.workerProductions.status}</option>
-                <option value="new">{t.status.new}</option>
-                <option value="completed">{t.status.completed}</option>
-              </select>
-              {hasFilters && (
-                <button
-                  className="btn-secondary flex items-center gap-1.5 h-10 px-3 whitespace-nowrap"
-                  onClick={() => setColumnFilters([])}
-                >
-                  <X className="w-3.5 h-3.5" />
-                  {t.workerProductions.clearFilters}
-                </button>
+                <Filter className="w-4 h-4" />
+                {t.workerProductions.filter}
+                {hasFilters && (
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-brand-600 text-white">
+                    {columnFilters.length}
+                  </span>
+                )}
+              </button>
+
+              {filterOpen && (
+                <div className="absolute left-0 top-full mt-1 z-20 w-80 card p-4 shadow-lg">
+                  <div className="flex flex-col gap-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="date"
+                        className="input text-sm h-10"
+                        aria-label={t.workerProductions.dateFrom}
+                        value={getDateRange()[0]}
+                        onChange={setDateFilter(0)}
+                      />
+                      <input
+                        type="date"
+                        className="input text-sm h-10"
+                        aria-label={t.workerProductions.dateTo}
+                        value={getDateRange()[1]}
+                        onChange={setDateFilter(1)}
+                      />
+                    </div>
+                    <select
+                      className="input text-sm h-10"
+                      value={getFilter("process")}
+                      onChange={setFilter("process")}
+                    >
+                      <option value="">{t.workerProductions.process}</option>
+                      {processOptions.map((o) => (
+                        <option key={o} value={o} className="capitalize">{o}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="input text-sm h-10"
+                      value={getFilter("product")}
+                      onChange={setFilter("product")}
+                    >
+                      <option value="">{t.workerProductions.product}</option>
+                      {productOptions.map((o) => (
+                        <option key={o} value={o} className="capitalize">{o}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="input text-sm h-10"
+                      value={getFilter("station")}
+                      onChange={setFilter("station")}
+                    >
+                      <option value="">{t.workerProductions.station}</option>
+                      {stationOptions.map((o) => (
+                        <option key={o} value={o} className="capitalize">{o}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="input text-sm h-10"
+                      value={getFilter("status")}
+                      onChange={setFilter("status")}
+                    >
+                      <option value="">{t.workerProductions.status}</option>
+                      <option value="new">{t.status.new}</option>
+                      <option value="completed">{t.status.completed}</option>
+                    </select>
+                    {hasFilters && (
+                      <button
+                        className="btn-secondary flex items-center justify-center gap-1.5 h-10 px-3"
+                        onClick={() => { setColumnFilters([]); setFilterOpen(false); }}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        {t.workerProductions.clearFilters}
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -290,7 +324,7 @@ export default function WorkerProductionsPage() {
                           <td className="pe-2 py-3 text-gray-400 dark:text-gray-500">
                             <Link
                               href={`/worker-productions/${s.id}`}
-                              className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                              className="font-medium hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                             >
                               {new Date(s.createdAt).toLocaleDateString()}
                             </Link>
