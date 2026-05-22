@@ -126,7 +126,11 @@ export const en = {
     changesSaved: "Changes saved.",
     submit: "Submit",
     back: "Back",
+    createdAt: "Created",
     updatedAt: "Updated",
+    unitsPlaceholder: "e.g. 10",
+    defectUnitsPlaceholder: "Units",
+    notesPlaceholder: "Any additional notes…",
   },
   profile: {
     title: "Profile",

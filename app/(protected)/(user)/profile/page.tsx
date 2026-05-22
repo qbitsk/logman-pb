@@ -46,7 +46,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-6">{t.profile.title}</h1>
+      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-4">{t.profile.title}</h1>
 
       <div className="card max-w-lg space-y-6">
         {/* Account info */}

@@ -91,9 +91,8 @@ export default function AdminWorkerProductionEditPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-4">
         <h1 className="text-2xl font-bold text-brand-950 dark:text-white">{t.workerProductionForm.editTitle}</h1>
-        {production && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">#{production.id}</p>}
       </div>
 
       {loading || !production ? (

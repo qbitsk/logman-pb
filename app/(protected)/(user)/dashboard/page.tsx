@@ -37,7 +37,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-brand-950 dark:text-white">
             {t.dashboard.hello}, {session?.user.name?.split(" ")[0]} 👋

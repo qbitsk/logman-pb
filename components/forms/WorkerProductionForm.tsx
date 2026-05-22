@@ -295,7 +295,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
         </div>
       )}
       {isEdit && (
-        <div className="mb-6 flex items-center gap-3 flex-wrap">
+        <div className="mb-4 flex items-center gap-3 flex-wrap">
           {(() => {
             const status = getWorkerProductionStatus(production!.createdAt);
             return (
@@ -305,10 +305,10 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             );
           })()}
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            by <span className="font-medium text-gray-700 dark:text-gray-300">{production!.userName}</span>
+            <span className="font-medium text-gray-700 dark:text-gray-300">{production!.userName}</span>
           </span>
           <span className="text-sm text-gray-400 dark:text-gray-500 ml-auto">
-            {t.workerProductionForm.updatedAt} {new Date(production!.updatedAt).toLocaleString()}
+            {new Date(production!.createdAt).toLocaleString()}
           </span>
         </div>
       )}
@@ -409,7 +409,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             value={form.units}
             onChange={(e) => set("units", e.target.value)}
             className="input"
-            placeholder="e.g. 10"
+            placeholder={t.workerProductionForm.unitsPlaceholder}
           />
           {errors.units && <p className="text-red-600 text-xs mt-1">{errors.units}</p>}
         </div>
@@ -425,7 +425,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             className={clsx("input", isEdit ? "min-h-[80px] resize-y" : "resize-none")}
             value={form.notes}
             onChange={(e) => set("notes", e.target.value)}
-            placeholder={!isEdit ? "Any additional notes…" : undefined}
+            placeholder={!isEdit ? t.workerProductionForm.notesPlaceholder : undefined}
             maxLength={isEdit ? 500 : undefined}
           />
           {errors.notes && <p className="text-red-600 text-xs mt-1">{errors.notes}</p>}
@@ -490,7 +490,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
                     value={defect.units}
                     onChange={(e) => setDefect(defect._key, "units", e.target.value)}
                     className="input w-24"
-                    placeholder="Units"
+                    placeholder={t.workerProductionForm.defectUnitsPlaceholder}
                   />
                   <button
                     type="button"
@@ -507,11 +507,11 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
         {success && <p className="text-sm text-emerald-600">{t.workerProductionForm.changesSaved}</p>}
 
-        <div className={clsx("flex gap-3 pt-2", isEdit && "justify-end")}>
+        <div className="flex gap-3 justify-end">
           {isEdit ? (
             <>
               <button type="button" onClick={() => router.push(resolvedBackUrl)} className="btn-secondary">
-                {t.common.back}
+                {t.common.cancel}
               </button>
               <button type="submit" className="btn-primary" disabled={loading}>
                 {loading ? t.workerProductionForm.saving : t.workerProductionForm.saveChanges}
@@ -519,11 +519,11 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             </>
           ) : (
             <>
-              <button type="submit" disabled={loading} className="btn-primary">
-                {loading ? t.workerProductionForm.submitting : t.workerProductionForm.submit}
-              </button>
               <button type="button" onClick={() => router.back()} className="btn-secondary">
                 {t.common.cancel}
+              </button>
+              <button type="submit" disabled={loading} className="btn-primary">
+                {loading ? t.workerProductionForm.submitting : t.workerProductionForm.submit}
               </button>
             </>
           )}

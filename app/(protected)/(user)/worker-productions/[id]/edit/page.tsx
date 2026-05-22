@@ -100,12 +100,12 @@ export default function EditWorkerProductionPage() {
     <div>
       <Link
         href="/worker-productions"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 mb-6"
+        className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 mb-4"
       >
         <ArrowLeft className="w-4 h-4" />
         {t.common.back}
       </Link>
-      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-6">{t.workerProductionForm.editTitle}</h1>
+      <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-4">{t.workerProductionForm.editTitle}</h1>
 
       {loading ? (
         <div className="card text-center py-16">

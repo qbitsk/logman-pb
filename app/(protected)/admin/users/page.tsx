@@ -112,7 +112,7 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-brand-950 dark:text-white">{t.adminUsers.title}</h1>
         <button onClick={openCreate} className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" />

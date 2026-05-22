@@ -40,7 +40,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
 
   return (
     <div className="max-w-2xl">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <Link
           href={backUrl}
           className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
@@ -59,7 +59,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
         )}
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4">
         <div className="flex items-center gap-3 mt-2">
           <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[production.status])}>
             {t.status[production.status as keyof typeof t.status] ?? production.status}

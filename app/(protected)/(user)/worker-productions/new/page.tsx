@@ -51,7 +51,7 @@ export default function NewWorkerProductionPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-1">{t.workerProductions.newProduction}</h1>
-      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t.workerProductionForm.newSubtitle}</p>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{t.workerProductionForm.newSubtitle}</p>
 
       {loading ? (
         <div className="card max-w-2xl text-center py-16">

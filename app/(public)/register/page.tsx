@@ -13,7 +13,7 @@ export default function RegisterPage() {
           <ShieldCheck className="w-6 h-6 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-2">{t.register.title}</h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
           {t.register.description}
         </p>
         <Link href="/login" className="btn-primary inline-block">

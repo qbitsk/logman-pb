@@ -565,13 +565,13 @@ export default function WorkCategoriesPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-4">
         <h1 className="text-2xl font-bold text-brand-950  dark:text-white">{t.definitions.title}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.definitions.subtitle}</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] -mx-4 px-4 sm:mx-0 sm:px-0">
         {TABS.map((tab) => (
           <button
             key={tab.id}
