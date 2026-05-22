@@ -169,7 +169,7 @@ export function Sidebar({
       <aside
         className={clsx(
           "hidden md:flex shrink-0 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-dvh sticky top-0 transition-[width] duration-200 ease-in-out overflow-hidden",
-          collapsed ? "w-14" : "w-50"
+          collapsed ? "w-14" : "w-40 lg:w-56"
         )}
       >
         <NavContent {...navProps} onNavigate={() => {}} collapsed={collapsed} />
