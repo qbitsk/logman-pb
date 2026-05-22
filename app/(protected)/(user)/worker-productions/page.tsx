@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Plus, Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown, Clock, CheckCircle } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
 import {
@@ -32,6 +32,11 @@ type WorkerProduction = {
 const statusStyles: Record<string, string> = {
   new:       "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   completed: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+};
+
+const StatusIcon = ({ status }: { status: string }) => {
+  if (status === "completed") return <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
+  return <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
 };
 
 // Handles nullable string columns — null values never match an active filter.
@@ -431,11 +436,11 @@ export default function WorkerProductionsPage() {
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/worker-productions/${s.id}`}
-                          className="text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                          className="text-sm font-medium tabular-nums text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                         >
                           {new Date(s.createdAt).toLocaleDateString()}
                         </Link>
-                        <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
+                        <StatusIcon status={s.status} />
                       </div>
                      <RowActions row={s} onDeleted={handleDeleted} />
                     </div>

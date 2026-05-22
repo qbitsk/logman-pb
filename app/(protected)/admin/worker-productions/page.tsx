@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown, Clock, CheckCircle } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
 import {
@@ -34,6 +34,11 @@ type WorkerProduction = {
 const statusStyles: Record<string, string> = {
   new:       "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   completed: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+};
+
+const StatusIcon = ({ status }: { status: string }) => {
+  if (status === "completed") return <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
+  return <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
 };
 
 // Filters by a [from, to] date range (both optional). Compares calendar day only.
@@ -448,11 +453,12 @@ export default function AdminWorkerProductionsPage() {
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/admin/worker-productions/${s.id}`}
-                          className="text-sm font-medium text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                          className="text-sm font-medium tabular-nums text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                         >
                           {new Date(s.createdAt).toLocaleDateString()}
                         </Link>
-                        <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
+                        <StatusIcon status={s.status} />
+                        <span className="text-sm text-gray-500 dark:text-gray-400">{s.userName}</span>
                       </div>
                       <RowActions row={s} onDeleted={handleDeleted} />
                     </div>
@@ -460,7 +466,6 @@ export default function AdminWorkerProductionsPage() {
                       <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">{s.productionPartName}</span>
                       <span className="mt-0.5 block text-xs leading-tight text-gray-400 dark:text-gray-400">{s.productionProcessName}</span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{s.userName}</p>
                     <dl className="grid grid-cols-3 gap-x-4 gap-y-2 text-sm">
                       {(
                         [
