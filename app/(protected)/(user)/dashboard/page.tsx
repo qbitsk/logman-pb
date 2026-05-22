@@ -37,7 +37,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-brand-950 dark:text-white">
             {t.dashboard.hello}, {session?.user.name?.split(" ")[0]} 👋
@@ -51,19 +51,19 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-3 gap-4 mb-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="card flex items-center gap-4">
-              <div className={`p-3 rounded-xl ${stat.color}`}>
+            <div key={stat.label} className="card p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+              <div className={`p-2 sm:p-3 rounded-xl ${stat.color}`}>
                 <Icon className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-brand-950 dark:text-white">
                   {stat.value ?? <span className="text-gray-300 dark:text-gray-600">—</span>}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <p className="text-sm hidden sm:block text-gray-500 dark:text-gray-400">{stat.label}</p>
               </div>
             </div>
           );
