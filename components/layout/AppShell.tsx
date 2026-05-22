@@ -9,7 +9,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
 
   const handleMenuToggle = () => {
-    if (window.innerWidth >= 768) {
+    if (window.innerWidth >= 1024) {
       setDesktopCollapsed((v) => !v);
     } else {
       setMobileOpen((v) => !v);
