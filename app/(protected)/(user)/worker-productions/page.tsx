@@ -416,7 +416,8 @@ export default function WorkerProductionsPage() {
                           <td className="px-2 py-3 text-center tabular-nums text-gray-500 dark:text-gray-400">{s.shift ?? <Dash />}</td>
                           <td className="px-2 py-3 text-center tabular-nums text-gray-500 dark:text-gray-400">{s.units ?? <Dash />}</td>
                           <td className="px-2 py-3 text-center">
-                            <span className={clsx("badge capitalize", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
+                            <span className={clsx("badge capitalize hidden xl:inline", statusStyles[s.status])}>{t.status[s.status as keyof typeof t.status] ?? s.status}</span>
+                            <span className="flex w-full items-center xl:hidden justify-center"><StatusIcon status={s.status} /></span>
                           </td>
                           <td className="py-3 text-end">
                             <RowActions row={s} onDeleted={handleDeleted} />
