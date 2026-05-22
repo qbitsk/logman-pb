@@ -41,14 +41,13 @@ const StatusIcon = ({ status }: { status: string }) => {
   return <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
 };
 
-// Filters by a [from, to] date range (both optional). Compares calendar day only.
+// Filters by a [from, to] date range (both optional). Uses 00:00:00 for start and 23:59:00 for end.
 const dateRangeFilter: FilterFn<WorkerProduction> = (row, columnId, filterValue: [string, string]) => {
   const [from, to] = filterValue;
   const raw = row.getValue<string>(columnId);
   const d = new Date(raw);
-  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  if (from && day < new Date(from).getTime()) return false;
-  if (to   && day > new Date(to).getTime())   return false;
+  if (from && d < new Date(`${from}T00:00:00`)) return false;
+  if (to   && d > new Date(`${to}T23:59:00`))   return false;
   return true;
 };
 
