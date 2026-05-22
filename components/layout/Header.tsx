@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "@/lib/auth/client";
 import { Menu, LogOut, User } from "lucide-react";
@@ -35,7 +36,9 @@ export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 md:px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      
+      <div className="flex gap-2 items-center">
       {/* Left: hamburger */}
       <button
         onClick={onMenuToggle}
@@ -44,6 +47,10 @@ export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
       >
         <Menu className="w-5 h-5" />
       </button>
+
+      <Image className="lg:hidden" src="/images/logo.png" alt="Logman" width={100} height={100} style={{ width: "auto", height: "24px" }} loading="eager" />
+
+      </div>
 
       {/* Right: dark mode + user */}
       <div className="flex items-center gap-2">
