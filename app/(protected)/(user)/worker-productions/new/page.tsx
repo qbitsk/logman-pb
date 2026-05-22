@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { ArrowLeft } from "lucide-react";
@@ -14,6 +14,23 @@ type ProductionComponent = { id: string; name: string; productionPartId: string 
 type ProductionDefect = { id: string; name: string; type: "unit" | "component"; productionPartId: string; productionComponentId: string | null };
 
 export default function NewWorkerProductionPage() {
+  return (
+    <Suspense
+      fallback={
+        <div>
+          <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-1">New Production</h1>
+          <div className="card max-w-2xl text-center py-16">
+            <p className="text-gray-400">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <NewWorkerProductionPageContent />
+    </Suspense>
+  );
+}
+
+function NewWorkerProductionPageContent() {
   const searchParams = useSearchParams();
   const { t } = useTranslation();
   const initialPartId = searchParams.get("partId") ?? undefined;

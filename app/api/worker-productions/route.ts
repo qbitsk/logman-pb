@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { workerProductions, workerProductionDefects, productionParts, productionProcesses, productionStations, getWorkerProductionStatus } from "@/lib/db/schema";
 import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
-import { eq, leftJoin } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 // GET /api/worker-productions — list worker productions for the current user

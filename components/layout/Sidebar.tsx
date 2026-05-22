@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useTranslation } from "@/lib/i18n";
+import { version } from "@/package.json";
 
 const roleRank: Record<string, number> = { user: 1, operator: 2, admin: 3 };
 
@@ -133,6 +134,13 @@ function NavContent({
           </>
         )}
       </nav>
+
+      {/* Version */}
+      <div className={clsx("px-3 py-3", collapsed ? "flex justify-center" : "")}>
+        <span className="text-xs text-gray-300 dark:text-gray-600">
+          {collapsed ? `v${version}` : `v${version}`}
+        </span>
+      </div>
     </div>
   );
 }
