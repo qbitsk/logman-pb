@@ -39,7 +39,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
   const wasUpdated = new Date(production.updatedAt) > new Date(production.createdAt);
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl">
       <div className="mb-4 flex items-center justify-between">
         <Link
           href={backUrl}

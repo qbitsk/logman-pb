@@ -35,7 +35,7 @@ export default function ExportsPage() {
         {t.exports.subtitle}
       </p>
 
-      <div className="max-w-2xl">
+      <div className="max-w-3xl">
         <div className="card flex flex-col gap-4">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400">
             <FileText className="w-5 h-5" />

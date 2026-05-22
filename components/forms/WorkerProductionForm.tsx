@@ -260,7 +260,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
   }
 
   return (
-    <div className={isEdit ? "max-w-2xl" : undefined}>
+    <div className="max-w-3xl">
       {showLogoffModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 max-w-sm w-full mx-4 flex flex-col gap-6">

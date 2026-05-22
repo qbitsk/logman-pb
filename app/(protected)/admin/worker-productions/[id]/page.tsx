@@ -29,7 +29,7 @@ export default function AdminWorkerProductionDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl card text-center py-16">
+      <div className="max-w-3xl card text-center py-16">
         <p className="text-gray-400">{t.common.loading}</p>
       </div>
     );
@@ -37,7 +37,7 @@ export default function AdminWorkerProductionDetailPage() {
 
   if (notFound || !production) {
     return (
-      <div className="max-w-2xl card text-center py-16">
+      <div className="max-w-3xl card text-center py-16">
         <p className="text-gray-400">{t.workerProductionDetail.notFound}</p>
       </div>
     );

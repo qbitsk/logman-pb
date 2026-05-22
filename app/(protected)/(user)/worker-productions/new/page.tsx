@@ -19,7 +19,7 @@ export default function NewWorkerProductionPage() {
       fallback={
         <div>
           <h1 className="text-2xl font-bold text-brand-950 dark:text-white mb-1">New Production</h1>
-          <div className="card max-w-2xl text-center py-16">
+          <div className="card max-w-3xl text-center py-16">
             <p className="text-gray-400">Loading...</p>
           </div>
         </div>
@@ -71,11 +71,11 @@ function NewWorkerProductionPageContent() {
       <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{t.workerProductionForm.newSubtitle}</p>
 
       {loading ? (
-        <div className="card max-w-2xl text-center py-16">
+        <div className="card max-w-3xl text-center py-16">
           <p className="text-gray-400">{t.common.loading}</p>
         </div>
       ) : (
-        <div className="card max-w-2xl">
+        <div className="card max-w-3xl">
           <WorkerProductionForm
             productionProcesses={productionProcesses}
             productionParts={productionParts}
