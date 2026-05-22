@@ -276,19 +276,19 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             <div className="flex gap-3 justify-center">
               <button
                 type="button"
-                onClick={handleLogoff}
-                disabled={loggingOff}
-                className="btn-primary"
-              >
-                {loggingOff ? t.common.signingOut : t.common.signOut}
-              </button>
-              <button
-                type="button"
                 onClick={() => { setShowLogoffModal(false); router.push("/worker-productions"); }}
                 disabled={loggingOff}
                 className="btn-secondary"
               >
                 {t.common.cancel}
+              </button>
+              <button
+                type="button"
+                onClick={handleLogoff}
+                disabled={loggingOff}
+                className="btn-primary"
+              >
+                {loggingOff ? t.common.signingOut : t.common.signOut}
               </button>
             </div>
           </div>
@@ -381,20 +381,23 @@ export function WorkerProductionForm({ production, productionProcesses, producti
           <label className="label" htmlFor="productionStationId">
             {t.workerProductionForm.workStation} <span className="text-gray-400 font-normal">({t.common.optional})</span>
           </label>
-          <select
-            id="productionStationId"
-            name="productionStationId"
-            value={form.productionStationId}
-            onChange={(e) => set("productionStationId", e.target.value)}
-            className="input"
-          >
-            <option value="">{t.workerProductionForm.none}</option>
+          <div id="productionStationId" className="flex flex-wrap gap-2 mt-1">
             {filteredStations.map((ws) => (
-              <option key={ws.id} value={ws.id}>
+              <button
+                key={ws.id}
+                type="button"
+                onClick={() => set("productionStationId", form.productionStationId === ws.id ? "" : ws.id)}
+                className={clsx(
+                  "px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors",
+                  form.productionStationId === ws.id
+                    ? "bg-brand-600 text-white border-transparent"
+                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-brand-300"
+                )}
+              >
                 {ws.name}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
 
         <div>
@@ -432,7 +435,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between gap-2 mb-2">
             <label className="label">{t.workerProductionForm.defects}</label>
             <div className="flex gap-2">
               <button type="button" onClick={() => addDefect("unit")} className="btn-secondary inline-flex items-center gap-1 text-xs py-1 px-2">
