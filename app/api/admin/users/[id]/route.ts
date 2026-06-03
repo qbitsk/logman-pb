@@ -16,6 +16,7 @@ const patchSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
   role: z.enum(["user", "operator", "admin"]).optional(),
+  nfcKey: z.string().min(4).max(256).nullable().optional(),
 });
 
 // PATCH /api/admin/users/[id] — update a user's name and/or role
@@ -39,7 +40,7 @@ export async function PATCH(
     .update(users)
     .set({ ...result.data, updatedAt: new Date() })
     .where(eq(users.id, id))
-    .returning({ id: users.id, name: users.name, email: users.email, role: users.role, createdAt: users.createdAt });
+    .returning({ id: users.id, name: users.name, email: users.email, role: users.role, nfcKey: users.nfcKey, createdAt: users.createdAt });
 
   if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

@@ -226,6 +226,8 @@ export const sk: Translations = {
     password: "Heslo",
     allUsers: "Všetci používatelia",
     user: "Používateľ",
+    nfcKey: "NFC Kľúč",
+    nfcKeyPlaceholder: "Naskenujte kartu alebo zadajte kľúč… (nechajte prázdne pre vymazanie)",
   },
   adminProductions: {
     title: "Všetky produkcie",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { signIn } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -14,6 +14,66 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // NFC card reader detection: rapid keystrokes followed by Enter
+  const nfcBuffer = useRef("");
+  const nfcLastKey = useRef(0);
+  const NFC_SPEED_MS = 50; // max ms between keystrokes for NFC
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const now = Date.now();
+
+      if (e.key === "Enter") {
+        const buf = nfcBuffer.current;
+        const elapsed = now - nfcLastKey.current;
+        nfcBuffer.current = "";
+
+        // Only treat as NFC if buffer has content and last keystroke was fast
+        if (buf.length >= 4 && elapsed < NFC_SPEED_MS * 3) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleNfcScan(buf);
+        }
+        return;
+      }
+
+      if (e.key.length === 1) {
+        const elapsed = now - nfcLastKey.current;
+        // Reset buffer if the user has been idle (i.e. human typing, not NFC)
+        if (nfcLastKey.current > 0 && elapsed > NFC_SPEED_MS * 5) {
+          nfcBuffer.current = "";
+        }
+        nfcBuffer.current += e.key;
+        nfcLastKey.current = now;
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () => document.removeEventListener("keydown", handleKeyDown, { capture: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleNfcScan(key: string) {
+    if (loading) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/nfc-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key }),
+        credentials: "include",
+      });
+      if (res.ok) {
+        router.push("/dashboard");
+      } else {
+        setError(t.auth.invalidCredentials);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -224,6 +224,8 @@ export const en = {
     password: "Password",
     allUsers: "All users",
     user: "User",
+    nfcKey: "NFC Key",
+    nfcKeyPlaceholder: "Scan card or enter key… (leave blank to clear)",
   },
   adminProductions: {
     title: "All Productions",

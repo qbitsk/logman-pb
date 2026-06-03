@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   role: text("role", { enum: ["user", "operator", "admin"] })
     .notNull()
     .default("user"),
+  nfcKey: text("nfc_key").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

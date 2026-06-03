@@ -100,6 +100,7 @@ export async function GET() {
       name: users.name,
       email: users.email,
       role: users.role,
+      nfcKey: users.nfcKey,
       createdAt: users.createdAt,
     })
     .from(users)

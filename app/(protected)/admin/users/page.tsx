@@ -10,6 +10,7 @@ type User = {
   name: string;
   email: string;
   role: "user" | "operator" | "admin";
+  nfcKey: string | null;
   createdAt: string;
 };
 
@@ -20,7 +21,7 @@ const roleStyles: Record<string, string> = {
 };
 
 const emptyCreateForm = { name: "", email: "", password: "", role: "user" as User["role"] };
-const emptyEditForm   = { name: "", email: "", role: "user" as User["role"] };
+const emptyEditForm   = { name: "", email: "", role: "user" as User["role"], nfcKey: "" };
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -53,7 +54,7 @@ export default function AdminUsersPage() {
   }
 
   function openEdit(user: User) {
-    setEditForm({ name: user.name, email: user.email, role: user.role });
+    setEditForm({ name: user.name, email: user.email, role: user.role, nfcKey: user.nfcKey ?? "" });
     setEditError(null);
     setEditTarget(user);
   }
@@ -86,7 +87,10 @@ export default function AdminUsersPage() {
     const res = await fetch(`/api/admin/users/${editTarget.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editForm),
+      body: JSON.stringify({
+        ...editForm,
+        nfcKey: editForm.nfcKey.trim() === "" ? null : editForm.nfcKey.trim(),
+      }),
     });
     if (res.ok) {
       const updated: User = await res.json();
@@ -231,6 +235,16 @@ export default function AdminUsersPage() {
                   <option value="operator">{t.roles.operator}</option>
                   <option value="admin">{t.roles.admin}</option>
                 </select>
+              </div>
+              <div>
+                <label className="label">{t.adminUsers.nfcKey}</label>
+                <input
+                  className="input font-mono"
+                  value={editForm.nfcKey}
+                  onChange={(e) => setEditForm((f) => ({ ...f, nfcKey: e.target.value }))}
+                  placeholder={t.adminUsers.nfcKeyPlaceholder}
+                  autoComplete="off"
+                />
               </div>
               {editError && <p className="text-sm text-red-600">{editError}</p>}
               <div className="flex justify-end gap-3 pt-1">
