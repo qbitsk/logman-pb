@@ -45,6 +45,7 @@ type WorkerProduction = {
 type ProductionPart = {
   id: string;
   name: string;
+  number?: string | null;
   productionProcessId: string;
 };
 
@@ -347,7 +348,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
           >
             {filteredProducts.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {c.name}{c.number ? ` (${c.number})` : ""}
               </option>
             ))}
           </select>
