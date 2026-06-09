@@ -86,5 +86,6 @@ export async function generateProductionsCSV(
       .join(delimiter);
   });
 
-  return [allHeaders.join(delimiter), ...rows].join("\n");
+  const BOM = "\uFEFF";
+  return BOM + [allHeaders.join(delimiter), ...rows].join("\n");
 }

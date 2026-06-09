@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
   const csv = await generateProductionsCSV(typedRows, typedDefectRows, csvDelimiter);
   return new NextResponse(csv, {
     headers: {
-      "Content-Type": "text/csv",
+      "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="worker-productions-${Date.now()}.csv"`,
     },
   });
