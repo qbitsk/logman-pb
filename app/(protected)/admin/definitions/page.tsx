@@ -662,7 +662,12 @@ export default function WorkCategoriesPage() {
                 <tbody>
                   {productionParts.map((prod) => (
                     <tr key={prod.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
-                      <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{prod.name}</td>
+                      <td className="pe-2 py-3">
+                        <span className="font-medium text-gray-700 dark:text-gray-200">{prod.name}</span>
+                        {prod.number && (
+                          <span className="ml-2 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">{prod.number}</span>
+                        )}
+                      </td>
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{prod.productionProcessName}</td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
@@ -713,7 +718,10 @@ export default function WorkCategoriesPage() {
                     <tr key={comp.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
                       <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{comp.name}</td>
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === comp.productionPartId)?.productionProcessName ?? "—"}</td>
-                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{comp.productionPartName}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">
+                        {comp.productionPartName}
+                        {(() => { const n = productionParts.find((p) => p.id === comp.productionPartId)?.number; return n ? <span className="ml-2 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">{n}</span> : null; })()}
+                      </td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
@@ -764,7 +772,10 @@ export default function WorkCategoriesPage() {
                     <tr key={def.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
                       <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{def.name}</td>
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{(() => { const comp = components.find((c) => c.id === def.productionComponentId); return comp ? (productionParts.find((p) => p.id === comp.productionPartId)?.productionProcessName ?? "—") : "—"; })()}</td>
-                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{def.productionPartName ?? "—"}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">
+                        {def.productionPartName ?? "—"}
+                        {(() => { const comp = components.find((c) => c.id === def.productionComponentId); const n = comp ? productionParts.find((p) => p.id === comp.productionPartId)?.number : null; return n ? <span className="ml-2 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">{n}</span> : null; })()}
+                      </td>
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{def.componentName ?? "—"}</td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
@@ -815,7 +826,10 @@ export default function WorkCategoriesPage() {
                     <tr key={station.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
                       <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{station.name}</td>
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === station.productionPartId)?.productionProcessName ?? "—"}</td>
-                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{station.productionPartName}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">
+                        {station.productionPartName}
+                        {(() => { const n = productionParts.find((p) => p.id === station.productionPartId)?.number; return n ? <span className="ml-2 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">{n}</span> : null; })()}
+                      </td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openStationEdit(station)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
@@ -865,7 +879,10 @@ export default function WorkCategoriesPage() {
                     <tr key={def.id} className="border-b border-gray-200 dark:border-gray-700 last:border-0">
                       <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{def.name}</td>
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === def.productionPartId)?.productionProcessName ?? "—"}</td>
-                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === def.productionPartId)?.name ?? def.productionPartName ?? "—"}</td>
+                      <td className="px-2 py-3 text-gray-500 dark:text-gray-400">
+                        {productionParts.find((p) => p.id === def.productionPartId)?.name ?? def.productionPartName ?? "—"}
+                        {(() => { const n = productionParts.find((p) => p.id === def.productionPartId)?.number; return n ? <span className="ml-2 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">{n}</span> : null; })()}
+                      </td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => openUnitDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
