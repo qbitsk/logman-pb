@@ -2,14 +2,14 @@ import { createAuthEndpoint, APIError } from "better-auth/api";
 import { setSessionCookie } from "better-auth/cookies";
 import type { BetterAuthPlugin } from "better-auth";
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 
 /**
  * Custom NFC-card login mounted at `/api/auth/nfc/login`.
  *
- * Workers tap a card whose key maps to a `role: "user"` account; we look it up
+ * A user of any role taps a card whose key maps to their account; we look it up
  * and create a session for them. Unlike the previous hand-rolled route, this is
  * a real Better Auth plugin, so session creation and cookie signing — including
  * the cookie cache — are delegated to Better Auth and stay in sync with the rest
@@ -37,7 +37,7 @@ export const nfcPlugin = () =>
           const [match] = await db
             .select({ id: users.id })
             .from(users)
-            .where(and(eq(users.nfcKey, key), eq(users.role, "user")))
+            .where(eq(users.nfcKey, key))
             .limit(1);
 
           if (!match) {

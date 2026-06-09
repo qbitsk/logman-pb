@@ -239,12 +239,11 @@ export default function AdminUsersPage() {
               <div>
                 <label className="label">{t.adminUsers.nfcKey}</label>
                 <input
-                  className="input font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="input font-mono"
                   value={editForm.nfcKey}
                   onChange={(e) => setEditForm((f) => ({ ...f, nfcKey: e.target.value }))}
                   placeholder={t.adminUsers.nfcKeyPlaceholder}
                   autoComplete="off"
-                  disabled={editForm.role !== "user"}
                 />
               </div>
               {editError && <p className="text-sm text-red-600">{editError}</p>}
