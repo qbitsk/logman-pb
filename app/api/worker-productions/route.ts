@@ -21,6 +21,7 @@ export async function GET() {
       shift: workerProductions.shift,
       createdAt: workerProductions.createdAt,
       productionPartName: productionParts.name,
+      productionPartNumber: productionParts.number,
       productionProcessName: productionProcesses.name,
       stationName: productionStations.name,
     })

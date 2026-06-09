@@ -1012,7 +1012,7 @@ export default function WorkCategoriesPage() {
               >
                 <option value="">— {t.definitions.selectPart} —</option>
                 {productionParts.map((prod) => (
-                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
+                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}{prod.number ? ` (${prod.number})` : ""}</option>
                 ))}
               </select>
             </div>
@@ -1057,9 +1057,10 @@ export default function WorkCategoriesPage() {
                 <option value="">— {t.definitions.selectComponent} —</option>
                 {components.map((comp) => {
                   const part = productionParts.find((p) => p.id === comp.productionPartId);
+                  const partSuffix = part?.number ? ` (${part.number})` : "";
                   const label = part
-                    ? `${part.productionProcessName} → ${comp.productionPartName} → ${comp.name}`
-                    : comp.productionPartName ? `${comp.productionPartName} → ${comp.name}` : comp.name;
+                    ? `${part.productionProcessName} → ${comp.productionPartName}${partSuffix} → ${comp.name}`
+                    : comp.productionPartName ? `${comp.productionPartName}${partSuffix} → ${comp.name}` : comp.name;
                   return <option key={comp.id} value={comp.id}>{label}</option>;
                 })}
               </select>
@@ -1104,7 +1105,7 @@ export default function WorkCategoriesPage() {
               >
                 <option value="">— {t.definitions.selectPart} —</option>
                 {productionParts.map((prod) => (
-                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
+                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}{prod.number ? ` (${prod.number})` : ""}</option>
                 ))}
               </select>
             </div>
@@ -1148,7 +1149,7 @@ export default function WorkCategoriesPage() {
               >
                 <option value="">— {t.definitions.selectPart} —</option>
                 {productionParts.map((prod) => (
-                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}</option>
+                  <option key={prod.id} value={prod.id}>{prod.productionProcessName} → {prod.name}{prod.number ? ` (${prod.number})` : ""}</option>
                 ))}
               </select>
             </div>

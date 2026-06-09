@@ -25,6 +25,7 @@ type WorkerProduction = {
   shift: number | null;
   createdAt: string;
   productionPartName: string;
+  productionPartNumber: string | null;
   productionProcessName: string;
   stationName: string | null;
 };
@@ -408,7 +409,10 @@ export default function WorkerProductionsPage() {
                             </Link>
                           </td>
                           <td className="px-2 py-3 capitalize">
-                            <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">{s.productionPartName.replaceAll("_", "_\u200B")}</span>
+                            <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">
+                              {s.productionPartName.replaceAll("_", "_​")}
+                              {s.productionPartNumber && <span className="ml-2 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">{s.productionPartNumber}</span>}
+                            </span>
                             <span className="mt-0.5 block text-xs leading-tight text-gray-400 dark:text-gray-400">{s.productionProcessName}</span>
                           </td>
                           <td className="px-2 py-3 text-gray-500 dark:text-gray-400 capitalize">{s.stationName ?? <Dash />}</td>
@@ -445,7 +449,10 @@ export default function WorkerProductionsPage() {
                      <RowActions row={s} onDeleted={handleDeleted} />
                     </div>
                     <div className="pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
-                      <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">{s.productionPartName}</span>
+                      <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">
+                        {s.productionPartName}
+                        {s.productionPartNumber && <span className="ml-2 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">{s.productionPartNumber}</span>}
+                      </span>
                       <span className="mt-0.5 block text-xs leading-tight text-gray-400 dark:text-gray-400">{s.productionProcessName}</span>      
                     </div>
                     <dl className="grid grid-cols-3 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm">
