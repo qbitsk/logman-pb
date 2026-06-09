@@ -107,7 +107,7 @@ export default function WorkerProductionsPage() {
   const [productions, setProductions] = useState<WorkerProduction[]>([]);
   const [loading, setLoading] = useState(true);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [partSearch, setPartSearch] = useState("");
   const filterRef = useRef<HTMLDivElement>(null);

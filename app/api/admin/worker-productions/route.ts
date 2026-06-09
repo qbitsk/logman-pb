@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
 import { workerProductions, workerProductionDefects, productionDefects, users, productionParts, productionProcesses, productionStations, getWorkerProductionStatus } from "@/lib/db/schema";
-import { eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
 // GET /api/admin/worker-productions — list all worker productions with user info (admin/operator)
@@ -30,7 +30,7 @@ export async function GET() {
     .innerJoin(productionParts, eq(workerProductions.productionPartId, productionParts.id))
     .innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id))
     .leftJoin(productionStations, eq(workerProductions.productionStationId, productionStations.id))
-    .orderBy(workerProductions.createdAt);
+    .orderBy(desc(workerProductions.createdAt));
 
   const ids = rows.map((r) => r.id);
   const defectTotals = ids.length

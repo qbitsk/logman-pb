@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { workerProductions, workerProductionDefects, productionDefects, productionParts, productionProcesses, productionStations, getWorkerProductionStatus } from "@/lib/db/schema";
 import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
-import { eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
 // GET /api/worker-productions — list worker productions for the current user
@@ -30,7 +30,7 @@ export async function GET() {
     .innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id))
     .leftJoin(productionStations, eq(workerProductions.productionStationId, productionStations.id))
     .where(eq(workerProductions.userId, session.user.id))
-    .orderBy(workerProductions.createdAt);
+    .orderBy(desc(workerProductions.createdAt));
 
   const ids = userProductions.map((p) => p.id);
   const defectTotals = ids.length
