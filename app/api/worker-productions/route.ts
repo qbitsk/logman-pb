@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
-import { workerProductions, workerProductionDefects, productionParts, productionProcesses, productionStations, getWorkerProductionStatus } from "@/lib/db/schema";
+import { workerProductions, workerProductionDefects, productionDefects, productionParts, productionProcesses, productionStations, getWorkerProductionStatus } from "@/lib/db/schema";
 import { workerProductionSchema } from "@/lib/validations/worker-production";
 import { sendSubmissionConfirmation, sendAdminNotification } from "@/lib/mail";
-import { eq } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
 // GET /api/worker-productions — list worker productions for the current user
@@ -32,7 +32,36 @@ export async function GET() {
     .where(eq(workerProductions.userId, session.user.id))
     .orderBy(workerProductions.createdAt);
 
-  return NextResponse.json(userProductions.map((p) => ({ ...p, status: getWorkerProductionStatus(p.createdAt) })));
+  const ids = userProductions.map((p) => p.id);
+  const defectTotals = ids.length
+    ? await db
+        .select({
+          workerProductionId: workerProductionDefects.workerProductionId,
+          type: productionDefects.type,
+          total: sql<number>`cast(sum(${workerProductionDefects.units}) as int)`.as("total"),
+        })
+        .from(workerProductionDefects)
+        .innerJoin(productionDefects, eq(workerProductionDefects.productionDefectId, productionDefects.id))
+        .where(inArray(workerProductionDefects.workerProductionId, ids))
+        .groupBy(workerProductionDefects.workerProductionId, productionDefects.type)
+    : [];
+
+  const defectMap = new Map<string, { defectedProducts: number; defectedComponents: number }>();
+  for (const row of defectTotals) {
+    const entry = defectMap.get(row.workerProductionId) ?? { defectedProducts: 0, defectedComponents: 0 };
+    if (row.type === "unit") entry.defectedProducts = row.total;
+    else if (row.type === "component") entry.defectedComponents = row.total;
+    defectMap.set(row.workerProductionId, entry);
+  }
+
+  return NextResponse.json(
+    userProductions.map((p) => ({
+      ...p,
+      status: getWorkerProductionStatus(p.createdAt),
+      defectedProducts: defectMap.get(p.id)?.defectedProducts ?? 0,
+      defectedComponents: defectMap.get(p.id)?.defectedComponents ?? 0,
+    }))
+  );
 }
 
 // POST /api/worker-productions — create a new worker production

@@ -119,7 +119,7 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
               </div>
               <div>
                 <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.defectedComponents}</dt>
-                <dd className="text-red-500 font-medium">{defectedComponents}</dd>
+                <dd className="text-orange-600 font-medium">{defectedComponents}</dd>
               </div>
             </>
           )}
