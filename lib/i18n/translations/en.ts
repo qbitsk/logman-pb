@@ -133,6 +133,10 @@ export const en = {
     notesPlaceholder: "Any additional notes…",
     shiftRequired: "Please select a shift",
     stationRequired: "Please select a workstation",
+    processOption: "— Select Process —",
+    partOption: "— Select Part —",
+    processRequired: "Please select a process",
+    partRequired: "Please select a part",
   },
   profile: {
     title: "Profile",

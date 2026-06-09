@@ -135,6 +135,10 @@ export const sk: Translations = {
     notesPlaceholder: "Akékoľvek doplňujúce poznámky…",
     shiftRequired: "Prosím vyberte zmenu",
     stationRequired: "Prosím vyberte pracovisko",
+    processOption: "— Vyberte proces —",
+    partOption: "— Vyberte diel —",
+    processRequired: "Prosím vyberte proces",
+    partRequired: "Prosím vyberte diel",
   },
   profile: {
     title: "Profil",

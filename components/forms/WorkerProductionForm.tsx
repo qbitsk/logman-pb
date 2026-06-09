@@ -104,15 +104,16 @@ export function WorkerProductionForm({ production, productionProcesses, producti
   const resolvedBackUrl = backUrl ?? (isEdit ? "/admin/worker-productions" : "/worker-productions");
 
   const [productionProcessId, setProductionProcessId] = useState(() => {
-    const initialProductId = production?.productionPartId ?? initialPartId ?? productionParts[0]?.id ?? "";
+    const initialProductId = production?.productionPartId ?? initialPartId ?? "";
+    if (!initialProductId) return "";
     const product = productionParts.find((p) => p.id === initialProductId);
-    return product?.productionProcessId ?? productionProcesses[0]?.id ?? "";
+    return product?.productionProcessId ?? "";
   });
 
   const filteredProducts = productionParts.filter((p) => p.productionProcessId === productionProcessId);
 
   const [form, setForm] = useState({
-    productionPartId: production?.productionPartId ?? initialPartId ?? (productionParts[0]?.id ?? ""),
+    productionPartId: production?.productionPartId ?? initialPartId ?? "",
     productionStationId: production?.productionStationId ?? "",
     units: production?.units?.toString() ?? "",
     shift: production?.shift?.toString() ?? "",
@@ -132,6 +133,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
   );
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof WorkerProductionInput, string>>>({});
+  const [processError, setProcessError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [showLogoffModal, setShowLogoffModal] = useState(false);
@@ -143,8 +145,8 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
   function handleProductionProcessChange(newProcessId: string) {
     setProductionProcessId(newProcessId);
-    const firstProduct = productionParts.find((p) => p.productionProcessId === newProcessId);
-    set("productionPartId", firstProduct?.id ?? "");
+    setProcessError(null);
+    set("productionPartId", "");
   }
 
   function set(key: "productionPartId" | "productionStationId" | "units" | "shift" | "notes", value: string) {
@@ -195,13 +197,23 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     setServerError(null);
     setSuccess(false);
 
+    let hasError = false;
+    if (!productionProcessId) {
+      setProcessError(t.workerProductionForm.processRequired);
+      hasError = true;
+    } else {
+      setProcessError(null);
+    }
+
     const requiredErrors: typeof errors = {};
+    if (!form.productionPartId) requiredErrors.productionPartId = t.workerProductionForm.partRequired;
     if (!form.shift) requiredErrors.shift = t.workerProductionForm.shiftRequired;
     if (filteredStations.length > 0 && !form.productionStationId) requiredErrors.productionStationId = t.workerProductionForm.stationRequired;
     if (Object.keys(requiredErrors).length > 0) {
       setErrors(requiredErrors);
-      return;
+      hasError = true;
     }
+    if (hasError) return;
 
     if (!isEdit) {
       const result = workerProductionSchema.safeParse({
@@ -337,12 +349,14 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             onChange={(e) => handleProductionProcessChange(e.target.value)}
             className="input"
           >
+            <option value="" disabled>{t.workerProductionForm.processOption}</option>
             {productionProcesses.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
               </option>
             ))}
           </select>
+          {processError && <p className="text-red-600 text-xs mt-1">{processError}</p>}
         </div>
 
         <div>
@@ -354,6 +368,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             onChange={(e) => set("productionPartId", e.target.value)}
             className="input"
           >
+            <option value="" disabled>{t.workerProductionForm.partOption}</option>
             {filteredProducts.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}{c.number ? ` (${c.number})` : ""}
