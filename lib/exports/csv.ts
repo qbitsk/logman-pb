@@ -10,6 +10,7 @@ type ProductionCSVRow = {
   id: string;
   processName: string;
   productionPartName: string;
+  productionPartNumber: string | null;
   workStationName: string;
   units: number | null;
   shift: number | null;
@@ -71,7 +72,7 @@ export async function generateProductionsCSV(
     return [
       s.id,
       s.processName,
-      s.productionPartName,
+      s.productionPartNumber ? `${s.productionPartName} (${s.productionPartNumber})` : s.productionPartName,
       s.workStationName,
       s.units ?? "",
       s.shift ?? "",
