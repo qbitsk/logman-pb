@@ -78,7 +78,7 @@ function RowActions({
     <div className="flex items-center justify-end gap-1">
       <Link
         href={`/worker-productions/${row.id}/edit`}
-        className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors"
+        className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors"
         aria-label={t.workerProductions.editProduction}
       >
         <Pencil className="w-4 h-4" />

@@ -153,10 +153,10 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="py-3 text-end">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEdit(user)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors" aria-label="Edit user">
+                      <button onClick={() => openEdit(user)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors" aria-label="Edit user">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => deleteUser(user)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors" aria-label="Delete user">
+                      <button onClick={() => deleteUser(user)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors" aria-label="Delete user">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

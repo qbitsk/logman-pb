@@ -1,28 +1,55 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-:root {
-  --brand: #4f52e5;
-  --brand-dark: #4140ca;
-  --bg: #f0f4ff;
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, Segoe UI, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-brand-50: #f0f4ff;
+  --color-brand-100: #e0e9ff;
+  --color-brand-200: #c7d7fe;
+  --color-brand-300: #a5b8fc;
+  --color-brand-400: #8193f8;
+  --color-brand-500: #6470f1;
+  --color-brand-600: #4f52e5;
+  --color-brand-700: #4140ca;
+  --color-brand-800: #3636a3;
+  --color-brand-900: #313281;
+  --color-brand-950: #1e1d4c;
 }
 
-body {
-  background-color: var(--bg);
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-  .btn-secondary {
-    @apply bg-white hover:bg-brand-50 text-brand-700 font-semibold px-5 py-2.5 rounded-lg border border-brand-200 transition-colors text-sm dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-brand-300 dark:border-gray-700;
-  }
-  .input {
-    @apply w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-base text-gray-900 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 transition dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-brand-500 dark:focus:ring-brand-900/30;
-  }
-  select.input {
+@utility btn-primary {
+  @apply bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+@utility btn-secondary {
+  @apply bg-white hover:bg-brand-50 text-brand-700 font-semibold px-5 py-2.5 rounded-lg border border-brand-200 transition-colors text-sm dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-brand-300 dark:border-gray-700;
+}
+
+@utility input {
+  @apply w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-base text-gray-900 focus:border-brand-400 focus:outline-hidden focus:ring-2 focus:ring-brand-100 transition dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-brand-500 dark:focus:ring-brand-900/30;
+  &select {
     -webkit-appearance: none;
     appearance: none;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -31,16 +58,37 @@ body {
     background-size: 1.25em 1.25em;
     padding: 0.5rem 0.5rem 0.5rem 1rem;
   }
-  .dark select.input {
+  .dark &select {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
   }
-  .label {
-    @apply block text-sm font-medium text-gray-700 mb-1 dark:text-gray-400;
+}
+
+@utility dark {
+  & select.input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
   }
-  .card {
-    @apply bg-white rounded-2xl border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-800;
+}
+
+@utility label {
+  @apply block text-sm font-medium text-gray-700 mb-1 dark:text-gray-400;
+}
+
+@utility card {
+  @apply bg-white rounded-2xl border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-800;
+}
+
+@utility badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+@layer utilities {
+  :root {
+    --brand: #4f52e5;
+    --brand-dark: #4140ca;
+    --bg: #f0f4ff;
   }
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+
+  body {
+    background-color: var(--bg);
   }
 }

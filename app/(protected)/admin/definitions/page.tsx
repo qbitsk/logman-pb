@@ -571,7 +571,7 @@ export default function WorkCategoriesPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -617,10 +617,10 @@ export default function WorkCategoriesPage() {
                       <td className="pe-2 py-3 font-medium text-gray-700 dark:text-gray-200">{process.name}</td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openProcessEdit(process)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                          <button onClick={() => openProcessEdit(process)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteProcess(process.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                          <button onClick={() => deleteProcess(process.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -665,10 +665,10 @@ export default function WorkCategoriesPage() {
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{prod.productionProcessName}</td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openProdEdit(prod)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                          <button onClick={() => openProdEdit(prod)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteProd(prod.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                          <button onClick={() => deleteProd(prod.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -715,10 +715,10 @@ export default function WorkCategoriesPage() {
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{comp.productionPartName}</td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                          <button onClick={() => openCompEdit(comp)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteComp(comp.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                          <button onClick={() => deleteComp(comp.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -767,10 +767,10 @@ export default function WorkCategoriesPage() {
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{def.componentName ?? "—"}</td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                          <button onClick={() => openDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteDef(def.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                          <button onClick={() => deleteDef(def.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -817,10 +817,10 @@ export default function WorkCategoriesPage() {
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{station.productionPartName}</td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openStationEdit(station)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                          <button onClick={() => openStationEdit(station)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteStation(station.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                          <button onClick={() => deleteStation(station.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -867,10 +867,10 @@ export default function WorkCategoriesPage() {
                       <td className="px-2 py-3 text-gray-500 dark:text-gray-400">{productionParts.find((p) => p.id === def.productionPartId)?.name ?? def.productionPartName ?? "—"}</td>
                       <td className="py-3 text-end">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => openUnitDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded transition-colors">
+                          <button onClick={() => openUnitDefEdit(def)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deleteUnitDef(def.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                          <button onClick={() => deleteUnitDef(def.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
