@@ -3,15 +3,36 @@ import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/db";
 import { workerProductions, users, productionParts, productionProcesses, productionStations, workerProductionDefects, productionComponents, productionDefects, getWorkerProductionStatus } from "@/lib/db/schema";
 import { generateProductionsCSV } from "@/lib/exports/csv";
-import { eq } from "drizzle-orm";
+import { and, eq, gte, ilike, lte } from "drizzle-orm";
 import { headers } from "next/headers";
 
-// GET /api/exports?format=csv
+// GET /api/exports?format=csv[&dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&process=...&product=...&station=...&status=new|completed&user=...&partSearch=...]
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session || session.user.role === "user") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+
+  const sp = request.nextUrl.searchParams;
+  const dateFrom  = sp.get("dateFrom")  ?? "";
+  const dateTo    = sp.get("dateTo")    ?? "";
+  const process   = sp.get("process")   ?? "";
+  const product   = sp.get("product")   ?? "";
+  const station   = sp.get("station")   ?? "";
+  const status    = sp.get("status")    ?? "";
+  const user      = sp.get("user")      ?? "";
+  const partSearch = sp.get("partSearch") ?? "";
+
+  const conditions = [
+    ...(dateFrom  ? [gte(workerProductions.createdAt, new Date(`${dateFrom}T00:00:00`))] : []),
+    ...(dateTo    ? [lte(workerProductions.createdAt, new Date(`${dateTo}T23:59:59`))]   : []),
+    ...(process   ? [eq(productionProcesses.name, process)]   : []),
+    ...(product   ? [eq(productionParts.name, product)]       : []),
+    ...(station   ? [eq(productionStations.name, station)]    : []),
+    ...(user      ? [eq(users.name, user)]                    : []),
+    ...(partSearch ? [ilike(productionParts.name, `%${partSearch}%`)] : []),
+  ];
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
   // Join worker productions with user, category and station data
   const rows = await db
@@ -34,9 +55,10 @@ export async function GET(request: NextRequest) {
     .leftJoin(productionParts, eq(workerProductions.productionPartId, productionParts.id))
     .leftJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id))
     .leftJoin(productionStations, eq(workerProductions.productionStationId, productionStations.id))
+    .where(whereClause)
     .orderBy(workerProductions.createdAt);
 
-  const typedRows = rows.map((r) => ({
+  let typedRows = rows.map((r) => ({
     ...r,
     processName: r.processName ?? "",
     productionPartName: r.productionPartName ?? "Unknown",
@@ -46,7 +68,12 @@ export async function GET(request: NextRequest) {
     status: getWorkerProductionStatus(r.createdAt),
   }));
 
+  if (status) {
+    typedRows = typedRows.filter((r) => r.status === status);
+  }
+
   // Fetch all defects with component name, defect name and type
+  const exportedIds = new Set(typedRows.map((r) => r.id));
   const defectRows = await db
     .select({
       submissionId: workerProductionDefects.workerProductionId,
@@ -59,7 +86,9 @@ export async function GET(request: NextRequest) {
     .leftJoin(productionDefects, eq(workerProductionDefects.productionDefectId, productionDefects.id))
     .leftJoin(productionComponents, eq(productionDefects.productionComponentId, productionComponents.id));
 
-  const typedDefectRows = defectRows.map((d) => ({
+  const typedDefectRows = defectRows
+    .filter((d) => exportedIds.has(d.submissionId))
+    .map((d) => ({
     submissionId: d.submissionId,
     componentName: d.componentName ?? "Unknown",
     defectName: d.defectName ?? "Unknown",

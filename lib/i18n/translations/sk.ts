@@ -243,6 +243,7 @@ export const sk: Translations = {
     total: "celkovo",
     noProductions: "Zatiaľ žiadne produkcie.",
     editProduction: "Upraviť produkciu",
+    exportCsv: "Exportovať CSV",
   },
   exports: {
     title: "Export dát",

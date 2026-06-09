@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown, Clock, CheckCircle } from "lucide-react";
+import { Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown, Clock, CheckCircle, Download } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
 import {
@@ -202,6 +202,43 @@ export default function AdminWorkerProductionsPage() {
   const handleDeleted = (id: string) =>
     setProductions((prev) => prev.filter((x) => x.id !== id));
 
+  const [csvLoading, setCsvLoading] = useState(false);
+
+  const exportCSV = async () => {
+    setCsvLoading(true);
+    try {
+      const params = new URLSearchParams({ format: "csv" });
+      const [dateFrom, dateTo] = getDateRange();
+      if (dateFrom) params.set("dateFrom", dateFrom);
+      if (dateTo)   params.set("dateTo",   dateTo);
+      const proc    = getFilter("process");
+      const product = getFilter("product");
+      const station = getFilter("station");
+      const status  = getFilter("status");
+      const user    = getFilter("user");
+      if (proc)               params.set("process",    proc);
+      if (product)            params.set("product",    product);
+      if (station)            params.set("station",    station);
+      if (status)             params.set("status",     status);
+      if (user)               params.set("user",       user);
+      if (partSearch.trim())  params.set("partSearch", partSearch.trim());
+
+      const res = await fetch(`/api/exports?${params.toString()}`);
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `worker-productions-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCsvLoading(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -249,7 +286,6 @@ export default function AdminWorkerProductionsPage() {
                   </span>
                 )}
               </button>
-
               {filterOpen && (
                 <div className="absolute right-0 top-full mt-1 z-20 w-80 card p-4 shadow-lg">
                   <div className="flex flex-col gap-3">
@@ -331,6 +367,15 @@ export default function AdminWorkerProductionsPage() {
                 </div>
               )}
             </div>
+            <button
+              className="btn-secondary flex items-center gap-2 h-10 px-3"
+              onClick={exportCSV}
+              disabled={csvLoading}
+              title={t.adminProductions.exportCsv}
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">{csvLoading ? t.exports.generating : t.adminProductions.exportCsv}</span>
+            </button>
           </div>
 
           {filteredRows.length === 0 ? (

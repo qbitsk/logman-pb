@@ -241,6 +241,7 @@ export const en = {
     total: "total",
     noProductions: "No productions yet.",
     editProduction: "Edit production",
+    exportCsv: "Export CSV",
   },
   exports: {
     title: "Data Exports",
