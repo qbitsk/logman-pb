@@ -131,6 +131,8 @@ export const en = {
     unitsPlaceholder: "e.g. 10",
     defectUnitsPlaceholder: "Units",
     notesPlaceholder: "Any additional notes…",
+    shiftRequired: "Please select a shift",
+    stationRequired: "Please select a workstation",
   },
   profile: {
     title: "Profile",

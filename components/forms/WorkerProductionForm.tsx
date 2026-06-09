@@ -195,6 +195,14 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     setServerError(null);
     setSuccess(false);
 
+    const requiredErrors: typeof errors = {};
+    if (!form.shift) requiredErrors.shift = t.workerProductionForm.shiftRequired;
+    if (filteredStations.length > 0 && !form.productionStationId) requiredErrors.productionStationId = t.workerProductionForm.stationRequired;
+    if (Object.keys(requiredErrors).length > 0) {
+      setErrors(requiredErrors);
+      return;
+    }
+
     if (!isEdit) {
       const result = workerProductionSchema.safeParse({
         productionPartId: form.productionPartId,
@@ -357,7 +365,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
         <div>
           <label className="label">
-            {t.workerProductionForm.shift} <span className="text-gray-400 font-normal">({t.common.optional})</span>
+            {t.workerProductionForm.shift} *
           </label>
           <div className="flex gap-2 mt-1">
             {([1, 2, 3] as const).map((s) => (
@@ -376,30 +384,34 @@ export function WorkerProductionForm({ production, productionProcesses, producti
               </button>
             ))}
           </div>
+          {errors.shift && <p className="text-red-600 text-xs mt-1">{errors.shift}</p>}
         </div>
 
-        <div>
-          <label className="label" htmlFor="productionStationId">
-            {t.workerProductionForm.workStation} <span className="text-gray-400 font-normal">({t.common.optional})</span>
-          </label>
-          <div id="productionStationId" className="flex flex-wrap gap-2 mt-1">
-            {filteredStations.map((ws) => (
-              <button
-                key={ws.id}
-                type="button"
-                onClick={() => set("productionStationId", form.productionStationId === ws.id ? "" : ws.id)}
-                className={clsx(
-                  "px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors",
-                  form.productionStationId === ws.id
-                    ? "bg-brand-600 text-white border-transparent"
-                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-brand-300"
-                )}
-              >
-                {ws.name}
-              </button>
-            ))}
+        {filteredStations.length > 0 && (
+          <div>
+            <label className="label" htmlFor="productionStationId">
+              {t.workerProductionForm.workStation} *
+            </label>
+            <div id="productionStationId" className="flex flex-wrap gap-2 mt-1">
+              {filteredStations.map((ws) => (
+                <button
+                  key={ws.id}
+                  type="button"
+                  onClick={() => set("productionStationId", form.productionStationId === ws.id ? "" : ws.id)}
+                  className={clsx(
+                    "px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors",
+                    form.productionStationId === ws.id
+                      ? "bg-brand-600 text-white border-transparent"
+                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-brand-300"
+                  )}
+                >
+                  {ws.name}
+                </button>
+              ))}
+            </div>
+            {errors.productionStationId && <p className="text-red-600 text-xs mt-1">{errors.productionStationId}</p>}
           </div>
-        </div>
+        )}
 
         <div>
           <label className="label" htmlFor="units">

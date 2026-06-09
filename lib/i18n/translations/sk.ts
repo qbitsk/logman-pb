@@ -133,6 +133,8 @@ export const sk: Translations = {
     unitsPlaceholder: "napr. 10",
     defectUnitsPlaceholder: "Počet",
     notesPlaceholder: "Akékoľvek doplňujúce poznámky…",
+    shiftRequired: "Prosím vyberte zmenu",
+    stationRequired: "Prosím vyberte pracovisko",
   },
   profile: {
     title: "Profil",
