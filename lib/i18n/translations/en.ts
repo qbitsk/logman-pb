@@ -39,6 +39,8 @@ export const en = {
   auth: {
     email: "Email",
     password: "Password",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
     signIn: "Sign in",
     signingIn: "Signing in…",
     invalidCredentials: "Invalid email or password.",

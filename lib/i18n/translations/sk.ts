@@ -41,6 +41,8 @@ export const sk: Translations = {
   auth: {
     email: "E-mail",
     password: "Heslo",
+    showPassword: "Zobraziť heslo",
+    hidePassword: "Skryť heslo",
     signIn: "Prihlásiť sa",
     signingIn: "Prihlasovanie…",
     invalidCredentials: "Nesprávny e-mail alebo heslo.",
