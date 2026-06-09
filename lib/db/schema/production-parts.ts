@@ -4,6 +4,7 @@ import { productionProcesses } from "./production-processes";
 export const productionParts = pgTable("production_parts", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
+  number: text("number"),
   productionProcessId: text("production_process_id")
     .notNull()
     .references(() => productionProcesses.id),

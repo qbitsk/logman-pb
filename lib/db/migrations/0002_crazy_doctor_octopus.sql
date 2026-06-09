@@ -1,0 +1,1 @@
+ALTER TABLE "production_parts" ADD COLUMN "number" text;
