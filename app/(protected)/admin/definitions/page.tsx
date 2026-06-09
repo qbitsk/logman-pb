@@ -17,6 +17,7 @@ type ProductionProcess = {
 type ProductionPart = {
   id: string;
   name: string;
+  number?: string | null;
   productionProcessId: string;
   productionProcessName: string;
   createdAt: string;
@@ -113,7 +114,7 @@ export default function WorkCategoriesPage() {
   const [productionParts, setProductionParts] = useState<ProductionPart[]>([]);
   const [prodLoading, setProdLoading] = useState(true);
   const [prodModal, setProdModal] = useState<{ open: boolean; editing: ProductionPart | null }>({ open: false, editing: null });
-  const [prodForm, setProdForm] = useState({ name: "", productionProcessId: "" });
+  const [prodForm, setProdForm] = useState({ name: "", number: "", productionProcessId: "" });
   const [prodError, setProdError] = useState<string | null>(null);
   const [prodSaving, setProdSaving] = useState(false);
 
@@ -263,13 +264,13 @@ export default function WorkCategoriesPage() {
   // ───────────────────────────────────────────────────────────────────────────
 
   function openProdCreate() {
-    setProdForm({ name: "", productionProcessId: productionProcesses[0]?.id ?? "" });
+    setProdForm({ name: "", number: "", productionProcessId: productionProcesses[0]?.id ?? "" });
     setProdError(null);
     setProdModal({ open: true, editing: null });
   }
 
   function openProdEdit(prod: ProductionPart) {
-    setProdForm({ name: prod.name, productionProcessId: prod.productionProcessId });
+    setProdForm({ name: prod.name, number: prod.number ?? "", productionProcessId: prod.productionProcessId });
     setProdError(null);
     setProdModal({ open: true, editing: prod });
   }
@@ -929,6 +930,15 @@ export default function WorkCategoriesPage() {
                 onChange={(e) => setProdForm((f) => ({ ...f, name: e.target.value }))}
                 required
                 autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">{t.definitions.partNumber}</label>
+              <input
+                className="input w-full"
+                value={prodForm.number}
+                onChange={(e) => setProdForm((f) => ({ ...f, number: e.target.value }))}
+                placeholder={t.common.optional}
               />
             </div>
             <div>

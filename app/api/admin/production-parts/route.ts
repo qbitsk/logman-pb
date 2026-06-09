@@ -14,6 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1),
+  number: z.string().optional().nullable(),
   productionProcessId: z.string().min(1),
 });
 
@@ -26,6 +27,7 @@ export async function GET() {
     .select({
       id: productionParts.id,
       name: productionParts.name,
+      number: productionParts.number,
       productionProcessId: productionParts.productionProcessId,
       productionProcessName: productionProcesses.name,
       createdAt: productionParts.createdAt,
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
 
   const [created] = await db
     .insert(productionParts)
-    .values({ name: result.data.name, productionProcessId: result.data.productionProcessId })
+    .values({ name: result.data.name, number: result.data.number ?? null, productionProcessId: result.data.productionProcessId })
     .returning();
 
   return NextResponse.json(created, { status: 201 });

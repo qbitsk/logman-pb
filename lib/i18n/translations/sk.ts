@@ -185,6 +185,7 @@ export const sk: Translations = {
     addDefect: "Chyba komponentu",
     processName: "Názov procesu",
     partName: "Názov dielu",
+    partNumber: "Číslo",
     componentName: "Názov komponentu",
     stationName: "Názov stanice",
     defectName: "Názov chyby",

@@ -183,6 +183,7 @@ export const en = {
     addDefect: "Component Defect",
     processName: "Process Name",
     partName: "Part Name",
+    partNumber: "Number",
     componentName: "Component Name",
     stationName: "Station Name",
     defectName: "Defect Name",

@@ -14,6 +14,7 @@ async function requireAdmin() {
 
 const bodySchema = z.object({
   name: z.string().min(1).optional(),
+  number: z.string().optional().nullable(),
   productionProcessId: z.string().min(1).optional(),
 });
 
