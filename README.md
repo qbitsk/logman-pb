@@ -7,7 +7,7 @@ A production-logging app for the shop floor: workers record **worker productions
 | Layer | Technology |
 |---|---|
 | Framework | Next.js 16 (App Router) + React 19 |
-| Auth | Better Auth (email/password) + custom NFC login |
+| Auth | Better Auth (email/password) + NFC login plugin |
 | Database | Supabase (Postgres) |
 | ORM | Drizzle |
 | Email | Resend + React Email |
@@ -100,7 +100,7 @@ Public sign-up is disabled — admins create users via the admin UI / `/api/admi
 ## Authentication
 
 - **Email/password** via Better Auth.
-- **NFC login** — `user`-role accounts can have an `nfcKey`; scanning posts the key to `/api/auth/nfc-login`, which mints a Better Auth-compatible session cookie.
+- **NFC login** — `user`-role accounts can have an `nfcKey`; scanning posts the key to `/api/auth/nfc/login`, served by a custom Better Auth plugin (`lib/auth/nfc-plugin.ts`). The plugin delegates session creation and cookie signing to Better Auth, so they stay in sync with the rest of auth. The matching client plugin (`lib/auth/client.ts`) exposes `authClient.nfc.login({ key })` and refreshes `useSession()` on success, so no page reload is needed. Errors are intentionally generic to avoid NFC key enumeration.
 
 ## Exports
 

@@ -32,8 +32,8 @@ Access is enforced in **two independent layers** — keep them in sync:
 
 When adding a protected route or API, update `routePermissions` **and** add the in-handler role check.
 
-### NFC login (custom, bypasses Better Auth)
-`app/api/auth/nfc-login/route.ts` is a hand-rolled login: it looks up a `users.nfcKey` (only `role: "user"`), then manually creates a `sessions` row and signs the `better-auth.session_token` cookie with HMAC-SHA256 the same way Better Auth does. If you change Better Auth's session/cookie scheme, this must be updated to match. Errors are intentionally generic to avoid NFC key enumeration.
+### NFC login (custom Better Auth plugin)
+NFC-card login is a real Better Auth plugin (`lib/auth/nfc-plugin.ts`), registered in `auth`'s `plugins` (`lib/auth/config.ts`) and mounted at `/api/auth/nfc/login`. It looks up a `users.nfcKey` (only `role: "user"`), then delegates session creation and cookie signing to Better Auth via `ctx.context.internalAdapter` and `setSessionCookie` — so it stays in sync with the rest of auth (including the cookie cache) automatically; there is no hand-rolled `sessions` insert or HMAC cookie signing anymore. The matching client plugin in `lib/auth/client.ts` exposes `authClient.nfc.login({ key })` and refetches the session atom on success (via `atomListeners`), so `useSession()` updates with no page reload. Errors are intentionally generic to avoid NFC key enumeration.
 
 ### Data model (`lib/db/schema/`)
 The production hierarchy: `productionProcesses` → `productionParts` (each part belongs to a process) → a `workerProduction` references a part + optional station, plus `units`/`shift`/`notes`/`userId`. Related lookup tables: `productionStations`, `productionComponents`, `productionDefects`, with `workerProductionDefects` as the join to defects. Auth tables (`users`, `sessions`, `accounts`, `verifications`) live in `users.ts`. All schemas are re-exported from `schema/index.ts`; import entities from `@/lib/db/schema`.
