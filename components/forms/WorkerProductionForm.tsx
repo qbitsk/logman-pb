@@ -136,6 +136,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
   const [processError, setProcessError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showNoDefectsWarning, setShowNoDefectsWarning] = useState(false);
   const [showLogoffModal, setShowLogoffModal] = useState(false);
   const [loggingOff, setLoggingOff] = useState(false);
 
@@ -192,6 +193,48 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     );
   }
 
+  async function doSubmit() {
+    setServerError(null);
+    setLoading(true);
+    try {
+      const url = isEdit ? (editUrl ?? `/api/admin/worker-productions/${production!.id}`) : "/api/worker-productions";
+      const method = isEdit ? "PATCH" : "POST";
+      const parsedDefects = defects
+        .filter((d) => d.productionDefectId && d.units)
+        .map((d) => ({
+          productionDefectId: d.productionDefectId,
+          units: parseInt(d.units, 10),
+        }));
+
+      const body = isEdit
+        ? JSON.stringify({ ...form, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workerProductionDefects: parsedDefects })
+        : JSON.stringify({ productionPartId: form.productionPartId, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workerProductionDefects: parsedDefects });
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setServerError(data.error ?? "Something went wrong.");
+        return;
+      }
+
+      if (isEdit) {
+        setSuccess(true);
+        router.push(resolvedBackUrl);
+      } else {
+        setShowLogoffModal(true);
+      }
+    } catch {
+      setServerError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setServerError(null);
@@ -234,44 +277,12 @@ export function WorkerProductionForm({ production, productionProcesses, producti
       }
     }
 
-    setLoading(true);
-    try {
-      const url = isEdit ? (editUrl ?? `/api/admin/worker-productions/${production!.id}`) : "/api/worker-productions";
-      const method = isEdit ? "PATCH" : "POST";
-      const parsedDefects = defects
-        .filter((d) => d.productionDefectId && d.units)
-        .map((d) => ({
-          productionDefectId: d.productionDefectId,
-          units: parseInt(d.units, 10),
-        }));
-
-      const body = isEdit
-        ? JSON.stringify({ ...form, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workerProductionDefects: parsedDefects })
-        : JSON.stringify({ productionPartId: form.productionPartId, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workerProductionDefects: parsedDefects });
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body,
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setServerError(data.error ?? "Something went wrong.");
-        return;
-      }
-
-      if (isEdit) {
-        setSuccess(true);
-        router.push(resolvedBackUrl);
-      } else {
-        setShowLogoffModal(true);
-      }
-    } catch {
-      setServerError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
+    if (defects.length === 0) {
+      setShowNoDefectsWarning(true);
+      return;
     }
+
+    await doSubmit();
   }
 
   async function handleLogoff() {
@@ -282,6 +293,38 @@ export function WorkerProductionForm({ production, productionProcesses, producti
 
   return (
     <div className="max-w-3xl">
+      {showNoDefectsWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 max-w-sm w-full mx-4 flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {t.workerProductionForm.noDefectsWarningTitle}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t.workerProductionForm.noDefectsWarningMessage}
+              </p>
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowNoDefectsWarning(false)}
+                disabled={loading}
+                className="btn-secondary"
+              >
+                {t.common.cancel}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowNoDefectsWarning(false); doSubmit(); }}
+                disabled={loading}
+                className="btn-primary"
+              >
+                {loading ? t.workerProductionForm.submitting : t.workerProductionForm.submit}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showLogoffModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 max-w-sm w-full mx-4 flex flex-col gap-6">

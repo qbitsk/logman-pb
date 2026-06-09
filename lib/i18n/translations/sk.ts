@@ -139,6 +139,8 @@ export const sk: Translations = {
     partOption: "— Vyberte diel —",
     processRequired: "Prosím vyberte proces",
     partRequired: "Prosím vyberte diel",
+    noDefectsWarningTitle: "Neboli pridávané žiadne chyby",
+    noDefectsWarningMessage: "Nepridávali ste žiadne chyby. Naozaj chcete odovzdať?",
   },
   profile: {
     title: "Profil",

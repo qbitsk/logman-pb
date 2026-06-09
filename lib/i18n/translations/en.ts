@@ -137,6 +137,8 @@ export const en = {
     partOption: "— Select Part —",
     processRequired: "Please select a process",
     partRequired: "Please select a part",
+    noDefectsWarningTitle: "No Defects Added",
+    noDefectsWarningMessage: "You haven't added any defects. Are you sure you want to submit?",
   },
   profile: {
     title: "Profile",
