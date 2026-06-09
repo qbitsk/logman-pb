@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { signIn } from "@/lib/auth/client";
+import { signIn, authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -59,20 +59,14 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/auth/nfc-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key }),
-        credentials: "include",
-      });
-      if (res.ok) {
-        // NFC login bypasses Better Auth's client, so its useSession store
-        // doesn't know about the new session. A full navigation forces the
-        // session to be re-fetched on load (a soft router.push would leave the
-        // header showing stale/empty user data until a manual refresh).
-        window.location.href = "/dashboard";
-      } else {
+      // Goes through the Better Auth client, which signs the session in and
+      // refreshes the useSession store — so a soft navigation is enough and the
+      // header shows the user immediately, no page reload needed.
+      const { error } = await authClient.nfc.login({ key });
+      if (error) {
         setError(t.auth.invalidCredentials);
+      } else {
+        router.push("/dashboard");
       }
     } finally {
       setLoading(false);
