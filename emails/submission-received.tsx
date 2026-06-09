@@ -1,48 +1,23 @@
-import {
-  Body, Button, Container, Head, Heading,
-  Html, Preview, Text, Section,
-} from "@react-email/components";
-
-interface SubmissionReceivedEmailProps {
-  userName: string;
-  submissionUrl: string;
+export function submissionReceivedEmailHtml({ userName, submissionUrl }: { userName: string; submissionUrl: string }): string {
+  return `<!DOCTYPE html>
+<html>
+<body style="font-family:sans-serif;background:#f0f4ff;margin:0;padding:0">
+  <div style="max-width:520px;margin:40px auto;padding:32px;background:#fff;border-radius:8px">
+    <h1 style="color:#1e1d4c;font-size:22px;margin-bottom:16px">Submission Received ✅</h1>
+    <p style="color:#444;font-size:15px;line-height:1.6">Hi ${userName},</p>
+    <p style="color:#444;font-size:15px;line-height:1.6">We've received your submission. Our team will review it and get back to you.</p>
+    <div style="text-align:center;margin:24px 0">
+      <a href="${submissionUrl}" style="background:#4f52e5;color:#fff;padding:12px 28px;border-radius:6px;font-weight:bold;text-decoration:none">View Submission</a>
+    </div>
+  </div>
+</body>
+</html>`;
 }
 
-export function SubmissionReceivedEmail({
-  userName, submissionUrl,
-}: SubmissionReceivedEmailProps) {
-  return (
-    <Html>
-      <Head />
-      <Preview>Your submission has been received</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Heading style={h1}>Submission Received ✅</Heading>
-          <Text style={text}>Hi {userName},</Text>
-          <Text style={text}>
-            We've received your submission.
-            Our team will review it and get back to you.
-          </Text>
-          <Section style={buttonSection}>
-            <Button href={submissionUrl} style={button}>
-              View Submission
-            </Button>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  );
-}
+export function submissionReceivedEmailText({ userName, submissionUrl }: { userName: string; submissionUrl: string }): string {
+  return `Hi ${userName},
 
-const main = { backgroundColor: "#f0f4ff", fontFamily: "sans-serif" };
-const container = {
-  margin: "40px auto", padding: "32px", backgroundColor: "#ffffff",
-  borderRadius: "8px", maxWidth: "520px",
-};
-const h1 = { color: "#1e1d4c", fontSize: "22px", marginBottom: "16px" };
-const text = { color: "#444", fontSize: "15px", lineHeight: "1.6" };
-const buttonSection = { textAlign: "center" as const, margin: "24px 0" };
-const button = {
-  backgroundColor: "#4f52e5", color: "#fff", padding: "12px 28px",
-  borderRadius: "6px", fontWeight: "bold", textDecoration: "none",
-};
+We've received your submission. Our team will review it and get back to you.
+
+View Submission: ${submissionUrl}`;
+}
