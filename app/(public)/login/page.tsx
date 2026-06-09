@@ -66,7 +66,11 @@ export default function LoginPage() {
         credentials: "include",
       });
       if (res.ok) {
-        router.push("/dashboard");
+        // NFC login bypasses Better Auth's client, so its useSession store
+        // doesn't know about the new session. A full navigation forces the
+        // session to be re-fetched on load (a soft router.push would leave the
+        // header showing stale/empty user data until a manual refresh).
+        window.location.href = "/dashboard";
       } else {
         setError(t.auth.invalidCredentials);
       }
