@@ -60,6 +60,11 @@ export const en = {
     quickActions: "Quick actions",
     newProductionBtn: "New production",
     viewAllProductions: "View all productions",
+    selectProcess: "Select a process",
+    selectPart: "Select a part",
+    backToProcesses: "Back to processes",
+    noProcesses: "No processes available.",
+    noParts: "No parts for this process.",
   },
   workerProductions: {
     title: "My Productions",

@@ -62,6 +62,11 @@ export const sk: Translations = {
     quickActions: "Rýchle akcie",
     newProductionBtn: "Nová produkcia",
     viewAllProductions: "Zobraziť všetky produkcie",
+    selectProcess: "Vyberte proces",
+    selectPart: "Vyberte diel",
+    backToProcesses: "Späť na procesy",
+    noProcesses: "Žiadne procesy nie sú k dispozícii.",
+    noParts: "Pre tento proces nie sú žiadne diely.",
   },
   workerProductions: {
     title: "Moje produkcie",
