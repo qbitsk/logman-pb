@@ -14,6 +14,7 @@ export type WorkerProductionDetailData = {
   createdAt: string;
   updatedAt: string;
   productionPartName: string | null;
+  productionPartNumber?: string | null;
   productionProcessName: string | null;
   stationName: string | null;
   defects: { workDefectName?: string | null; workDefectType?: string | null; workComponentName?: string | null; units: number }[];
@@ -81,7 +82,12 @@ export function WorkerProductionDetail({ production, backUrl, editUrl }: Props) 
 
           <div>
               <dt className="text-xs text-gray-400 dark:text-gray-500">{t.workerProductionDetail.part}</dt>
-            <dd className="text-gray-700 dark:text-gray-300 capitalize">{production.productionPartName}</dd>
+            <dd className="text-gray-700 dark:text-gray-300 capitalize">
+              {production.productionPartName}
+              {production.productionPartNumber && (
+                <span className="ml-2 inline-block rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">{production.productionPartNumber}</span>
+              )}
+            </dd>
           </div>
 
           {production.stationName && (

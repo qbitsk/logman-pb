@@ -69,7 +69,7 @@ export async function GET(
       .innerJoin(productionDefects, eq(workerProductionDefects.productionDefectId, productionDefects.id))
       .leftJoin(productionComponents, eq(productionDefects.productionComponentId, productionComponents.id))
       .where(eq(workerProductionDefects.workerProductionId, id)),
-    db.select({ name: productionParts.name, productionProcessName: productionProcesses.name }).from(productionParts).innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id)).where(eq(productionParts.id, row.productionPartId)).limit(1),
+    db.select({ name: productionParts.name, number: productionParts.number, productionProcessName: productionProcesses.name }).from(productionParts).innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id)).where(eq(productionParts.id, row.productionPartId)).limit(1),
     row.productionStationId
       ? db.select({ name: productionStations.name }).from(productionStations).where(eq(productionStations.id, row.productionStationId)).limit(1)
       : Promise.resolve([]),
@@ -79,6 +79,7 @@ export async function GET(
     ...row,
     status: getWorkerProductionStatus(row.createdAt),
     productionPartName: categoryRow[0]?.name ?? null,
+    productionPartNumber: categoryRow[0]?.number ?? null,
     productionProcessName: categoryRow[0]?.productionProcessName ?? null,
     stationName: stationRow[0]?.name ?? null,
     existingDefects,
