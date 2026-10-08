@@ -14,6 +14,12 @@ const patchSchema = z.object({
   shift: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
   workerProductionDefects: z.array(workerProductionDefectSchema).optional(),
+  // Production date — editable by admin/operator only (the user route intentionally omits it).
+  // Small tolerance for client/server clock skew.
+  createdAt: z.coerce
+    .date()
+    .refine((d) => d.getTime() <= Date.now() + 5 * 60 * 1000, "Date cannot be in the future")
+    .optional(),
 });
 
 async function requireAdminOrOperator() {

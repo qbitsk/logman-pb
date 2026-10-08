@@ -15,6 +15,7 @@ export const en = {
     allOption: "All",
     failedToSave: "Failed to save",
     failedToDelete: "Failed to delete.",
+    failedToLoad: "Failed to load data. Please refresh the page.",
     dataAffectedWarning: "This may affect existing data.",
   },
   status: {
@@ -139,6 +140,9 @@ export const en = {
     defectUnitsPlaceholder: "Units",
     notesPlaceholder: "Any additional notes…",
     shiftRequired: "Please select a shift",
+    productionDate: "Production date",
+    dateRequired: "Please select a date",
+    dateInFuture: "Date cannot be in the future",
     stationRequired: "Please select a workstation",
     processOption: "— Select Process —",
     partOption: "— Select Part —",

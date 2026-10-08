@@ -36,55 +36,57 @@ export default function AdminWorkerProductionEditPage() {
   const [stations, setStations] = useState<ProductionStation[]>([]);
   const [components, setComponents] = useState<ProductionComponent[]>([]);
   const [productionDefects, setProductionDefects] = useState<ProductionDefect[]>([]);
-  const [loadedCount, setLoadedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
-  const markLoaded = () => setLoadedCount((c) => c + 1);
-
+  // Load everything together so the form only mounts once all data is present
+  // (it reads lookups in useState initializers and won't pick up later arrivals).
   useEffect(() => {
-    fetch(`/api/admin/worker-productions/${id}`)
-      .then((r) => {
-        if (r.status === 404) { setNotFound(true); return null; }
-        return r.json();
-      })
-      .then((data) => {
-        if (!data) return;
+    let cancelled = false;
+    const getJson = (url: string) =>
+      fetch(url).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${url}: ${r.status}`))));
+
+    Promise.all([
+      fetch(`/api/admin/worker-productions/${id}`).then((r) =>
+        r.status === 404 ? null : r.ok ? r.json() : Promise.reject(new Error(`production: ${r.status}`))
+      ),
+      getJson("/api/production-parts"),
+      getJson("/api/production-processes"),
+      getJson("/api/production-stations"),
+      getJson("/api/production-components"),
+      getJson("/api/production-defects"),
+    ])
+      .then(([data, parts, processes, stationsData, componentsData, defectsData]) => {
+        if (cancelled) return;
+        if (!data) { setNotFound(true); return; }
         const { existingDefects: defects, ...prod } = data;
         setProduction(prod);
         setExistingDefects(defects ?? []);
-        markLoaded();
-      });
+        setProductionParts(parts);
+        setProductionProcesses(processes);
+        setStations(stationsData);
+        setComponents(componentsData);
+        setProductionDefects(defectsData);
+        setLoading(false);
+      })
+      .catch(() => { if (!cancelled) setLoadError(true); });
+
+    return () => { cancelled = true; };
   }, [id]);
-
-  useEffect(() => {
-    fetch("/api/production-parts").then((r) => r.json()).then((d) => { setProductionParts(d); markLoaded(); });
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/production-processes").then((r) => r.json()).then((d) => { setProductionProcesses(d); markLoaded(); });
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/production-stations").then((r) => r.json()).then((d) => { setStations(d); markLoaded(); });
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/production-components").then((r) => r.json()).then((d) => { setComponents(d); markLoaded(); });
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/production-defects").then((r) => r.json()).then((d) => { setProductionDefects(d); markLoaded(); });
-  }, []);
-
-  useEffect(() => {
-    if (loadedCount >= 6) setLoading(false);
-  }, [loadedCount]);
 
   if (notFound) {
     return (
       <div className="card text-center py-16">
         <p className="text-gray-400">{t.workerProductionDetail.notFound}</p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="card text-center py-16">
+        <p className="text-red-600 dark:text-red-400">{t.common.failedToLoad}</p>
       </div>
     );
   }
@@ -109,6 +111,7 @@ export default function AdminWorkerProductionEditPage() {
           productionDefects={productionDefects}
           existingDefects={existingDefects}
           backUrl="/admin/worker-productions"
+          canEditDate
         />
       )}
     </div>

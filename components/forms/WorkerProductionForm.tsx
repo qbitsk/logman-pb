@@ -29,6 +29,21 @@ function getWorkerProductionStatus(createdAt: Date): "new" | "completed" {
   ) ? "new" : "completed";
 }
 
+/** Local-time YYYY-MM-DD, as used by <input type="date"> */
+function toDateInputValue(d: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Applies a local YYYY-MM-DD date to `original`, keeping its time of day; never later than now. */
+function withDate(original: Date, dateValue: string): Date {
+  const [y, m, d] = dateValue.split("-").map(Number);
+  const result = new Date(original);
+  result.setFullYear(y, m - 1, d);
+  const now = new Date();
+  return result > now ? now : result;
+}
+
 type WorkerProduction = {
   id: string;
   productionPartId: string;
@@ -95,9 +110,11 @@ type Props = {
   editUrl?: string;
   backUrl?: string;
   initialPartId?: string;
+  /** Allow changing the production date (createdAt). Only for admin/operator edit pages. */
+  canEditDate?: boolean;
 };
 
-export function WorkerProductionForm({ production, productionProcesses, productionParts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl, initialPartId }: Props) {
+export function WorkerProductionForm({ production, productionProcesses, productionParts, productionStations, productionComponents, productionDefects, existingDefects, editUrl, backUrl, initialPartId, canEditDate = false }: Props) {
   const router = useRouter();
   const { t } = useTranslation();
   const isEdit = !!production;
@@ -119,6 +136,14 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     shift: production?.shift?.toString() ?? "",
     notes: production?.notes ?? "",
   });
+  const showDateField = isEdit && canEditDate;
+  const originalDate = production ? toDateInputValue(production.createdAt) : "";
+  const [productionDate, setProductionDate] = useState(originalDate);
+  const [dateError, setDateError] = useState<string | null>(null);
+  const dateChanged = showDateField && !!productionDate && productionDate !== originalDate;
+  const effectiveCreatedAt = production
+    ? (dateChanged ? withDate(production.createdAt, productionDate) : production.createdAt)
+    : null;
   const [defects, setDefects] = useState<DefectEntry[]>(() =>
     (existingDefects ?? []).map((d) => {
       const wd = productionDefects.find((w) => w.id === d.productionDefectId);
@@ -207,7 +232,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
         }));
 
       const body = isEdit
-        ? JSON.stringify({ ...form, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workerProductionDefects: parsedDefects })
+        ? JSON.stringify({ ...form, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes || null, workerProductionDefects: parsedDefects, ...(dateChanged && effectiveCreatedAt ? { createdAt: effectiveCreatedAt.toISOString() } : {}) })
         : JSON.stringify({ productionPartId: form.productionPartId, productionStationId: form.productionStationId || null, units: form.units ? parseInt(form.units, 10) : null, shift: form.shift ? parseInt(form.shift, 10) : null, notes: form.notes, workerProductionDefects: parsedDefects });
 
       const res = await fetch(url, {
@@ -255,6 +280,17 @@ export function WorkerProductionForm({ production, productionProcesses, producti
     if (Object.keys(requiredErrors).length > 0) {
       setErrors(requiredErrors);
       hasError = true;
+    }
+    if (showDateField) {
+      if (!productionDate) {
+        setDateError(t.workerProductionForm.dateRequired);
+        hasError = true;
+      } else if (productionDate > toDateInputValue(new Date())) {
+        setDateError(t.workerProductionForm.dateInFuture);
+        hasError = true;
+      } else {
+        setDateError(null);
+      }
     }
     if (hasError) return;
 
@@ -361,7 +397,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
       {isEdit && (
         <div className="mb-4 flex items-center gap-3 flex-wrap">
           {(() => {
-            const status = getWorkerProductionStatus(production!.createdAt);
+            const status = getWorkerProductionStatus(effectiveCreatedAt!);
             return (
               <span className={clsx("badge capitalize text-sm px-3 py-1 rounded-full font-medium", statusStyles[status])}>
                 {t.status[status] ?? status}
@@ -372,7 +408,7 @@ export function WorkerProductionForm({ production, productionProcesses, producti
             <span className="font-medium text-gray-700 dark:text-gray-300">{production!.userName}</span>
           </span>
           <span className="text-sm text-gray-400 dark:text-gray-500 ml-auto">
-            {new Date(production!.createdAt).toLocaleString()}
+            {effectiveCreatedAt!.toLocaleString()}
           </span>
         </div>
       )}
@@ -420,6 +456,22 @@ export function WorkerProductionForm({ production, productionProcesses, producti
           </select>
           {errors.productionPartId && <p className="text-red-600 text-xs mt-1">{errors.productionPartId}</p>}
         </div>
+
+        {showDateField && (
+          <div>
+            <label className="label" htmlFor="productionDate">{t.workerProductionForm.productionDate} *</label>
+            <input
+              id="productionDate"
+              name="productionDate"
+              type="date"
+              max={toDateInputValue(new Date())}
+              value={productionDate}
+              onChange={(e) => { setProductionDate(e.target.value); setDateError(null); setSuccess(false); }}
+              className="input"
+            />
+            {dateError && <p className="text-red-600 text-xs mt-1">{dateError}</p>}
+          </div>
+        )}
 
         <div>
           <label className="label">

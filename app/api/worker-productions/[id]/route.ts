@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { workerProductionDefectSchema } from "@/lib/validations/worker-production";
 
+// createdAt (production date) is intentionally not editable here — only via /api/admin/worker-productions/[id].
 const patchSchema = z.object({
   productionPartId: z.string().min(1).optional(),
   productionStationId: z.string().optional().nullable(),

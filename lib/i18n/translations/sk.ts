@@ -17,6 +17,7 @@ export const sk: Translations = {
     allOption: "Všetky",
     failedToSave: "Uloženie zlyhalo",
     failedToDelete: "Odstránenie zlyhalo.",
+    failedToLoad: "Nepodarilo sa načítať údaje. Obnovte stránku.",
     dataAffectedWarning: "Táto akcia môže ovplyvniť existujúce dáta.",
   },
   status: {
@@ -141,6 +142,9 @@ export const sk: Translations = {
     defectUnitsPlaceholder: "Počet",
     notesPlaceholder: "Akékoľvek doplňujúce poznámky…",
     shiftRequired: "Prosím vyberte zmenu",
+    productionDate: "Dátum výroby",
+    dateRequired: "Prosím vyberte dátum",
+    dateInFuture: "Dátum nemôže byť v budúcnosti",
     stationRequired: "Prosím vyberte pracovisko",
     processOption: "— Vyberte proces —",
     partOption: "— Vyberte diel —",
