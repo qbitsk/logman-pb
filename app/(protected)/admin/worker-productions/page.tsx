@@ -2,18 +2,16 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown, Clock, CheckCircle, Download } from "lucide-react";
+import { Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, CheckCircle, Download } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
 import {
   useReactTable,
   getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
   type ColumnDef,
   type Column,
   type ColumnFiltersState,
-  type FilterFn,
+  type PaginationState,
   type SortingState,
 } from "@tanstack/react-table";
 import { useTranslation } from "@/lib/i18n";
@@ -44,15 +42,14 @@ const StatusIcon = ({ status }: { status: string }) => {
   return <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
 };
 
-// Filters by a [from, to] date range (both optional). Uses 00:00:00 for start and 23:59:00 for end.
-const dateRangeFilter: FilterFn<WorkerProduction> = (row, columnId, filterValue: [string, string]) => {
-  const [from, to] = filterValue;
-  const raw = row.getValue<string>(columnId);
-  const d = new Date(raw);
-  if (from && d < new Date(`${from}T00:00:00`)) return false;
-  if (to   && d > new Date(`${to}T23:59:00`))   return false;
-  return true;
+type FilterOptions = {
+  processes: string[];
+  products: string[];
+  stations: string[];
+  users: string[];
 };
+
+const PAGE_SIZES = [25, 50, 100];
 
 function Dash() {
   return <span className="text-gray-300 dark:text-gray-600">—</span>;
@@ -68,6 +65,30 @@ function SortIcon({ column }: { column: Column<WorkerProduction> }) {
   if (dir === "asc")  return <ChevronUp className="w-3 h-3" />;
   if (dir === "desc") return <ChevronDown className="w-3 h-3" />;
   return <ChevronsUpDown className="w-3 h-3 opacity-30" />;
+}
+
+function PageButton({
+  onClick,
+  disabled,
+  label,
+  children,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      className="btn-secondary h-9 w-9 flex items-center justify-center p-0 disabled:opacity-40 disabled:cursor-not-allowed"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+    >
+      {children}
+    </button>
+  );
 }
 
 function RowActions({
@@ -99,12 +120,21 @@ function RowActions({
 export default function AdminWorkerProductionsPage() {
   const { t } = useTranslation();
   const [productions, setProductions] = useState<WorkerProduction[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ processes: [], products: [], stations: [], users: [] });
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
   const [filterOpen, setFilterOpen] = useState(false);
   const [partSearch, setPartSearch] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const filterRef = useRef<HTMLDivElement>(null);
+
+  const resetPageIndex = () => setPagination((p) => ({ ...p, pageIndex: 0 }));
 
   useEffect(() => {
     if (!filterOpen) return;
@@ -117,66 +147,114 @@ export default function AdminWorkerProductionsPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, [filterOpen]);
 
+  // Debounce the part search so typing doesn't fire a request per keystroke
   useEffect(() => {
-    fetch("/api/admin/worker-productions")
-      .then((r) => r.json())
-      .then(setProductions)
-      .finally(() => setLoading(false));
+    const q = partSearch.trim();
+    if (q === appliedSearch) return;
+    const timeout = setTimeout(() => {
+      setAppliedSearch(q);
+      resetPageIndex();
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [partSearch, appliedSearch]);
+
+  useEffect(() => {
+    fetch("/api/admin/worker-productions/filter-options")
+      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
+      .then(setFilterOptions)
+      .catch(() => {});
   }, []);
+
+  // Filter query string shared by the list request and the CSV export.
+  // Dates are sent as ISO timestamps so day boundaries follow the browser's timezone.
+  const filterQuery = useMemo(() => {
+    const params = new URLSearchParams();
+    for (const f of columnFilters) {
+      if (f.id === "date") {
+        const [from, to] = f.value as [string, string];
+        if (from) params.set("dateFrom", new Date(`${from}T00:00:00`).toISOString());
+        if (to)   params.set("dateTo",   new Date(`${to}T23:59:59.999`).toISOString());
+      } else {
+        params.set(f.id, String(f.value));
+      }
+    }
+    if (appliedSearch) params.set("partSearch", appliedSearch);
+    return params.toString();
+  }, [columnFilters, appliedSearch]);
+
+  const { pageIndex, pageSize } = pagination;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const params = new URLSearchParams(filterQuery);
+    params.set("page", String(pageIndex + 1));
+    params.set("pageSize", String(pageSize));
+    if (sorting[0]) {
+      params.set("sort", sorting[0].id);
+      params.set("dir", sorting[0].desc ? "desc" : "asc");
+    }
+    setFetching(true);
+    fetch(`/api/admin/worker-productions?${params.toString()}`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((res: { items: WorkerProduction[]; total: number }) => {
+        // The current page can fall off the end after deletions — jump to the last one
+        const lastPageIndex = Math.max(0, Math.ceil(res.total / pageSize) - 1);
+        if (pageIndex > lastPageIndex) {
+          setPagination((p) => ({ ...p, pageIndex: lastPageIndex }));
+          return;
+        }
+        setProductions(res.items);
+        setTotal(res.total);
+        setLoadError(false);
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        console.error(err);
+        setLoadError(true);
+      })
+      .finally(() => {
+        if (controller.signal.aborted) return;
+        setLoading(false);
+        setFetching(false);
+      });
+    return () => controller.abort();
+  }, [filterQuery, sorting, pageIndex, pageSize, reloadKey]);
 
   const columns = useMemo<ColumnDef<WorkerProduction>[]>(
     () => [
-      { accessorKey: "createdAt",             id: "date",    filterFn: dateRangeFilter },
-      { accessorKey: "productionProcessName", id: "process", filterFn: "equals" },
-      { accessorKey: "productionPartName",    id: "product", filterFn: "equals" },
-      { accessorKey: "stationName",           id: "station", filterFn: "equals" },
-      { accessorKey: "status",                id: "status",  filterFn: "equals" },
-      { accessorKey: "userName",              id: "user",    filterFn: "equals" },
+      { accessorKey: "createdAt",             id: "date" },
+      { accessorKey: "productionProcessName", id: "process" },
+      { accessorKey: "productionPartName",    id: "product" },
+      { accessorKey: "stationName",           id: "station" },
+      { accessorKey: "status",                id: "status" },
+      { accessorKey: "userName",              id: "user" },
       { accessorKey: "shift",                 id: "shift",   enableColumnFilter: false },
       { accessorKey: "units",                 id: "units",   enableColumnFilter: false },
     ],
     [],
   );
 
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+
+  // Filtering, sorting and pagination all happen server-side; the table only holds their state.
   const table = useReactTable({
     data: productions,
     columns,
-    state: { columnFilters, sorting },
-    onColumnFiltersChange: setColumnFilters,
-    onSortingChange: setSorting,
+    state: { columnFilters, sorting, pagination },
+    onColumnFiltersChange: (updater) => { setColumnFilters(updater); resetPageIndex(); },
+    onSortingChange: (updater) => { setSorting(updater); resetPageIndex(); },
+    onPaginationChange: setPagination,
+    manualFiltering: true,
+    manualSorting: true,
+    manualPagination: true,
+    pageCount,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   });
 
-  const processOptions = useMemo(
-    () => [...new Set(productions.map((p) => p.productionProcessName))].sort(),
-    [productions],
-  );
-  const productOptions = useMemo(
-    () => [...new Set(productions.map((p) => p.productionPartName))].sort(),
-    [productions],
-  );
-  const stationOptions = useMemo(
-    () => [...new Set(productions.map((p) => p.stationName).filter((s): s is string => s != null))].sort(),
-    [productions],
-  );
-  const userOptions = useMemo(
-    () => [...new Set(productions.map((p) => p.userName))].sort(),
-    [productions],
-  );
-
-  const normalize = (s: string) =>
-    s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
-
-  const filteredRows = useMemo(() => {
-    const rows = table.getSortedRowModel().rows;
-    if (!partSearch.trim()) return rows;
-    const q = normalize(partSearch);
-    return rows.filter((r) => normalize(r.original.productionPartName).includes(q));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productions, columnFilters, sorting, partSearch]);
+  const rows = table.getRowModel().rows;
   const hasFilters = columnFilters.length > 0;
+  const rangeFrom = total === 0 ? 0 : pageIndex * pageSize + 1;
+  const rangeTo = Math.min(total, (pageIndex + 1) * pageSize);
 
   const getFilter = (id: string) =>
     (table.getColumn(id)?.getFilterValue() as string) ?? "";
@@ -199,29 +277,15 @@ export default function AdminWorkerProductionsPage() {
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       table.getColumn(id)?.setFilterValue(e.target.value || undefined);
 
-  const handleDeleted = (id: string) =>
-    setProductions((prev) => prev.filter((x) => x.id !== id));
+  const handleDeleted = () => setReloadKey((k) => k + 1);
 
   const [csvLoading, setCsvLoading] = useState(false);
 
   const exportCSV = async () => {
     setCsvLoading(true);
     try {
-      const params = new URLSearchParams({ format: "csv" });
-      const [dateFrom, dateTo] = getDateRange();
-      if (dateFrom) params.set("dateFrom", dateFrom);
-      if (dateTo)   params.set("dateTo",   dateTo);
-      const proc    = getFilter("process");
-      const product = getFilter("product");
-      const station = getFilter("station");
-      const status  = getFilter("status");
-      const user    = getFilter("user");
-      if (proc)               params.set("process",    proc);
-      if (product)            params.set("product",    product);
-      if (station)            params.set("station",    station);
-      if (status)             params.set("status",     status);
-      if (user)               params.set("user",       user);
-      if (partSearch.trim())  params.set("partSearch", partSearch.trim());
+      const params = new URLSearchParams(filterQuery);
+      params.set("format", "csv");
 
       const res = await fetch(`/api/exports?${params.toString()}`);
       if (!res.ok) throw new Error("Export failed");
@@ -244,9 +308,9 @@ export default function AdminWorkerProductionsPage() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-brand-950 dark:text-white">{t.adminProductions.title}</h1>
-          {!loading && (
+          {!loading && !loadError && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {t.workerProductions.showing(hasFilters || partSearch.trim() ? filteredRows.length : productions.length, productions.length)}
+              {total} {t.adminProductions.total}
             </p>
           )}
         </div>
@@ -256,7 +320,11 @@ export default function AdminWorkerProductionsPage() {
         <div className="card text-center py-16">
           <p className="text-gray-400">{t.common.loading}</p>
         </div>
-      ) : productions.length === 0 ? (
+      ) : loadError ? (
+        <div className="card text-center py-16">
+          <p className="text-gray-400">{t.common.failedToLoad}</p>
+        </div>
+      ) : total === 0 && !hasFilters && !appliedSearch ? (
         <div className="card text-center py-16">
           <p className="text-gray-400">{t.workerProductions.noProductions}</p>
         </div>
@@ -311,7 +379,7 @@ export default function AdminWorkerProductionsPage() {
                       onChange={setFilter("process")}
                     >
                       <option value="">{t.workerProductions.process}</option>
-                      {processOptions.map((o) => (
+                      {filterOptions.processes.map((o) => (
                         <option key={o} value={o} className="capitalize">{o}</option>
                       ))}
                     </select>
@@ -321,7 +389,7 @@ export default function AdminWorkerProductionsPage() {
                       onChange={setFilter("product")}
                     >
                       <option value="">{t.workerProductions.product}</option>
-                      {productOptions.map((o) => (
+                      {filterOptions.products.map((o) => (
                         <option key={o} value={o} className="capitalize">{o}</option>
                       ))}
                     </select>
@@ -331,7 +399,7 @@ export default function AdminWorkerProductionsPage() {
                       onChange={setFilter("station")}
                     >
                       <option value="">{t.workerProductions.station}</option>
-                      {stationOptions.map((o) => (
+                      {filterOptions.stations.map((o) => (
                         <option key={o} value={o} className="capitalize">{o}</option>
                       ))}
                     </select>
@@ -350,7 +418,7 @@ export default function AdminWorkerProductionsPage() {
                       onChange={setFilter("user")}
                     >
                       <option value="">{t.adminUsers.allUsers}</option>
-                      {userOptions.map((o) => (
+                      {filterOptions.users.map((o) => (
                         <option key={o} value={o}>{o}</option>
                       ))}
                     </select>
@@ -378,12 +446,12 @@ export default function AdminWorkerProductionsPage() {
             </button>
           </div>
 
-          {filteredRows.length === 0 ? (
+          {rows.length === 0 ? (
             <div className="card text-center py-12">
               <p className="text-gray-400">{t.workerProductions.noProductions}</p>
             </div>
           ) : (
-            <>
+            <div className={clsx("transition-opacity", fetching && "opacity-60")}>
               {/* Desktop table */}
               <div className="card px-5 py-3 hidden sm:block">
                 <div className="overflow-x-auto">
@@ -457,7 +525,7 @@ export default function AdminWorkerProductionsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredRows.map(({ original: s }) => (
+                      {rows.map(({ original: s }) => (
                         <tr
                           key={s.id}
                           className="border-b border-gray-200 dark:border-gray-700 last:border-0"
@@ -506,7 +574,7 @@ export default function AdminWorkerProductionsPage() {
 
               {/* Mobile card list */}
               <div className="flex flex-col gap-3 sm:hidden">
-                {filteredRows.map(({ original: s }) => (
+                {rows.map(({ original: s }) => (
                   <div key={s.id} className="card px-3 py-2">
                     <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
                       <div className="flex items-center gap-2">
@@ -558,7 +626,40 @@ export default function AdminWorkerProductionsPage() {
                   </div>
                 ))}
               </div>
-            </>
+            </div>
+          )}
+
+          {total > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-4 text-sm text-gray-500 dark:text-gray-400">
+              <label className="flex items-center gap-2">
+                <span className="hidden sm:inline">{t.workerProductions.rowsPerPage}</span>
+                <select
+                  className="input h-9 py-0 pl-2.5! pr-8! text-sm w-auto"
+                  value={pageSize}
+                  onChange={(e) => setPagination({ pageIndex: 0, pageSize: Number(e.target.value) })}
+                >
+                  {PAGE_SIZES.map((size) => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
+              </label>
+              <span className="tabular-nums">{t.workerProductions.range(rangeFrom, rangeTo, total)}</span>
+              <div className="flex items-center gap-1">
+                <PageButton onClick={() => table.firstPage()} disabled={!table.getCanPreviousPage()} label={t.workerProductions.firstPage}>
+                  <ChevronsLeft className="w-4 h-4" />
+                </PageButton>
+                <PageButton onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} label={t.workerProductions.previousPage}>
+                  <ChevronLeft className="w-4 h-4" />
+                </PageButton>
+                <span className="px-2 tabular-nums whitespace-nowrap">{t.workerProductions.pageOf(pageIndex + 1, pageCount)}</span>
+                <PageButton onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} label={t.workerProductions.nextPage}>
+                  <ChevronRight className="w-4 h-4" />
+                </PageButton>
+                <PageButton onClick={() => table.lastPage()} disabled={!table.getCanNextPage()} label={t.workerProductions.lastPage}>
+                  <ChevronsRight className="w-4 h-4" />
+                </PageButton>
+              </div>
+            </div>
           )}
         </>
       )}

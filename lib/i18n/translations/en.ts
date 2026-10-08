@@ -90,6 +90,13 @@ export const en = {
     editProduction: "Edit production",
     deleteProduction: "Delete production",
     showing: (count: number, total: number) => `${count} of ${total}`,
+    range: (from: number, to: number, total: number) => `${from}–${to} of ${total}`,
+    pageOf: (page: number, pages: number) => `Page ${page} of ${pages}`,
+    rowsPerPage: "Rows per page",
+    firstPage: "First page",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+    lastPage: "Last page",
   },
   workerProductionDetail: {
     process: "Process",

@@ -92,6 +92,13 @@ export const sk: Translations = {
     editProduction: "Upraviť produkciu",
     deleteProduction: "Odstrániť produkciu",
     showing: (count: number, total: number) => `${count} z ${total}`,
+    range: (from: number, to: number, total: number) => `${from}–${to} z ${total}`,
+    pageOf: (page: number, pages: number) => `Strana ${page} z ${pages}`,
+    rowsPerPage: "Riadkov na stranu",
+    firstPage: "Prvá strana",
+    previousPage: "Predchádzajúca strana",
+    nextPage: "Ďalšia strana",
+    lastPage: "Posledná strana",
   },
   workerProductionDetail: {
     process: "Proces",
