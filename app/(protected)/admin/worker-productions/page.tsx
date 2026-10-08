@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, CheckCircle, Download } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
 import { clsx } from "clsx";
@@ -15,6 +16,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { useTranslation } from "@/lib/i18n";
+import { withListQuery } from "@/lib/worker-productions/admin-list-url";
 
 type WorkerProduction = {
   id: string;
@@ -50,6 +52,35 @@ type FilterOptions = {
 };
 
 const PAGE_SIZES = [25, 50, 100];
+const DEFAULT_PAGE_SIZE = 50;
+const DEFAULT_SORTING: SortingState = [{ id: "date", desc: true }];
+const SORTABLE = ["date", "product", "station", "shift", "units", "status", "user"];
+// Column filter id -> URL query key ("date" is split into from/to)
+const FILTER_KEYS = ["process", "product", "station", "status", "user"] as const;
+
+// The list view (page, page size, sort, filters, search) lives in the URL so it survives
+// navigating to a production and back, and the browser back button steps through pages.
+function parseListState(sp: URLSearchParams) {
+  const sizeParam = Number(sp.get("size"));
+  const pageSize = PAGE_SIZES.includes(sizeParam) ? sizeParam : DEFAULT_PAGE_SIZE;
+  const pageIndex = Math.max(0, (Math.floor(Number(sp.get("page"))) || 1) - 1);
+
+  const sortParam = sp.get("sort") ?? "";
+  const sorting: SortingState = SORTABLE.includes(sortParam)
+    ? [{ id: sortParam, desc: sp.get("dir") !== "asc" }]
+    : DEFAULT_SORTING;
+
+  const columnFilters: ColumnFiltersState = [];
+  const from = sp.get("from") ?? "";
+  const to = sp.get("to") ?? "";
+  if (from || to) columnFilters.push({ id: "date", value: [from, to] });
+  for (const key of FILTER_KEYS) {
+    const value = sp.get(key);
+    if (value) columnFilters.push({ id: key, value });
+  }
+
+  return { pagination: { pageIndex, pageSize }, sorting, columnFilters, search: sp.get("q") ?? "" };
+}
 
 function Dash() {
   return <span className="text-gray-300 dark:text-gray-600">—</span>;
@@ -93,16 +124,18 @@ function PageButton({
 
 function RowActions({
   row,
+  listQuery,
   onDeleted,
 }: {
   row: WorkerProduction;
+  listQuery: string;
   onDeleted: (id: string) => void;
 }) {
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-end gap-1">
       <Link
-        href={`/admin/worker-productions/${row.id}/edit`}
+        href={withListQuery(`/admin/worker-productions/${row.id}/edit`, listQuery)}
         className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-sm transition-colors"
         aria-label={t.workerProductions.editProduction}
       >
@@ -118,7 +151,24 @@ function RowActions({
 }
 
 export default function AdminWorkerProductionsPage() {
+  return (
+    <Suspense>
+      <AdminWorkerProductionsList />
+    </Suspense>
+  );
+}
+
+function AdminWorkerProductionsList() {
   const { t } = useTranslation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const listQuery = searchParams.toString();
+  const { pagination, sorting, columnFilters, search: appliedSearch } = useMemo(
+    () => parseListState(new URLSearchParams(listQuery)),
+    [listQuery],
+  );
+
   const [productions, setProductions] = useState<WorkerProduction[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -126,15 +176,63 @@ export default function AdminWorkerProductionsPage() {
   const [loadError, setLoadError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({ processes: [], products: [], stations: [], users: [] });
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([{ id: "date", desc: true }]);
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 });
   const [filterOpen, setFilterOpen] = useState(false);
-  const [partSearch, setPartSearch] = useState("");
-  const [appliedSearch, setAppliedSearch] = useState("");
+  const [partSearch, setPartSearch] = useState(appliedSearch);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const resetPageIndex = () => setPagination((p) => ({ ...p, pageIndex: 0 }));
+  // Keep the search box in sync when the URL changes from outside (back/forward)
+  const [prevAppliedSearch, setPrevAppliedSearch] = useState(appliedSearch);
+  if (appliedSearch !== prevAppliedSearch) {
+    setPrevAppliedSearch(appliedSearch);
+    if (appliedSearch !== partSearch.trim()) setPartSearch(appliedSearch);
+  }
+
+  // Writes changes into the URL. Page changes push a history entry (so "back" returns to the
+  // previous page); filter/sort/search changes replace it and jump back to page 1.
+  const updateQuery = useCallback(
+    (changes: Record<string, string | undefined>, { history = "replace", resetPage = true }: { history?: "push" | "replace"; resetPage?: boolean } = {}) => {
+      const params = new URLSearchParams(listQuery);
+      for (const [key, value] of Object.entries(changes)) {
+        if (value) params.set(key, value);
+        else params.delete(key);
+      }
+      if (resetPage || params.get("page") === "1") params.delete("page");
+      const qs = params.toString();
+      const href = qs ? `${pathname}?${qs}` : pathname;
+      if (history === "push") router.push(href);
+      else router.replace(href, { scroll: false });
+    },
+    [listQuery, pathname, router],
+  );
+
+  const setColumnFilters = (next: ColumnFiltersState) => {
+    const changes: Record<string, string | undefined> = { from: undefined, to: undefined };
+    for (const key of FILTER_KEYS) changes[key] = undefined;
+    for (const f of next) {
+      if (f.id === "date") {
+        const [from, to] = f.value as [string, string];
+        changes.from = from || undefined;
+        changes.to = to || undefined;
+      } else {
+        changes[f.id] = String(f.value);
+      }
+    }
+    updateQuery(changes);
+  };
+
+  const setSorting = (next: SortingState) => {
+    const s = next[0];
+    const isDefault = !s || (s.id === DEFAULT_SORTING[0].id && s.desc === DEFAULT_SORTING[0].desc);
+    updateQuery({ sort: isDefault ? undefined : s.id, dir: isDefault ? undefined : s.desc ? "desc" : "asc" });
+  };
+
+  const setPagination = (next: PaginationState) => {
+    if (next.pageSize !== pagination.pageSize) {
+      updateQuery({ size: next.pageSize === DEFAULT_PAGE_SIZE ? undefined : String(next.pageSize) });
+    } else if (next.pageIndex !== pagination.pageIndex) {
+      updateQuery({ page: String(next.pageIndex + 1) }, { history: "push", resetPage: false });
+    }
+  };
 
   useEffect(() => {
     if (!filterOpen) return;
@@ -151,12 +249,9 @@ export default function AdminWorkerProductionsPage() {
   useEffect(() => {
     const q = partSearch.trim();
     if (q === appliedSearch) return;
-    const timeout = setTimeout(() => {
-      setAppliedSearch(q);
-      resetPageIndex();
-    }, 300);
+    const timeout = setTimeout(() => updateQuery({ q: q || undefined }), 300);
     return () => clearTimeout(timeout);
-  }, [partSearch, appliedSearch]);
+  }, [partSearch, appliedSearch, updateQuery]);
 
   useEffect(() => {
     fetch("/api/admin/worker-productions/filter-options")
@@ -183,16 +278,16 @@ export default function AdminWorkerProductionsPage() {
   }, [columnFilters, appliedSearch]);
 
   const { pageIndex, pageSize } = pagination;
+  const sortId = sorting[0].id;
+  const sortDesc = sorting[0].desc;
 
   useEffect(() => {
     const controller = new AbortController();
     const params = new URLSearchParams(filterQuery);
     params.set("page", String(pageIndex + 1));
     params.set("pageSize", String(pageSize));
-    if (sorting[0]) {
-      params.set("sort", sorting[0].id);
-      params.set("dir", sorting[0].desc ? "desc" : "asc");
-    }
+    params.set("sort", sortId);
+    params.set("dir", sortDesc ? "desc" : "asc");
     setFetching(true);
     fetch(`/api/admin/worker-productions?${params.toString()}`, { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
@@ -200,7 +295,7 @@ export default function AdminWorkerProductionsPage() {
         // The current page can fall off the end after deletions — jump to the last one
         const lastPageIndex = Math.max(0, Math.ceil(res.total / pageSize) - 1);
         if (pageIndex > lastPageIndex) {
-          setPagination((p) => ({ ...p, pageIndex: lastPageIndex }));
+          updateQuery({ page: String(lastPageIndex + 1) }, { resetPage: false });
           return;
         }
         setProductions(res.items);
@@ -218,7 +313,7 @@ export default function AdminWorkerProductionsPage() {
         setFetching(false);
       });
     return () => controller.abort();
-  }, [filterQuery, sorting, pageIndex, pageSize, reloadKey]);
+  }, [filterQuery, sortId, sortDesc, pageIndex, pageSize, reloadKey, updateQuery]);
 
   const columns = useMemo<ColumnDef<WorkerProduction>[]>(
     () => [
@@ -241,9 +336,9 @@ export default function AdminWorkerProductionsPage() {
     data: productions,
     columns,
     state: { columnFilters, sorting, pagination },
-    onColumnFiltersChange: (updater) => { setColumnFilters(updater); resetPageIndex(); },
-    onSortingChange: (updater) => { setSorting(updater); resetPageIndex(); },
-    onPaginationChange: setPagination,
+    onColumnFiltersChange: (updater) => setColumnFilters(typeof updater === "function" ? updater(columnFilters) : updater),
+    onSortingChange: (updater) => setSorting(typeof updater === "function" ? updater(sorting) : updater),
+    onPaginationChange: (updater) => setPagination(typeof updater === "function" ? updater(pagination) : updater),
     manualFiltering: true,
     manualSorting: true,
     manualPagination: true,
@@ -532,7 +627,7 @@ export default function AdminWorkerProductionsPage() {
                         >
                           <td className="pe-2 py-3 text-gray-400 dark:text-gray-500">
                             <Link
-                              href={`/admin/worker-productions/${s.id}`}
+                              href={withListQuery(`/admin/worker-productions/${s.id}`, listQuery)}
                               className="font-medium text-sm hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                             >
                               <span className="hidden md:block">{new Date(s.createdAt).toLocaleDateString()}</span>
@@ -563,7 +658,7 @@ export default function AdminWorkerProductionsPage() {
                           </td>
                           <td className="px-2 py-3 font-medium text-gray-700 dark:text-gray-200">{s.userName}</td>
                           <td className="py-3 text-end">
-                            <RowActions row={s} onDeleted={handleDeleted} />
+                            <RowActions row={s} listQuery={listQuery} onDeleted={handleDeleted} />
                           </td>
                         </tr>
                       ))}
@@ -579,7 +674,7 @@ export default function AdminWorkerProductionsPage() {
                     <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
                       <div className="flex items-center gap-2">
                         <Link
-                          href={`/admin/worker-productions/${s.id}`}
+                          href={withListQuery(`/admin/worker-productions/${s.id}`, listQuery)}
                           className="text-sm font-medium tabular-nums text-gray-400 dark:text-gray-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                         >
                           {new Date(s.createdAt).toLocaleDateString()}
@@ -587,7 +682,7 @@ export default function AdminWorkerProductionsPage() {
                         <StatusIcon status={s.status} />
                         <span className="text-sm text-gray-500 dark:text-gray-400">{s.userName}</span>
                       </div>
-                      <RowActions row={s} onDeleted={handleDeleted} />
+                      <RowActions row={s} listQuery={listQuery} onDeleted={handleDeleted} />
                     </div>
                     <div className="pb-2 mb-2 border-b border-gray-100 dark:border-gray-800">
                       <span className="block font-medium leading-tight text-gray-700 dark:text-gray-200">

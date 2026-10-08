@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { WorkerProductionForm } from "@/components/forms/WorkerProductionForm";
 import { useTranslation } from "@/lib/i18n";
+import { adminListHref } from "@/lib/worker-productions/admin-list-url";
 
 type WorkerProduction = {
   id: string;
@@ -27,6 +28,7 @@ type ExistingDefect = { productionDefectId: string; units: number };
 
 export default function AdminWorkerProductionEditPage() {
   const { id } = useParams<{ id: string }>();
+  const listQuery = useSearchParams().get("list");
   const { t } = useTranslation();
 
   const [production, setProduction] = useState<WorkerProduction | null>(null);
@@ -110,7 +112,7 @@ export default function AdminWorkerProductionEditPage() {
           productionComponents={components}
           productionDefects={productionDefects}
           existingDefects={existingDefects}
-          backUrl="/admin/worker-productions"
+          backUrl={adminListHref(listQuery)}
           canEditDate
         />
       )}

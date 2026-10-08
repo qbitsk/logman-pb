@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { WorkerProductionDetail, type WorkerProductionDetailData } from "@/components/WorkerProductionDetail";
 import { useTranslation } from "@/lib/i18n";
+import { adminListHref, withListQuery } from "@/lib/worker-productions/admin-list-url";
 
 export default function AdminWorkerProductionDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const listQuery = useSearchParams().get("list");
   const { t } = useTranslation();
 
   const [production, setProduction] = useState<WorkerProductionDetailData | null>(null);
@@ -46,8 +48,8 @@ export default function AdminWorkerProductionDetailPage() {
   return (
     <WorkerProductionDetail
       production={production}
-      backUrl="/admin/worker-productions"
-      editUrl={`/admin/worker-productions/${id}/edit`}
+      backUrl={adminListHref(listQuery)}
+      editUrl={withListQuery(`/admin/worker-productions/${id}/edit`, listQuery)}
     />
   );
 }
