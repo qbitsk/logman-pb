@@ -14,7 +14,6 @@
     "vercel-build": "if [ \"$VERCEL_ENV\" = \"production\" ]; then npm run db:migrate; fi && next build"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.47.0",
     "@tanstack/react-table": "^8.21.3",
     "better-auth": "v1.6.15",
     "clsx": "^2.1.1",

@@ -1,0 +1,30 @@
+[Unit]
+Description=Logman PB (Next.js)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=logman
+Group=logman
+# Symlink to the active release; resolved on every (re)start.
+WorkingDirectory=/srv/logman/current
+EnvironmentFile=/srv/logman/shared/.env
+Environment=NODE_ENV=production
+Environment=TZ=Europe/Bratislava
+Environment=NEXT_TELEMETRY_DISABLED=1
+# Run node directly (not via npm) so stop/restart signals reach Next.js.
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3000
+Restart=always
+RestartSec=3
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/logman
+MemoryMax=1G
+
+[Install]
+WantedBy=multi-user.target
