@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Build and activate a release on the server. Installed to /srv/logman/deploy.sh,
+# Build and activate a release on the server. Installed to /opt/logman/deploy.sh,
 # runs as the `logman` user.
 #
 #   deploy.sh <tag>              clone <tag>, build, migrate, activate
 #   deploy.sh --activate <tag>   switch to an already-built release (rollback)
 #
 # From your machine:
-#   ssh <server> 'sudo -iu logman /srv/logman/deploy.sh v0.11.0'
+#   ssh -t <server> 'sudo -iu logman /opt/logman/deploy.sh 0.11.0'
 set -euo pipefail
 
-APP=/srv/logman
+APP=/opt/logman
 REPO="${LOGMAN_REPO:-git@github.com:qbitsk/logman-pb.git}"
 KEEP_RELEASES=3
 HEALTH_URL=http://127.0.0.1:3000/login

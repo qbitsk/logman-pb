@@ -56,7 +56,7 @@ Route groups encode the access tier:
 `lib/mail/` wraps Resend; templates are React Email components in `emails/` (`welcome`, `submission-received`, `admin-notification`).
 
 ### Deployment
-Production is self-hosted on Ubuntu 24.04 with a local PostgreSQL; `deploy/` holds the scripts and runbook (`deploy/README.md`). Releases are built on the server from a git tag (`deploy.sh <tag>`). Two runtime details matter for code: the Postgres database timezone is `UTC` (timestamps are `timestamp without time zone`), and `NEXT_PUBLIC_APP_URL` is inlined at build time.
+Production is self-hosted on Ubuntu 24.04 with a local PostgreSQL; `deploy/` holds the scripts; the runbook is the "Self-hosted Deployment" section of `README.md`. Releases are built on the server from a git tag (`deploy.sh <tag>`). Two runtime details matter for code: the Postgres database timezone is `UTC` (timestamps are `timestamp without time zone`), and `NEXT_PUBLIC_APP_URL` is inlined at build time.
 
 ## Conventions
 

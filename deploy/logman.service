@@ -8,8 +8,8 @@ Type=simple
 User=logman
 Group=logman
 # Symlink to the active release; resolved on every (re)start.
-WorkingDirectory=/srv/logman/current
-EnvironmentFile=/srv/logman/shared/.env
+WorkingDirectory=/opt/logman/current
+EnvironmentFile=/opt/logman/shared/.env
 Environment=NODE_ENV=production
 Environment=TZ=Europe/Bratislava
 Environment=NEXT_TELEMETRY_DISABLED=1
@@ -23,7 +23,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/srv/logman
+ReadWritePaths=/opt/logman
 MemoryMax=1G
 
 [Install]

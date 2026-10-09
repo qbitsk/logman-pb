@@ -15,7 +15,7 @@ set -euo pipefail
 [ "$(id -u)" -eq 0 ] || { echo "run as root" >&2; exit 1; }
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-APP=/srv/logman
+APP=/opt/logman
 export DEBIAN_FRONTEND=noninteractive
 
 echo "── packages"
@@ -136,6 +136,6 @@ cat <<EOF
   1. Add this deploy key (read-only) to github.com/qbitsk/logman-pb → Settings → Deploy keys:
      $(cat "$APP/.ssh/id_ed25519.pub")
   2. Fill in RESEND_API_KEY, EMAIL_FROM, ADMIN_EMAIL in $APP/shared/.env
-  3. Restore the Supabase data (deploy/README.md → "Migrating data from Supabase")
+  3. Import the Supabase data (README.md → Self-hosted Deployment, step 14)
   4. sudo -iu logman $APP/deploy.sh <tag>
 EOF
