@@ -1,4 +1,4 @@
-# Installed by bootstrap.sh to /etc/cron.d/logman-backup
+# Install to /etc/cron.d/logman-backup (README → Self-hosted Deployment, step 13)
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # BACKUP_RSYNC_TARGET=backup@nas.local:/volume1/logman/

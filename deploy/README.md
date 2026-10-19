@@ -10,4 +10,3 @@ The step-by-step guide is in the main [README → Self-hosted Deployment](../REA
 | `nginx/logman.conf` | `/etc/nginx/sites-available/logman` | HTTP reverse proxy; replace `__APP_HOST__` with the hostname |
 | `backup.sh` | `/usr/local/bin/logman-backup` | Nightly `pg_dump`, 14-day retention, optional rsync off-server |
 | `logman-backup.cron` | `/etc/cron.d/logman-backup` | Runs the backup at 02:30 as `postgres` |
-| `bootstrap.sh` | — (run once as root) | Optional: automates the README's first-time setup steps 1–12 (`sudo APP_HOST=… PG_MAJOR=… ./bootstrap.sh`) |

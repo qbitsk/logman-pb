@@ -147,7 +147,7 @@ Server layout:
   deploy.sh                            builds and activates a release
 ```
 
-The config files used below live in [`deploy/`](deploy/). (`deploy/bootstrap.sh` automates steps 1–12 in one go; the manual steps here do the same thing.)
+The config files used below live in [`deploy/`](deploy/). The first-time setup is done by hand, step by step, on the server.
 
 Commands are marked 💻 (your machine) or 🖥 (the server).
 
@@ -155,10 +155,10 @@ Commands are marked 💻 (your machine) or 🖥 (the server).
 
 - **Server:** Ubuntu 24.04, SSH access with a `sudo` user, at least 2 GB RAM (`next build` needs it), outbound internet (npm, GitHub, Resend).
 - **Hostname:** pick the one address users will open, e.g. `logman.firma.sk`, and point it to the server's LAN IP in your internal DNS / router. **Don't use `.local`** — it is reserved for mDNS and resolves unreliably; use a subdomain of your real domain (best, also needed for TLS later) or `*.internal`. Users must always use this exact hostname: it is inlined into the client at build time and Better Auth rejects logins from any other origin.
-- **Supabase Postgres version:** run `select version();` in the Supabase SQL editor. The server's PostgreSQL major version (`17` in the examples below) must be **the same or newer**.
+- **PostgreSQL version:** this guide installs **PostgreSQL 18**. Importing from Supabase requires the server to run the same or a newer major version than Supabase (check with `select version();` in the Supabase SQL editor) — Supabase runs 15 or 17, so 18 is fine.
 - **Resend:** API key, sender address, admin notification address.
 
-In the commands below, replace `logman.firma.sk` with your hostname and `17` with your PostgreSQL major version.
+In the commands below, replace `logman.firma.sk` with your hostname.
 
 ### First-time server setup
 
@@ -192,19 +192,14 @@ node --version   # v24.x
 
 #### 4. PostgreSQL
 
-Install from the official PostgreSQL apt repository (PGDG), so the version can match Supabase:
+Ubuntu 24.04 ships PostgreSQL 16, so install 18 from the official PostgreSQL apt repository (PGDG). The `postgresql-common` package (step 2) ships the official setup script, which adds the repository and its signing key:
 
 🖥
 ```bash
-sudo install -d /usr/share/postgresql-common/pgdg
-sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
-. /etc/os-release
-echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $VERSION_CODENAME-pgdg main" \
-  | sudo tee /etc/apt/sources.list.d/pgdg.list
-sudo apt-get update
-sudo apt-get install -y postgresql-17
+sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y   # writes /etc/apt/sources.list.d/pgdg.sources
+sudo apt-get install -y postgresql-18
 
-pg_lsclusters   # the 17/main cluster must be "online" on port 5432
+pg_lsclusters   # the 18/main cluster must be "online" on port 5432
 ```
 
 PostgreSQL listens on `localhost` only by default — leave it that way.
@@ -224,6 +219,15 @@ CREATE DATABASE logman OWNER logman;
 ALTER DATABASE logman SET timezone TO 'UTC';
 \q
 ```
+
+Check that password login over `127.0.0.1` works (this is how the app connects) and the time zone is set:
+
+🖥
+```bash
+psql "postgresql://logman:<db-password>@127.0.0.1:5432/logman" -c "show timezone;"   # → UTC
+```
+
+Keep the password — it goes into `DATABASE_URL` in step 10.
 
 #### 6. Swap (only if the server has less than 4 GB RAM)
 
