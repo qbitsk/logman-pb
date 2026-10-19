@@ -385,18 +385,18 @@ Users log in once on the new hostname (old cookies belong to the old domain); pa
 
 #### 15. First deploy
 
-💻 Tag a release (tags have no `v` prefix):
+💻 Tag a release. The repo's `.npmrc` sets `tag-version-prefix=""`, so `npm version` creates tags without a `v` (e.g. `0.12.0`), like the older ones — `v0.11.0` is the one exception:
 ```bash
-npm version minor            # e.g. 0.10.0 → 0.11.0; commits and tags
+npm version minor            # e.g. 0.11.0 → 0.12.0; commits and tags
 git push origin main --tags
 ```
 
-🖥 Deploy it:
+🖥 Deploy it — the argument is the exact tag name:
 ```bash
-sudo -iu logman /opt/logman/deploy.sh 0.11.0
+sudo -iu logman /opt/logman/deploy.sh 0.12.0
 ```
 
-It ends with `✔ 0.11.0 is live`. The first run takes a few minutes (`npm ci` + build).
+It ends with `✔ 0.12.0 is live`. The first run takes a few minutes (`npm ci` + build).
 
 #### 16. Verify
 
@@ -440,7 +440,7 @@ If a file in `deploy/` changed (service, nginx, backup), copy it to the server a
 🖥
 ```bash
 ls /opt/logman/releases                                  # available releases
-sudo -iu logman /opt/logman/deploy.sh --activate 0.10.0
+sudo -iu logman /opt/logman/deploy.sh --activate <previous-tag>
 ```
 
 This switches the code only — database migrations stay applied. Keep migrations backward-compatible (add columns/tables; rename or drop them in a later release), so the previous release still works with the newer schema.

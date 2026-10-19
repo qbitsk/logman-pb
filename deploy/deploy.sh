@@ -6,7 +6,7 @@
 #   deploy.sh --activate <tag>   switch to an already-built release (rollback)
 #
 # From your machine:
-#   ssh -t <server> 'sudo -iu logman /opt/logman/deploy.sh 0.11.0'
+#   ssh -t <server> 'sudo -iu logman /opt/logman/deploy.sh 0.12.0'
 set -euo pipefail
 
 APP=/opt/logman
