@@ -81,6 +81,53 @@
   @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
 }
 
+/* Chart colors, validated per theme against the card surface (see components/analytics). */
+@layer base {
+  :root {
+    --chart-surface: #ffffff;
+    --chart-grid: #e5e7eb;
+    --chart-axis: #6b7280;
+    --chart-text: #374151;
+    --chart-ok: #059669;
+    --chart-ok-text: #047857;
+    --chart-nok: #dc2626;
+    --chart-nok-text: #b91c1c;
+    --chart-rate: #4f52e5;
+    --chart-rate-text: #4140ca;
+    --chart-other: #9ca3af;
+    --chart-series-1: #2a78d6;
+    --chart-series-2: #eb6834;
+    --chart-series-3: #1baf7a;
+    --chart-series-4: #eda100;
+    --chart-series-5: #e87ba4;
+    --chart-series-6: #008300;
+    --chart-series-7: #6250d6;
+    --chart-series-8: #e34948;
+  }
+
+  .dark {
+    --chart-surface: #101828;
+    --chart-grid: #1f2937;
+    --chart-axis: #9ca3af;
+    --chart-text: #e5e7eb;
+    --chart-ok: #059669;
+    --chart-ok-text: #34d399;
+    --chart-nok: #ef4444;
+    --chart-nok-text: #f87171;
+    --chart-rate: #6470f1;
+    --chart-rate-text: #a5b8fc;
+    --chart-other: #6b7280;
+    --chart-series-1: #3987e5;
+    --chart-series-2: #d95926;
+    --chart-series-3: #199e70;
+    --chart-series-4: #c98500;
+    --chart-series-5: #d55181;
+    --chart-series-6: #008300;
+    --chart-series-7: #9085e9;
+    --chart-series-8: #e66767;
+  }
+}
+
 @layer utilities {
   :root {
     --brand: #4f52e5;

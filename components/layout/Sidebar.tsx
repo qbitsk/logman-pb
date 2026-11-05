@@ -9,6 +9,7 @@ import {
   Layers,
   FileStack,
   ClipboardCheck,
+  BarChart3,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useTranslation } from "@/lib/i18n";
@@ -73,6 +74,7 @@ function NavContent({
 
   const operatorNavItems = [
     { href: "/admin/worker-productions", label: t.nav.productions, icon: ClipboardCheck },
+    { href: "/admin/analytics", label: t.nav.analytics, icon: BarChart3 },
   ];
 
   const adminNavItems = [

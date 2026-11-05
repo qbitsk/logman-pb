@@ -1,22 +1,22 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Pencil, X, Filter, Search, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, CheckCircle, Download } from "lucide-react";
+import { Pencil, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, CheckCircle, Download } from "lucide-react";
 import { DeleteWorkerProductionButton } from "@/components/DeleteWorkerProductionButton";
+import { WorkerProductionFilterBar } from "@/components/worker-productions/WorkerProductionFilterBar";
 import { clsx } from "clsx";
 import {
   useReactTable,
   getCoreRowModel,
   type ColumnDef,
   type Column,
-  type ColumnFiltersState,
   type PaginationState,
   type SortingState,
 } from "@tanstack/react-table";
 import { useTranslation } from "@/lib/i18n";
 import { withListQuery } from "@/lib/worker-productions/admin-list-url";
+import { useWorkerProductionFilters } from "@/lib/worker-productions/use-worker-production-filters";
 
 type WorkerProduction = {
   id: string;
@@ -44,20 +44,10 @@ const StatusIcon = ({ status }: { status: string }) => {
   return <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
 };
 
-type FilterOptions = {
-  processes: string[];
-  products: string[];
-  stations: string[];
-  users: string[];
-};
-
 const PAGE_SIZES = [25, 50, 100];
 const DEFAULT_PAGE_SIZE = 50;
 const DEFAULT_SORTING: SortingState = [{ id: "date", desc: true }];
 const SORTABLE = ["date", "product", "station", "shift", "units", "status", "user"];
-// Column filter id -> URL query key ("date" is split into from/to)
-const FILTER_KEYS = ["process", "product", "station", "status", "user"] as const;
-
 // The list view (page, page size, sort, filters, search) lives in the URL so it survives
 // navigating to a production and back, and the browser back button steps through pages.
 function parseListState(sp: URLSearchParams) {
@@ -70,16 +60,7 @@ function parseListState(sp: URLSearchParams) {
     ? [{ id: sortParam, desc: sp.get("dir") !== "asc" }]
     : DEFAULT_SORTING;
 
-  const columnFilters: ColumnFiltersState = [];
-  const from = sp.get("from") ?? "";
-  const to = sp.get("to") ?? "";
-  if (from || to) columnFilters.push({ id: "date", value: [from, to] });
-  for (const key of FILTER_KEYS) {
-    const value = sp.get(key);
-    if (value) columnFilters.push({ id: key, value });
-  }
-
-  return { pagination: { pageIndex, pageSize }, sorting, columnFilters, search: sp.get("q") ?? "" };
+  return { pagination: { pageIndex, pageSize }, sorting };
 }
 
 function Dash() {
@@ -160,11 +141,9 @@ export default function AdminWorkerProductionsPage() {
 
 function AdminWorkerProductionsList() {
   const { t } = useTranslation();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const listQuery = searchParams.toString();
-  const { pagination, sorting, columnFilters, search: appliedSearch } = useMemo(
+  const filters = useWorkerProductionFilters();
+  const { query: listQuery, filterQuery, appliedSearch, updateQuery } = filters;
+  const { pagination, sorting } = useMemo(
     () => parseListState(new URLSearchParams(listQuery)),
     [listQuery],
   );
@@ -175,50 +154,6 @@ function AdminWorkerProductionsList() {
   const [fetching, setFetching] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ processes: [], products: [], stations: [], users: [] });
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [partSearch, setPartSearch] = useState(appliedSearch);
-  const filterRef = useRef<HTMLDivElement>(null);
-
-  // Keep the search box in sync when the URL changes from outside (back/forward)
-  const [prevAppliedSearch, setPrevAppliedSearch] = useState(appliedSearch);
-  if (appliedSearch !== prevAppliedSearch) {
-    setPrevAppliedSearch(appliedSearch);
-    if (appliedSearch !== partSearch.trim()) setPartSearch(appliedSearch);
-  }
-
-  // Writes changes into the URL. Page changes push a history entry (so "back" returns to the
-  // previous page); filter/sort/search changes replace it and jump back to page 1.
-  const updateQuery = useCallback(
-    (changes: Record<string, string | undefined>, { history = "replace", resetPage = true }: { history?: "push" | "replace"; resetPage?: boolean } = {}) => {
-      const params = new URLSearchParams(listQuery);
-      for (const [key, value] of Object.entries(changes)) {
-        if (value) params.set(key, value);
-        else params.delete(key);
-      }
-      if (resetPage || params.get("page") === "1") params.delete("page");
-      const qs = params.toString();
-      const href = qs ? `${pathname}?${qs}` : pathname;
-      if (history === "push") router.push(href);
-      else router.replace(href, { scroll: false });
-    },
-    [listQuery, pathname, router],
-  );
-
-  const setColumnFilters = (next: ColumnFiltersState) => {
-    const changes: Record<string, string | undefined> = { from: undefined, to: undefined };
-    for (const key of FILTER_KEYS) changes[key] = undefined;
-    for (const f of next) {
-      if (f.id === "date") {
-        const [from, to] = f.value as [string, string];
-        changes.from = from || undefined;
-        changes.to = to || undefined;
-      } else {
-        changes[f.id] = String(f.value);
-      }
-    }
-    updateQuery(changes);
-  };
 
   const setSorting = (next: SortingState) => {
     const s = next[0];
@@ -233,49 +168,6 @@ function AdminWorkerProductionsList() {
       updateQuery({ page: String(next.pageIndex + 1) }, { history: "push", resetPage: false });
     }
   };
-
-  useEffect(() => {
-    if (!filterOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-        setFilterOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [filterOpen]);
-
-  // Debounce the part search so typing doesn't fire a request per keystroke
-  useEffect(() => {
-    const q = partSearch.trim();
-    if (q === appliedSearch) return;
-    const timeout = setTimeout(() => updateQuery({ q: q || undefined }), 300);
-    return () => clearTimeout(timeout);
-  }, [partSearch, appliedSearch, updateQuery]);
-
-  useEffect(() => {
-    fetch("/api/admin/worker-productions/filter-options")
-      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
-      .then(setFilterOptions)
-      .catch(() => {});
-  }, []);
-
-  // Filter query string shared by the list request and the CSV export.
-  // Dates are sent as ISO timestamps so day boundaries follow the browser's timezone.
-  const filterQuery = useMemo(() => {
-    const params = new URLSearchParams();
-    for (const f of columnFilters) {
-      if (f.id === "date") {
-        const [from, to] = f.value as [string, string];
-        if (from) params.set("dateFrom", new Date(`${from}T00:00:00`).toISOString());
-        if (to)   params.set("dateTo",   new Date(`${to}T23:59:59.999`).toISOString());
-      } else {
-        params.set(f.id, String(f.value));
-      }
-    }
-    if (appliedSearch) params.set("partSearch", appliedSearch);
-    return params.toString();
-  }, [columnFilters, appliedSearch]);
 
   const { pageIndex, pageSize } = pagination;
   const sortId = sorting[0].id;
@@ -323,23 +215,21 @@ function AdminWorkerProductionsList() {
       { accessorKey: "stationName",           id: "station" },
       { accessorKey: "status",                id: "status" },
       { accessorKey: "userName",              id: "user" },
-      { accessorKey: "shift",                 id: "shift",   enableColumnFilter: false },
-      { accessorKey: "units",                 id: "units",   enableColumnFilter: false },
+      { accessorKey: "shift",                 id: "shift" },
+      { accessorKey: "units",                 id: "units" },
     ],
     [],
   );
 
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
-  // Filtering, sorting and pagination all happen server-side; the table only holds their state.
+  // Sorting and pagination happen server-side; the table only holds their state.
   const table = useReactTable({
     data: productions,
     columns,
-    state: { columnFilters, sorting, pagination },
-    onColumnFiltersChange: (updater) => setColumnFilters(typeof updater === "function" ? updater(columnFilters) : updater),
+    state: { sorting, pagination },
     onSortingChange: (updater) => setSorting(typeof updater === "function" ? updater(sorting) : updater),
     onPaginationChange: (updater) => setPagination(typeof updater === "function" ? updater(pagination) : updater),
-    manualFiltering: true,
     manualSorting: true,
     manualPagination: true,
     pageCount,
@@ -347,30 +237,9 @@ function AdminWorkerProductionsList() {
   });
 
   const rows = table.getRowModel().rows;
-  const hasFilters = columnFilters.length > 0;
+  const hasFilters = filters.activeCount > 0;
   const rangeFrom = total === 0 ? 0 : pageIndex * pageSize + 1;
   const rangeTo = Math.min(total, (pageIndex + 1) * pageSize);
-
-  const getFilter = (id: string) =>
-    (table.getColumn(id)?.getFilterValue() as string) ?? "";
-
-  const getDateRange = () =>
-    (table.getColumn("date")?.getFilterValue() as [string, string]) ?? ["", ""];
-
-  const setDateFilter = (index: 0 | 1) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const next = [...getDateRange()] as [string, string];
-    next[index] = e.target.value;
-    if (!next[0] && !next[1]) {
-      table.getColumn("date")?.setFilterValue(undefined);
-    } else {
-      table.getColumn("date")?.setFilterValue(next);
-    }
-  };
-
-  const setFilter =
-    (id: string) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-      table.getColumn(id)?.setFilterValue(e.target.value || undefined);
 
   const handleDeleted = () => setReloadKey((k) => k + 1);
 
@@ -426,110 +295,7 @@ function AdminWorkerProductionsList() {
       ) : (
         <>
           {/* Filter toolbar */}
-          <div className="flex items-center justify-end gap-2 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              <input
-                type="search"
-                className="input h-10 pl-9 text-sm w-full"
-                placeholder={t.workerProductions.searchPart}
-                value={partSearch}
-                onChange={(e) => setPartSearch(e.target.value)}
-              />
-            </div>
-            <div className="relative" ref={filterRef}>
-              <button
-                className="btn-secondary flex items-center gap-2 h-10 px-3"
-                onClick={() => setFilterOpen((v) => !v)}
-              >
-                <Filter className="w-4 h-4" />
-                {hasFilters && (
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-brand-600 text-white">
-                    {columnFilters.length}
-                  </span>
-                )}
-              </button>
-              {filterOpen && (
-                <div className="absolute right-0 top-full mt-1 z-20 w-80 card p-4 shadow-lg">
-                  <div className="flex flex-col gap-3">
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="date"
-                        className="input text-sm h-10"
-                        aria-label={t.workerProductions.dateFrom}
-                        value={getDateRange()[0]}
-                        onChange={setDateFilter(0)}
-                      />
-                      <input
-                        type="date"
-                        className="input text-sm h-10"
-                        aria-label={t.workerProductions.dateTo}
-                        value={getDateRange()[1]}
-                        onChange={setDateFilter(1)}
-                      />
-                    </div>
-                    <select
-                      className="input text-sm h-10"
-                      value={getFilter("process")}
-                      onChange={setFilter("process")}
-                    >
-                      <option value="">{t.workerProductions.process}</option>
-                      {filterOptions.processes.map((o) => (
-                        <option key={o} value={o} className="capitalize">{o}</option>
-                      ))}
-                    </select>
-                    <select
-                      className="input text-sm h-10"
-                      value={getFilter("product")}
-                      onChange={setFilter("product")}
-                    >
-                      <option value="">{t.workerProductions.product}</option>
-                      {filterOptions.products.map((o) => (
-                        <option key={o} value={o} className="capitalize">{o}</option>
-                      ))}
-                    </select>
-                    <select
-                      className="input text-sm h-10"
-                      value={getFilter("station")}
-                      onChange={setFilter("station")}
-                    >
-                      <option value="">{t.workerProductions.station}</option>
-                      {filterOptions.stations.map((o) => (
-                        <option key={o} value={o} className="capitalize">{o}</option>
-                      ))}
-                    </select>
-                    <select
-                      className="input text-sm h-10"
-                      value={getFilter("status")}
-                      onChange={setFilter("status")}
-                    >
-                      <option value="">{t.workerProductions.status}</option>
-                      <option value="new">{t.status.new}</option>
-                      <option value="completed">{t.status.completed}</option>
-                    </select>
-                    <select
-                      className="input text-sm h-10"
-                      value={getFilter("user")}
-                      onChange={setFilter("user")}
-                    >
-                      <option value="">{t.adminUsers.allUsers}</option>
-                      {filterOptions.users.map((o) => (
-                        <option key={o} value={o}>{o}</option>
-                      ))}
-                    </select>
-                    {hasFilters && (
-                      <button
-                        className="btn-secondary flex items-center justify-center gap-1.5 h-10 px-3"
-                        onClick={() => { setColumnFilters([]); setFilterOpen(false); }}
-                      >
-                        <X className="w-3.5 h-3.5" />
-                        {t.workerProductions.clearFilters}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+          <WorkerProductionFilterBar filters={filters}>
             <button
               className="btn-secondary flex items-center gap-2 h-10 px-3"
               onClick={exportCSV}
@@ -539,7 +305,7 @@ function AdminWorkerProductionsList() {
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">{csvLoading ? t.exports.generating : t.adminProductions.exportCsv}</span>
             </button>
-          </div>
+          </WorkerProductionFilterBar>
 
           {rows.length === 0 ? (
             <div className="card text-center py-12">

@@ -19,6 +19,8 @@ export const routePermissions: Array<{ prefix: string; role: Role }> = [
   // Operator-accessible admin routes (must come before the general /admin entry)
   { prefix: "/admin/worker-productions", role: "operator" },
   { prefix: "/api/admin/worker-productions", role: "operator" },
+  { prefix: "/admin/analytics", role: "operator" },
+  { prefix: "/api/admin/analytics", role: "operator" },
   // Admin-only routes
   { prefix: "/admin", role: "admin" },
   { prefix: "/api/admin", role: "admin" },
