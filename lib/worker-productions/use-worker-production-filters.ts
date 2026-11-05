@@ -8,12 +8,13 @@ export type FilterOptions = {
   products: string[];
   stations: string[];
   users: string[];
+  productsByProcess: Record<string, string[]>;
 };
 
 export const FILTER_KEYS = ["process", "product", "station", "status", "user"] as const;
 export type FilterKey = (typeof FILTER_KEYS)[number];
 
-const EMPTY_OPTIONS: FilterOptions = { processes: [], products: [], stations: [], users: [] };
+const EMPTY_OPTIONS: FilterOptions = { processes: [], products: [], stations: [], users: [], productsByProcess: {} };
 
 type UpdateOptions = { history?: "push" | "replace"; resetPage?: boolean };
 
@@ -97,6 +98,15 @@ export function useWorkerProductionFilters() {
   }, []);
 
   const setFilter = (key: FilterKey, value: string) => updateQuery({ [key]: value || undefined });
+
+  // A product from another process would leave the results empty, so it's dropped with the switch.
+  const setProcess = (value: string) => {
+    const products = options.productsByProcess[value];
+    const keepProduct = !products || products.includes(values.product);
+    updateQuery({ process: value || undefined, ...(keepProduct ? {} : { product: undefined }) });
+  };
+
+  const productOptions = values.process ? (options.productsByProcess[values.process] ?? []) : options.products;
   const setDateFrom = (value: string) => updateQuery({ from: value || undefined });
   const setDateTo = (value: string) => updateQuery({ to: value || undefined });
   const clearFilters = () =>
@@ -114,6 +124,7 @@ export function useWorkerProductionFilters() {
     filterQuery,
     updateQuery,
     options,
+    productOptions,
     dateFrom,
     dateTo,
     values,
@@ -121,6 +132,7 @@ export function useWorkerProductionFilters() {
     search,
     setSearch,
     setFilter,
+    setProcess,
     setDateFrom,
     setDateTo,
     clearFilters,

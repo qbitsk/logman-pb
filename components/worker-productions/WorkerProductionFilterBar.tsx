@@ -17,7 +17,7 @@ export function WorkerProductionFilterBar({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const { options, values, activeCount } = filters;
+  const { options, productOptions, values, activeCount } = filters;
 
   useEffect(() => {
     if (!open) return;
@@ -74,7 +74,7 @@ export function WorkerProductionFilterBar({
                   onChange={(e) => filters.setDateTo(e.target.value)}
                 />
               </div>
-              <select className="input text-sm h-10" value={values.process} onChange={onSelect("process")}>
+              <select className="input text-sm h-10" value={values.process} onChange={(e) => filters.setProcess(e.target.value)}>
                 <option value="">{t.workerProductions.process}</option>
                 {options.processes.map((o) => (
                   <option key={o} value={o} className="capitalize">{o}</option>
@@ -82,7 +82,7 @@ export function WorkerProductionFilterBar({
               </select>
               <select className="input text-sm h-10" value={values.product} onChange={onSelect("product")}>
                 <option value="">{t.workerProductions.product}</option>
-                {options.products.map((o) => (
+                {productOptions.map((o) => (
                   <option key={o} value={o} className="capitalize">{o}</option>
                 ))}
               </select>

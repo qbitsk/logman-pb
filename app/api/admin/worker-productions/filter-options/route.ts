@@ -13,7 +13,7 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const [processes, products, stations, userNames] = await Promise.all([
+  const [processes, products, stations, userNames, processProducts] = await Promise.all([
     db
       .selectDistinct({ name: productionProcesses.name })
       .from(workerProductions)
@@ -35,12 +35,25 @@ export async function GET() {
       .from(workerProductions)
       .innerJoin(users, eq(workerProductions.userId, users.id))
       .orderBy(users.name),
+    db
+      .selectDistinct({ process: productionProcesses.name, product: productionParts.name })
+      .from(workerProductions)
+      .innerJoin(productionParts, eq(workerProductions.productionPartId, productionParts.id))
+      .innerJoin(productionProcesses, eq(productionParts.productionProcessId, productionProcesses.id))
+      .orderBy(productionProcesses.name, productionParts.name),
   ]);
+
+  // Lets the product dropdown narrow to the selected process
+  const productsByProcess: Record<string, string[]> = {};
+  for (const { process, product } of processProducts) {
+    (productsByProcess[process] ??= []).push(product);
+  }
 
   return NextResponse.json({
     processes: processes.map((r) => r.name),
     products: products.map((r) => r.name),
     stations: stations.map((r) => r.name),
     users: userNames.map((r) => r.name),
+    productsByProcess,
   });
 }
