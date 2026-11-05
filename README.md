@@ -1,6 +1,6 @@
 # Logman PB
 
-A production-logging app for the shop floor: workers record **worker productions** (units produced per part, process, station, and shift, with optional defects), and operators/admins review, export, and manage them. The UI is Slovak-first with an English toggle.
+A production-logging app for the shop floor: workers record **worker productions** (units produced per part, process, station, and shift, with optional defects), and supervisors/admins review, export, and manage them. The UI is Slovak-first with an English toggle.
 
 ## Tech Stack
 
@@ -26,8 +26,8 @@ app/
 ├── (protected)/(user)/profile            # User profile
 ├── (protected)/admin/users               # Admin: manage users & roles
 ├── (protected)/admin/definitions         # Admin: processes/parts/stations/defects
-├── (protected)/admin/worker-productions  # Admin/operator: review all
-├── (protected)/admin/exports             # Operator+: download exports
+├── (protected)/admin/worker-productions  # Admin/supervisor: review all
+├── (protected)/admin/exports             # Admin: download exports
 └── api/                                  # Resource + /api/admin/* routes
 
 lib/
@@ -87,12 +87,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## User Roles
 
-Roles form a hierarchy: `admin > operator > user`.
+Roles form a hierarchy: `admin > supervisor > operator`.
 
 | Role | Access |
 |---|---|
-| `user` | Dashboard, own worker productions, form |
-| `operator` | Everything above + review all productions + exports |
+| `operator` | Dashboard, own worker productions, form |
+| `supervisor` | Everything above + review all productions + analytics + exports |
 | `admin` | Everything above + user management + definitions |
 
 Public sign-up is disabled — admins create users via the admin UI / `/api/admin/users`. The `role` is a column on the `users` table; access is enforced in `proxy.ts` (route-level) and re-checked in each API handler.
@@ -100,11 +100,11 @@ Public sign-up is disabled — admins create users via the admin UI / `/api/admi
 ## Authentication
 
 - **Email/password** via Better Auth.
-- **NFC login** — `user`-role accounts can have an `nfcKey`; scanning posts the key to `/api/auth/nfc/login`, served by a custom Better Auth plugin (`lib/auth/nfc-plugin.ts`). The plugin delegates session creation and cookie signing to Better Auth, so they stay in sync with the rest of auth. The matching client plugin (`lib/auth/client.ts`) exposes `authClient.nfc.login({ key })` and refreshes `useSession()` on success, so no page reload is needed. Errors are intentionally generic to avoid NFC key enumeration.
+- **NFC login** — accounts of any role can have an `nfcKey`; scanning posts the key to `/api/auth/nfc/login`, served by a custom Better Auth plugin (`lib/auth/nfc-plugin.ts`). The plugin delegates session creation and cookie signing to Better Auth, so they stay in sync with the rest of auth. The matching client plugin (`lib/auth/client.ts`) exposes `authClient.nfc.login({ key })` and refreshes `useSession()` on success, so no page reload is needed. Errors are intentionally generic to avoid NFC key enumeration.
 
 ## Exports
 
-Operators and admins can download a CSV of all worker productions (with defects) from `/api/exports?format=csv`. The field delimiter is chosen from the `Accept-Language` header (`,` for English locales, `;` for European locales so Excel/Calc parse it correctly).
+Supervisors and admins can download a CSV of all worker productions (with defects) from `/api/exports?format=csv`. The field delimiter is chosen from the `Accept-Language` header (`,` for English locales, `;` for European locales so Excel/Calc parse it correctly).
 
 ## Internationalization
 
@@ -405,7 +405,7 @@ If the hostname is not in DNS yet, add it on your machine for testing: 💻 `ech
 Open `http://logman.firma.sk` and check:
 
 - [ ] Email/password login and NFC login work; the session survives a page reload.
-- [ ] A `user` opening `/admin` lands on `/unauthorized`; operators reach the pages they are allowed to.
+- [ ] An `operator` opening `/admin` lands on `/unauthorized`; supervisors reach the pages they are allowed to.
 - [ ] A new worker production shows as "new" with the correct time.
 - [ ] Existing data is visible; filters and pagination work.
 - [ ] CSV export downloads; the notification email arrives.

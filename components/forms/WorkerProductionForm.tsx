@@ -110,7 +110,7 @@ type Props = {
   editUrl?: string;
   backUrl?: string;
   initialPartId?: string;
-  /** Allow changing the production date (createdAt). Only for admin/operator edit pages. */
+  /** Allow changing the production date (createdAt). Only for admin/supervisor edit pages. */
   canEditDate?: boolean;
 };
 

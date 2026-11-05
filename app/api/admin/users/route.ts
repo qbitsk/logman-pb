@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
+import { defaultRole, roles } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { users, accounts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -32,7 +33,7 @@ const createUserSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(["user", "operator", "admin"]).default("user"),
+  role: z.enum(roles).default(defaultRole),
 });
 
 export async function POST(request: NextRequest) {
@@ -112,7 +113,7 @@ export async function GET() {
 // PATCH /api/admin/users — update a user's role
 const updateRoleSchema = z.object({
   userId: z.string(),
-  role: z.enum(["user", "operator", "admin"]),
+  role: z.enum(roles),
 });
 
 export async function PATCH(request: NextRequest) {

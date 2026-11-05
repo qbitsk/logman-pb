@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useSession } from "@/lib/auth/client";
 import { authClient } from "@/lib/auth/client";
 import { useTranslation } from "@/lib/i18n";
+import type { Role } from "@/lib/auth/permissions";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
   const { t } = useTranslation();
+  const role = session?.user.role;
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -60,7 +62,7 @@ export default function ProfilePage() {
         </div>
         <div className="space-y-1">
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t.profile.role}</p>
-          <p className="text-gray-900 dark:text-gray-100 capitalize">{session?.user.role as string}</p>
+          <p className="text-gray-900 dark:text-gray-100 capitalize">{role ? t.roles[role as Role] ?? role : null}</p>
         </div>
 
         <hr className="border-gray-100 dark:border-gray-700" />

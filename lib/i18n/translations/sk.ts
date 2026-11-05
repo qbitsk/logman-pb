@@ -25,8 +25,8 @@ export const sk: Translations = {
     completed: "Dokončené",
   },
   roles: {
-    user: "Používateľ",
     operator: "Operátor",
+    supervisor: "Supervízor",
     admin: "Administrátor",
   },
   nav: {
@@ -34,7 +34,7 @@ export const sk: Translations = {
     myProductions: "Moje produkcie",
     productions: "Produkcie",
     analytics: "Analytika",
-    operator: "Operátor",
+    supervisor: "Supervízor",
     admin: "Administrátor",
     definitions: "Definície",
     exports: "Exporty",

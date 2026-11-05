@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
+import { hasRequiredRole } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { workerProductions, users, workerProductionDefects, productionDefects, productionComponents, productionParts, productionStations, productionProcesses, getWorkerProductionStatus } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -22,9 +23,9 @@ const patchSchema = z.object({
     .optional(),
 });
 
-async function requireAdminOrOperator() {
+async function requireSupervisor() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || !(["admin", "operator"] as string[]).includes(session.user.role)) return null;
+  if (!session || !hasRequiredRole(session.user.role, "supervisor")) return null;
   return session;
 }
 
@@ -33,7 +34,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await requireAdminOrOperator())) {
+  if (!(await requireSupervisor())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -102,7 +103,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await requireAdminOrOperator())) {
+  if (!(await requireSupervisor())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -146,7 +147,7 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await requireAdminOrOperator())) {
+  if (!(await requireSupervisor())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

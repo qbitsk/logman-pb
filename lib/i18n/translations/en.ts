@@ -23,8 +23,8 @@ export const en = {
     completed: "Completed",
   },
   roles: {
-    user: "User",
     operator: "Operator",
+    supervisor: "Supervisor",
     admin: "Admin",
   },
   nav: {
@@ -32,7 +32,7 @@ export const en = {
     myProductions: "My Productions",
     productions: "Productions",
     analytics: "Analytics",
-    operator: "Operator",
+    supervisor: "Supervisor",
     admin: "Admin",
     definitions: "Definitions",
     exports: "Exports",

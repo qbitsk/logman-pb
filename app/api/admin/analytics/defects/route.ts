@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
+import { hasRequiredRole } from "@/lib/auth/permissions";
 import { getMonthlyDefects } from "@/lib/worker-productions/analytics";
 import { parseWorkerProductionFilters } from "@/lib/worker-productions/filters";
 import { headers } from "next/headers";
@@ -9,7 +10,7 @@ import { headers } from "next/headers";
 // (dateFrom, dateTo, process, product, station, status, user, partSearch).
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || !(["admin", "operator"] as string[]).includes(session.user.role)) {
+  if (!session || !hasRequiredRole(session.user.role, "supervisor")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

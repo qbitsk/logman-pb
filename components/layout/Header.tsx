@@ -9,8 +9,7 @@ import { useState, useRef, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useTranslation } from "@/lib/i18n";
-
-const roleRank: Record<string, number> = { user: 1, operator: 2, admin: 3 };
+import { defaultRole, type Role } from "@/lib/auth/permissions";
 
 export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
   const { data: session } = useSession();
@@ -19,7 +18,7 @@ export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const userRole = session?.user?.role ?? "user";
+  const userRole = session?.user?.role ?? defaultRole;
 
   const handleSignOut = () =>
     signOut({ fetchOptions: { onSuccess: () => router.push("/login") } });
@@ -71,7 +70,7 @@ export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
                 {session?.user?.name}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 capitalize leading-tight">
-                {userRole}
+                {t.roles[userRole as Role] ?? userRole}
               </p>
             </div>
           </button>

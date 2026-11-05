@@ -13,9 +13,8 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useTranslation } from "@/lib/i18n";
+import { defaultRole, hasRequiredRole } from "@/lib/auth/permissions";
 import { version } from "@/package.json";
-
-const roleRank: Record<string, number> = { user: 1, operator: 2, admin: 3 };
 
 function NavLink({
   href,
@@ -54,25 +53,25 @@ function NavLink({
 
 function NavContent({
   pathname,
-  isOperator,
+  isSupervisor,
   isAdmin,
   onNavigate,
   collapsed,
 }: {
   pathname: string;
-  isOperator: boolean;
+  isSupervisor: boolean;
   isAdmin: boolean;
   onNavigate: () => void;
   collapsed?: boolean;
 }) {
   const { t } = useTranslation();
 
-  const userNavItems = [
+  const operatorNavItems = [
     { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard },
     { href: "/worker-productions", label: t.nav.myProductions, icon: FileText },
   ];
 
-  const operatorNavItems = [
+  const supervisorNavItems = [
     { href: "/admin/worker-productions", label: t.nav.productions, icon: ClipboardCheck },
     { href: "/admin/analytics", label: t.nav.analytics, icon: BarChart3 },
   ];
@@ -100,21 +99,21 @@ function NavContent({
 
       {/* Nav links */}
       <nav className="flex-1 px-2 py-2 space-y-1 overflow-y-auto">
-        {userNavItems.map((item) => (
+        {operatorNavItems.map((item) => (
           <NavLink key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} collapsed={collapsed} />
         ))}
 
-        {isOperator && (
+        {isSupervisor && (
           <>
             {!collapsed && (
               <div className="pt-4 pb-1 px-3">
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-600">
-                  {t.nav.operator}
+                  {t.nav.supervisor}
                 </span>
               </div>
             )}
             {collapsed && <div className="pt-2" />}
-            {operatorNavItems.map((item) => (
+            {supervisorNavItems.map((item) => (
               <NavLink key={item.href} {...item} pathname={pathname} onNavigate={onNavigate} collapsed={collapsed} />
             ))}
           </>
@@ -158,12 +157,12 @@ export function Sidebar({
 }) {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const userRole = session?.user?.role ?? "user";
+  const userRole = session?.user?.role ?? defaultRole;
 
-  const isOperator = roleRank[userRole] >= roleRank["operator"];
-  const isAdmin = roleRank[userRole] >= roleRank["admin"];
+  const isSupervisor = hasRequiredRole(userRole, "supervisor");
+  const isAdmin = hasRequiredRole(userRole, "admin");
 
-  const navProps = { pathname, isOperator, isAdmin, onNavigate: onClose };
+  const navProps = { pathname, isSupervisor, isAdmin, onNavigate: onClose };
 
   return (
     <>

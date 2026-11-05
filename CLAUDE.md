@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Logman PB is a manufacturing production-logging app: shop-floor workers record "worker productions" (units produced per part/process/station/shift), and operators/admins review, export, and manage them. Built with Next.js 16 (App Router), Better Auth, Drizzle ORM on Supabase Postgres, and Resend for email. UI is Slovak-first with an English toggle.
+Logman PB is a manufacturing production-logging app: shop-floor workers record "worker productions" (units produced per part/process/station/shift), and supervisors/admins review, export, and manage them. Built with Next.js 16 (App Router), Better Auth, Drizzle ORM on Supabase Postgres, and Resend for email. UI is Slovak-first with an English toggle.
 
 ## Commands
 
@@ -24,16 +24,16 @@ There is no test runner configured. `db:generate`/`db:migrate` and `db:studio` r
 ## Architecture
 
 ### Auth + access control (the central concept)
-Three roles form a hierarchy: `user < operator < admin` (see `lib/auth/permissions.ts`, `roleRank`). The `role` is a column on the `users` table, not Better Auth's plugin system — Better Auth is configured (`lib/auth/config.ts`) only with email/password and `role` as a read-only `additionalField`. **Public sign-up is disabled** (`disableSignUp: true`); admins create users via `/api/admin/users`.
+Three roles form a hierarchy: `operator < supervisor < admin` (see `lib/auth/permissions.ts`, `roleRank`). The `role` is a column on the `users` table, not Better Auth's plugin system — Better Auth is configured (`lib/auth/config.ts`) only with email/password and `role` as a read-only `additionalField`. **Public sign-up is disabled** (`disableSignUp: true`); admins create users via `/api/admin/users`.
 
 Access is enforced in **two independent layers** — keep them in sync:
-1. **Edge routing** — `proxy.ts` (Next 16's middleware equivalent) runs on every request, reads the session cookie, calls `/api/auth/get-session`, then matches the path against `routePermissions` in `lib/auth/permissions.ts` and redirects to `/unauthorized` on role mismatch. Order matters in `routePermissions`: more specific operator-accessible prefixes must come *before* the general `/admin` admin-only entry.
+1. **Edge routing** — `proxy.ts` (Next 16's middleware equivalent) runs on every request, reads the session cookie, calls `/api/auth/get-session`, then matches the path against `routePermissions` in `lib/auth/permissions.ts` and redirects to `/unauthorized` on role mismatch. Order matters in `routePermissions`: more specific supervisor-accessible prefixes must come *before* the general `/admin` admin-only entry.
 2. **API route handlers** — each handler re-checks the role server-side via `auth.api.getSession({ headers: await headers() })` and returns 403. The proxy is not trusted alone.
 
 When adding a protected route or API, update `routePermissions` **and** add the in-handler role check.
 
 ### NFC login (custom Better Auth plugin)
-NFC-card login is a real Better Auth plugin (`lib/auth/nfc-plugin.ts`), registered in `auth`'s `plugins` (`lib/auth/config.ts`) and mounted at `/api/auth/nfc/login`. It looks up a `users.nfcKey` (only `role: "user"`), then delegates session creation and cookie signing to Better Auth via `ctx.context.internalAdapter` and `setSessionCookie` — so it stays in sync with the rest of auth (including the cookie cache) automatically; there is no hand-rolled `sessions` insert or HMAC cookie signing anymore. The matching client plugin in `lib/auth/client.ts` exposes `authClient.nfc.login({ key })` and refetches the session atom on success (via `atomListeners`), so `useSession()` updates with no page reload. Errors are intentionally generic to avoid NFC key enumeration.
+NFC-card login is a real Better Auth plugin (`lib/auth/nfc-plugin.ts`), registered in `auth`'s `plugins` (`lib/auth/config.ts`) and mounted at `/api/auth/nfc/login`. It looks up a `users.nfcKey` (any role), then delegates session creation and cookie signing to Better Auth via `ctx.context.internalAdapter` and `setSessionCookie` — so it stays in sync with the rest of auth (including the cookie cache) automatically; there is no hand-rolled `sessions` insert or HMAC cookie signing anymore. The matching client plugin in `lib/auth/client.ts` exposes `authClient.nfc.login({ key })` and refetches the session atom on success (via `atomListeners`), so `useSession()` updates with no page reload. Errors are intentionally generic to avoid NFC key enumeration.
 
 ### Data model (`lib/db/schema/`)
 The production hierarchy: `productionProcesses` → `productionParts` (each part belongs to a process) → a `workerProduction` references a part + optional station, plus `units`/`shift`/`notes`/`userId`. Related lookup tables: `productionStations`, `productionComponents`, `productionDefects`, with `workerProductionDefects` as the join to defects. Auth tables (`users`, `sessions`, `accounts`, `verifications`) live in `users.ts`. All schemas are re-exported from `schema/index.ts`; import entities from `@/lib/db/schema`.
@@ -47,7 +47,7 @@ Route groups encode the access tier:
 - `(public)/` — `login`, `register`
 - `(protected)/(user)/` — `dashboard`, `worker-productions` (list/new/[id]/edit), `profile`
 - `(protected)/admin/` — `users`, `exports`, `definitions`, `worker-productions`
-- `api/` — public-facing resource routes (e.g. `/api/worker-productions`) vs. `/api/admin/*` for admin/operator management. Exports are served from `/api/exports` (operator+), generated by `lib/exports/`.
+- `api/` — public-facing resource routes (e.g. `/api/worker-productions`) vs. `/api/admin/*` for admin/supervisor management. Exports are served from `/api/exports` (supervisor+), generated by `lib/exports/`.
 
 ### i18n
 `lib/i18n/index.tsx` is a client-side context provider (`LocaleProvider` / `useTranslation` → `t`). Default locale is **`sk`**, persisted in `localStorage` under `locale`. Dictionaries are plain TS objects in `lib/i18n/translations/{en,sk}.ts` typed by `Translations` (the `en` dict is the source of truth for the type). User-facing strings go through `t`, not hardcoded.

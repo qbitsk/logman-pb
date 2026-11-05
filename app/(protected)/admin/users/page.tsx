@@ -4,24 +4,25 @@ import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
+import { defaultRole, type Role } from "@/lib/auth/permissions";
 
 type User = {
   id: string;
   name: string;
   email: string;
-  role: "user" | "operator" | "admin";
+  role: Role;
   nfcKey: string | null;
   createdAt: string;
 };
 
 const roleStyles: Record<string, string> = {
-  user:     "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-  operator: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  admin:    "bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400",
+  operator:   "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+  supervisor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  admin:      "bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400",
 };
 
-const emptyCreateForm = { name: "", email: "", password: "", role: "user" as User["role"] };
-const emptyEditForm   = { name: "", email: "", role: "user" as User["role"], nfcKey: "" };
+const emptyCreateForm = { name: "", email: "", password: "", role: defaultRole as User["role"] };
+const emptyEditForm   = { name: "", email: "", role: defaultRole as User["role"], nfcKey: "" };
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -194,8 +195,8 @@ export default function AdminUsersPage() {
               <div>
                 <label className="label">{t.adminUsers.role}</label>
                 <select className="input" value={createForm.role} onChange={(e) => setCreateForm((f) => ({ ...f, role: e.target.value as User["role"] }))}>
-                  <option value="user">{t.roles.user}</option>
                   <option value="operator">{t.roles.operator}</option>
+                  <option value="supervisor">{t.roles.supervisor}</option>
                   <option value="admin">{t.roles.admin}</option>
                 </select>
               </div>
@@ -231,8 +232,8 @@ export default function AdminUsersPage() {
               <div>
                 <label className="label">{t.adminUsers.role}</label>
                 <select className="input" value={editForm.role} onChange={(e) => setEditForm((f) => ({ ...f, role: e.target.value as User["role"] }))}>
-                  <option value="user">{t.roles.user}</option>
                   <option value="operator">{t.roles.operator}</option>
+                  <option value="supervisor">{t.roles.supervisor}</option>
                   <option value="admin">{t.roles.admin}</option>
                 </select>
               </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
+import { hasRequiredRole } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { workerProductions, users, productionParts, productionProcesses, productionStations } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -9,7 +10,7 @@ import { headers } from "next/headers";
 // used to populate the filter dropdowns of the paginated admin list (admin/operator)
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || !(["admin", "operator"] as string[]).includes(session.user.role)) {
+  if (!session || !hasRequiredRole(session.user.role, "supervisor")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -6,9 +6,9 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
-  role: text("role", { enum: ["user", "operator", "admin"] })
+  role: text("role", { enum: ["operator", "supervisor", "admin"] })
     .notNull()
-    .default("user"),
+    .default("operator"),
   nfcKey: text("nfc_key").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

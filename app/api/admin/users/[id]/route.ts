@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
+import { roles } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -15,7 +16,7 @@ async function requireAdmin() {
 const patchSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
-  role: z.enum(["user", "operator", "admin"]).optional(),
+  role: z.enum(roles).optional(),
   nfcKey: z.string().min(4).max(256).nullable().optional(),
 });
 

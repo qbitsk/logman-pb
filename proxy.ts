@@ -68,7 +68,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const userRole = (sessionData.user.role ?? "user") as Role;
+  const userRole = (sessionData.user.role ?? "operator") as Role;
 
   // Check route-level role requirements
   const matchedRoute = routePermissions.find((r) =>
