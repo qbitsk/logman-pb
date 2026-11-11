@@ -154,11 +154,11 @@ Commands are marked 💻 (your machine) or 🖥 (the server).
 ### Before you start
 
 - **Server:** Ubuntu 24.04, SSH access with a `sudo` user, at least 2 GB RAM (`next build` needs it), outbound internet (npm, GitHub, Resend).
-- **Hostname:** pick the one address users will open, e.g. `logman.firma.sk`, and point it to the server's LAN IP in your internal DNS / router. **Don't use `.local`** — it is reserved for mDNS and resolves unreliably; use a subdomain of your real domain (best, also needed for TLS later) or `*.internal`. Users must always use this exact hostname: it is inlined into the client at build time and Better Auth rejects logins from any other origin.
+- **Hostname:** the one address users open is `produkcia.logman-povazan.com`; point it to the server's LAN IP in your internal DNS / router. Users must always use this exact hostname: it is inlined into the client at build time and Better Auth rejects logins from any other origin.
 - **PostgreSQL version:** this guide installs **PostgreSQL 18**. Importing from Supabase requires the server to run the same or a newer major version than Supabase (check with `select version();` in the Supabase SQL editor) — Supabase runs 15 or 17, so 18 is fine.
 - **Resend:** API key, sender address, admin notification address.
 
-In the commands below, replace `logman.firma.sk` with your hostname.
+The commands below use the production hostname `produkcia.logman-povazan.com`.
 
 ### First-time server setup
 
@@ -296,8 +296,8 @@ sudo -u logman nano /opt/logman/shared/.env
 ```env
 DATABASE_URL="postgresql://logman:<db-password>@127.0.0.1:5432/logman"
 BETTER_AUTH_SECRET="<generated secret>"
-BETTER_AUTH_URL="http://logman.firma.sk"
-NEXT_PUBLIC_APP_URL="http://logman.firma.sk"
+BETTER_AUTH_URL="http://produkcia.logman-povazan.com"
+NEXT_PUBLIC_APP_URL="http://produkcia.logman-povazan.com"
 INTERNAL_APP_URL="http://127.0.0.1:3000"
 LOG_LEVEL="info"
 RESEND_API_KEY="re_..."
@@ -329,7 +329,7 @@ The unit runs `next start` on `127.0.0.1:3000` as the `logman` user from `/opt/l
 
 🖥
 ```bash
-sed 's/__APP_HOST__/logman.firma.sk/g' /tmp/logman-deploy/nginx/logman.conf | sudo tee /etc/nginx/sites-available/logman
+sed 's/__APP_HOST__/produkcia.logman-povazan.com/g' /tmp/logman-deploy/nginx/logman.conf | sudo tee /etc/nginx/sites-available/logman
 sudo ln -sfn /etc/nginx/sites-available/logman /etc/nginx/sites-enabled/logman
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
@@ -400,9 +400,9 @@ It ends with `✔ 0.12.0 is live`. The first run takes a few minutes (`npm ci` +
 
 #### 16. Verify
 
-If the hostname is not in DNS yet, add it on your machine for testing: 💻 `echo "<server-ip> logman.firma.sk" | sudo tee -a /etc/hosts`.
+If the hostname is not in DNS yet, add it on your machine for testing: 💻 `echo "<server-ip> produkcia.logman-povazan.com" | sudo tee -a /etc/hosts`.
 
-Open `http://logman.firma.sk` and check:
+Open `http://produkcia.logman-povazan.com` and check:
 
 - [ ] Email/password login and NFC login work; the session survives a page reload.
 - [ ] An `operator` opening `/admin` lands on `/unauthorized`; supervisors reach the pages they are allowed to.
@@ -459,7 +459,7 @@ Do a trial import (step 14) and test first; Vercel stays live meanwhile. On the 
    ```
 3. Repeat step 14 (dump + restore) with the current data.
 4. 🖥 `sudo systemctl start logman`
-5. Point terminals and bookmarks to `http://logman.firma.sk`.
+5. Point terminals and bookmarks to `http://produkcia.logman-povazan.com`.
 6. Keep Supabase and Vercel paused (not deleted) for a few weeks before shutting them down.
 
 ### Operations
@@ -481,7 +481,7 @@ Test a restore into a scratch database (`sudo -u postgres createdb logman_test`)
 No code changes are needed:
 
 1. Get a certificate — certbot with a DNS-01 challenge on a real domain (works for LAN-only servers), or one from an internal CA.
-2. In `/etc/nginx/sites-available/logman`, add a `listen 443 ssl` server with the same `location /` block, make the port-80 servers `return 301 https://logman.firma.sk$request_uri`, and run `sudo ufw allow 443/tcp`.
+2. In `/etc/nginx/sites-available/logman`, add a `listen 443 ssl` server with the same `location /` block, make the port-80 servers `return 301 https://produkcia.logman-povazan.com$request_uri`, and run `sudo ufw allow 443/tcp`.
 3. Change `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` in `/opt/logman/shared/.env` to `https://…`.
 4. Deploy a new release (the URL is inlined at build time).
 
