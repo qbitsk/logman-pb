@@ -415,16 +415,33 @@ Open `http://produkcia.logman-povazan.com` and check:
 
 When done, remove the copied files: 🖥 `rm -rf /tmp/logman-deploy`.
 
+### SSH access as `logman`
+
+`deploy/release.sh` logs in directly as `logman`, so add your public key once (as your sudo user):
+
+🖥
+```bash
+sudo -u logman nano /opt/logman/.ssh/authorized_keys   # paste the contents of your ~/.ssh/id_*.pub
+sudo chmod 600 /opt/logman/.ssh/authorized_keys
+sudo usermod -aG systemd-journal logman                # lets `release.sh --logs` read the app log
+```
+
+💻 Test with `ssh logman@logman-server-linux 'readlink /opt/logman/current'`. Anyone who can log in as `logman` controls the app (`.env`, deploy key), so only add keys of people who deploy.
+
 ### Deploying updates
+
+Deploys run from your machine with [`deploy/release.sh`](deploy/release.sh). It SSHes in as `logman` (see [SSH access as `logman`](#ssh-access-as-logman)) and runs `/opt/logman/deploy.sh` on the server.
 
 💻
 ```bash
-npm version patch            # or minor
-git push origin main --tags
-ssh -t <user>@<server-ip> 'sudo -iu logman /opt/logman/deploy.sh <tag>'
+deploy/release.sh patch      # or minor / major: npm version, push main + tag, deploy
+deploy/release.sh 0.14.0     # deploy an existing tag
+deploy/release.sh            # deploy the version in package.json
 ```
 
-`deploy.sh <tag>`:
+Before deploying it checks that the tag is on `origin`, and for a bump that you're on a clean `main` that isn't behind `origin/main`. It asks once for confirmation (`-y` skips it). The SSH target defaults to `logman@logman-server-linux`; override it with `LOGMAN_SSH`.
+
+`deploy.sh <tag>` on the server:
 
 1. clones the tag into `/opt/logman/releases/<tag>` and links `shared/.env` into it,
 2. runs `npm ci`, `npm run build`, `npm run db:migrate`,
@@ -433,14 +450,14 @@ ssh -t <user>@<server-ip> 'sudo -iu logman /opt/logman/deploy.sh <tag>'
 
 If anything fails before step 3, the running version is untouched and the half-built release is removed.
 
-If a file in `deploy/` changed (service, nginx, backup), copy it to the server and apply it as in the setup steps above — `deploy.sh` only deploys the app.
+If `deploy/deploy.sh` itself changed, upload it first with 💻 `deploy/release.sh --sync-script`. If another file in `deploy/` changed (service, nginx, backup), copy it to the server and apply it as in the setup steps above — `deploy.sh` only deploys the app.
 
 ### Rolling back
 
-🖥
+💻
 ```bash
-ls /opt/logman/releases                                  # available releases
-sudo -iu logman /opt/logman/deploy.sh --activate <previous-tag>
+deploy/release.sh --releases             # available releases and the active one
+deploy/release.sh --activate <previous-tag>
 ```
 
 This switches the code only — database migrations stay applied. Keep migrations backward-compatible (add columns/tables; rename or drop them in a later release), so the previous release still works with the newer schema.
@@ -466,9 +483,9 @@ Do a trial import (step 14) and test first; Vercel stays live meanwhile. On the 
 
 | Task | Command (🖥) |
 |---|---|
-| Live logs | `journalctl -u logman -f` |
+| Live logs | `journalctl -u logman -f` (💻 `deploy/release.sh --logs`) |
 | Status / restart | `systemctl status logman` / `sudo systemctl restart logman` |
-| Active release | `readlink /opt/logman/current` |
+| Active release | `readlink /opt/logman/current` (💻 `deploy/release.sh --releases`) |
 | DB shell | `sudo -u postgres psql logman` |
 | Backup now | `sudo -u postgres logman-backup` |
 | Restore a backup | `sudo -u postgres pg_restore --clean --if-exists -d logman /var/backups/logman/<file>.dump` |

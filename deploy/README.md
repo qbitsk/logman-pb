@@ -5,6 +5,7 @@ The step-by-step guide is in the main [README → Self-hosted Deployment](../REA
 
 | File | Installed to | Purpose |
 |---|---|---|
+| `release.sh` | — (run from your machine) | Bump/tag/push and deploy over SSH as `logman`, roll back, status, logs |
 | `deploy.sh` | `/opt/logman/deploy.sh` | Build and activate a release (`deploy.sh <tag>`), roll back (`deploy.sh --activate <tag>`) |
 | `logman.service` | `/etc/systemd/system/logman.service` | systemd unit running `next start` on `127.0.0.1:3000` |
 | `nginx/logman.conf` | `/etc/nginx/sites-available/logman` | HTTP reverse proxy; replace `__APP_HOST__` with the hostname |
