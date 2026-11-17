@@ -23,14 +23,17 @@ activate() {
   mv -Tf "$APP/current.tmp" "$APP/current"   # atomic symlink swap
   sudo /usr/bin/systemctl restart logman
 
+  # Next.js needs a few seconds to listen after the restart; "connection
+  # refused" until then is expected, so only report curl's last error.
+  local err=""
   for _ in $(seq 1 30); do
-    if curl -fsS -o /dev/null "$HEALTH_URL"; then
+    if err="$(curl -fsS -o /dev/null "$HEALTH_URL" 2>&1)"; then
       echo "✔ $(basename "$rel") is live"
       return 0
     fi
     sleep 1
   done
-  die "$(basename "$rel") did not answer on $HEALTH_URL — check: journalctl -u logman -n 100"
+  die "$(basename "$rel") did not answer on $HEALTH_URL (${err:-no error output}) — check: journalctl -u logman -n 100"
 }
 
 prune() {
