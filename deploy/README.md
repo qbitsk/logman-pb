@@ -8,6 +8,7 @@ The step-by-step guide is in the main [README → Self-hosted Deployment](../REA
 | `release.sh` | — (run from your machine) | Bump/tag/push and deploy over SSH as `logman`, roll back, status, logs |
 | `deploy.sh` | `/opt/logman/deploy.sh` | Build and activate a release (`deploy.sh <tag>`), roll back (`deploy.sh --activate <tag>`) |
 | `logman.service` | `/etc/systemd/system/logman.service` | systemd unit running `next start` on `127.0.0.1:3000` |
-| `nginx/logman.conf` | `/etc/nginx/sites-available/logman` | HTTP reverse proxy; replace `__APP_HOST__` with the hostname |
+| `nginx/logman.conf` | `/etc/nginx/sites-available/logman` | HTTP reverse proxy for `produkcia.logman-povazan.com` |
+| `nginx/logman-tls.conf` | `/etc/nginx/sites-available/logman` (instead of `logman.conf`) | HTTPS reverse proxy with the Let's Encrypt certificate (DNS-01, see README → HTTPS with Let's Encrypt); port 80 only redirects |
 | `backup.sh` | `/usr/local/bin/logman-backup` | Nightly `pg_dump`, 14-day retention, optional rsync off-server |
 | `logman-backup.cron` | `/etc/cron.d/logman-backup` | Runs the backup at 02:30 as `postgres` |

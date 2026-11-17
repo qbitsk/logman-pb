@@ -131,10 +131,10 @@ After changing the schema, run `npm run db:generate && npm run db:migrate`.
 
 ## Self-hosted Deployment (Ubuntu 24.04)
 
-The app runs on a single Ubuntu 24.04 server with a local PostgreSQL. It is built **on the server** from a git tag; nginx sits in front and serves plain HTTP (TLS can be added later without code changes).
+The app runs on a single Ubuntu 24.04 server with a local PostgreSQL. It is built **on the server** from a git tag; nginx sits in front and serves HTTP, or HTTPS with a Let's Encrypt certificate obtained via the DNS-01 challenge (see [HTTPS with Let's Encrypt](#https-with-lets-encrypt-dns-01)).
 
 ```
-LAN ──▶ nginx :80 ──▶ next start 127.0.0.1:3000 (systemd "logman") ──▶ PostgreSQL 127.0.0.1:5432
+LAN ──▶ nginx :80 / :443 ──▶ next start 127.0.0.1:3000 (systemd "logman") ──▶ PostgreSQL 127.0.0.1:5432
 ```
 
 Server layout:
@@ -251,7 +251,7 @@ sudo ufw allow 80/tcp
 sudo ufw enable
 ```
 
-PostgreSQL (5432) and the app (3000) are deliberately not opened.
+PostgreSQL (5432) and the app (3000) are deliberately not opened. Port 443 is opened when HTTPS is set up.
 
 #### 8. App user, directories, deploy script
 
@@ -329,13 +329,13 @@ The unit runs `next start` on `127.0.0.1:3000` as the `logman` user from `/opt/l
 
 🖥
 ```bash
-sed 's/__APP_HOST__/produkcia.logman-povazan.com/g' /tmp/logman-deploy/nginx/logman.conf | sudo tee /etc/nginx/sites-available/logman
+sudo cp /tmp/logman-deploy/nginx/logman.conf /etc/nginx/sites-available/logman
 sudo ln -sfn /etc/nginx/sites-available/logman /etc/nginx/sites-enabled/logman
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-Requests for any other host (e.g. the bare IP) are redirected to the canonical hostname.
+Requests for any other host (e.g. the bare IP) are redirected to the canonical hostname. This config serves plain HTTP; to serve HTTPS, follow [HTTPS with Let's Encrypt](#https-with-lets-encrypt-dns-01) after the first deploy.
 
 #### 13. Backups and log size
 
@@ -476,7 +476,7 @@ Do a trial import (step 14) and test first; Vercel stays live meanwhile. On the 
    ```
 3. Repeat step 14 (dump + restore) with the current data.
 4. 🖥 `sudo systemctl start logman`
-5. Point terminals and bookmarks to `http://produkcia.logman-povazan.com`.
+5. Point terminals and bookmarks to `https://produkcia.logman-povazan.com` (`http://` if HTTPS isn't set up yet).
 6. Keep Supabase and Vercel paused (not deleted) for a few weeks before shutting them down.
 
 ### Operations
@@ -488,18 +488,122 @@ Do a trial import (step 14) and test first; Vercel stays live meanwhile. On the 
 | Active release | `readlink /opt/logman/current` (💻 `deploy/release.sh --releases`) |
 | DB shell | `sudo -u postgres psql logman` |
 | Backup now | `sudo -u postgres logman-backup` |
+| Certificate expiry | `sudo certbot certificates` (renewal: [Renewing the certificate](#renewing-the-certificate)) |
 | Restore a backup | `sudo -u postgres pg_restore --clean --if-exists -d logman /var/backups/logman/<file>.dump` |
 | Drizzle Studio (💻) | `ssh -L 5433:127.0.0.1:5432 <user>@<server-ip>`, then `DATABASE_URL=postgresql://logman:<db-password>@127.0.0.1:5433/logman npm run db:studio` |
 
 Test a restore into a scratch database (`sudo -u postgres createdb logman_test`) at least once. Security updates are installed automatically by `unattended-upgrades`.
 
-### Adding TLS later
+### HTTPS with Let's Encrypt (DNS-01)
 
-No code changes are needed:
+The server is only reachable from the LAN, so Let's Encrypt can't connect to it for the usual HTTP-01 challenge. The **DNS-01** challenge proves control of the domain instead: you publish a TXT record at `_acme-challenge.produkcia.logman-povazan.com`, Let's Encrypt checks it in **public** DNS, and issues the certificate. Nothing is opened to the internet.
 
-1. Get a certificate — certbot with a DNS-01 challenge on a real domain (works for LAN-only servers), or one from an internal CA.
-2. In `/etc/nginx/sites-available/logman`, add a `listen 443 ssl` server with the same `location /` block, make the port-80 servers `return 301 https://produkcia.logman-povazan.com$request_uri`, and run `sudo ufw allow 443/tcp`.
-3. Change `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` in `/opt/logman/shared/.env` to `https://…`.
-4. Deploy a new release (the URL is inlined at build time).
+The DNS zone of `logman-povazan.com` is hosted at **Webhouse**. For now the TXT record is created **by hand** in the Webhouse administration, using certbot's manual mode — so the certificate is also **renewed by hand** (see [Renewing the certificate](#renewing-the-certificate)). Automating it later only changes how the TXT record gets created; the nginx and app setup below stays the same.
 
-Better Auth then switches to `__Secure-` cookies automatically; users log in once more.
+Good to know:
+
+- `produkcia.logman-povazan.com` doesn't need a public A record. Users keep resolving it to the LAN IP through internal DNS (see [Before you start](#before-you-start)); only the `_acme-challenge` TXT record has to be public.
+- Every issued certificate is published in public Certificate Transparency logs, so the hostname (not the IP) becomes publicly visible.
+- No code changes are needed: on an `https://` URL Better Auth switches to `__Secure-` cookies, and `proxy.ts` already reads both cookie names.
+
+#### 1. Install certbot
+
+🖥
+```bash
+sudo apt-get install -y certbot bind9-dnsutils   # dnsutils provides `dig` for checking the TXT record
+```
+
+The package also enables `certbot.timer`. It can't renew a manually validated certificate (there is no hook to create the TXT record), so expect failed attempts in `journalctl -u certbot` in the last month before expiry — they're harmless and stop once you renew by hand.
+
+#### 2. Issue the certificate
+
+Keep the Webhouse DNS administration open in a browser; certbot waits for you in the middle of this command.
+
+🖥
+```bash
+sudo certbot certonly \
+  --manual --preferred-challenges dns \
+  -d produkcia.logman-povazan.com \
+  --cert-name produkcia.logman-povazan.com \
+  --deploy-hook "systemctl reload nginx" \
+  -m <your-email> --agree-tos --no-eff-email
+```
+
+certbot prints something like:
+
+```
+Please deploy a DNS TXT record under the name:
+_acme-challenge.produkcia.logman-povazan.com.
+with the following value:
+gfj9Xq...Rg85nM
+```
+
+**Don't press Enter yet.**
+
+1. In Webhouse, add a **TXT** record to the `logman-povazan.com` zone: name `_acme-challenge.produkcia` (the zone suffix is added automatically — check it doesn't end up as `…logman-povazan.com.logman-povazan.com`), value as printed, the lowest TTL offered (e.g. 300). If a record from a previous run exists, replace its value.
+2. Check from a **second** SSH session that the record is visible on the zone's authoritative nameservers (not the LAN resolver, which may serve its own copy of the zone):
+   ```bash
+   dig +short NS logman-povazan.com                                          # Webhouse's nameservers
+   dig +short TXT _acme-challenge.produkcia.logman-povazan.com @<nameserver>  # repeat for each one
+   ```
+   Every nameserver must return the printed value. Changes at Webhouse can take several minutes to reach them.
+3. Then press **Enter** in the certbot session.
+
+On success:
+
+- The certificate lands in `/etc/letsencrypt/live/produkcia.logman-povazan.com/` (`fullchain.pem`, `privkey.pem`); the nginx config expects exactly this path, hence `--cert-name`.
+- The `--deploy-hook` is saved in `/etc/letsencrypt/renewal/produkcia.logman-povazan.com.conf`, so nginx is reloaded after every later renewal too.
+- `-m` receives Let's Encrypt account notices; use a real mailbox.
+- You can delete the TXT record afterwards (or leave it — the next run needs a new value anyway).
+
+If certbot reports "incorrect TXT record" or "no TXT record found", Let's Encrypt saw an old or missing value: rerun the command and wait until `dig` shows the new value on all nameservers before pressing Enter. Each attempt generates a new value; failed attempts count toward Let's Encrypt's [rate limits](https://letsencrypt.org/docs/rate-limits/) (5 failures per hostname per hour).
+
+#### 3. Switch nginx to HTTPS
+
+🖥
+```bash
+sudo cp /tmp/logman-deploy/nginx/logman-tls.conf /etc/nginx/sites-available/logman
+sudo nginx -t && sudo systemctl reload nginx
+sudo ufw allow 443/tcp
+```
+
+(If `/tmp/logman-deploy` is gone, copy the config files to the server again first, as in step 1: 💻 `scp -r deploy <user>@<server-ip>:/tmp/logman-deploy`.)
+
+[`logman-tls.conf`](deploy/nginx/logman-tls.conf) serves the app on 443 and keeps port 80 only to redirect to `https://produkcia.logman-povazan.com`; HTTPS requests for any other host (e.g. the bare IP) are redirected too. It leaves HSTS commented out: enable it once HTTPS has survived at least one renewal, because with HSTS an expired certificate locks users out instead of letting them fall back to HTTP.
+
+#### 4. Switch the app URLs to HTTPS
+
+🖥 In `/opt/logman/shared/.env`:
+```env
+BETTER_AUTH_URL="https://produkcia.logman-povazan.com"
+NEXT_PUBLIC_APP_URL="https://produkcia.logman-povazan.com"
+```
+
+Leave `INTERNAL_APP_URL` at `http://127.0.0.1:3000`; that's the server-internal hop from `proxy.ts` to the app, which doesn't go through nginx.
+
+`NEXT_PUBLIC_APP_URL` is inlined at build time, so deploy a **new** release: 💻 `deploy/release.sh patch`. (Redeploying the current tag doesn't work: `deploy.sh` refuses to rebuild a release that already exists.)
+
+Until the new release is live, logins fail: Better Auth rejects the `https://` origin while it still expects `http://`. Do steps 3 and 4 back to back, outside shift time.
+
+#### 5. Verify
+
+- [ ] `https://produkcia.logman-povazan.com` opens with a valid certificate (padlock, issued by Let's Encrypt).
+- [ ] `http://produkcia.logman-povazan.com` and `http://<server-ip>` redirect to `https://produkcia.logman-povazan.com`.
+- [ ] Email/password and NFC login work; the session survives a reload. Users log in once more (the cookie name changed).
+- [ ] Update terminal and browser bookmarks to `https://` (the HTTP redirect keeps old ones working).
+- [ ] Put a renewal reminder in the calendar (see below).
+
+#### Renewing the certificate
+
+Let's Encrypt certificates are valid for 90 days (shrinking to 45 days by 2028), and Let's Encrypt no longer emails expiry warnings. While renewal is manual, **set a calendar reminder about 60 days after each issuance**, and renew with the same command as in [step 2](#2-issue-the-certificate) — the TXT record procedure is identical, with a new value. If certbot asks whether to keep the existing certificate, choose **Renew & replace**. nginx picks up the new certificate through the saved deploy hook; nothing else changes (no new deploy, users stay logged in).
+
+🖥
+```bash
+sudo certbot certificates   # expiry date and days left
+```
+
+If the certificate expires, browsers show a full-page warning and users can't log in until it's renewed.
+
+#### Automating renewal (later)
+
+Unattended renewal needs a script that creates and removes the TXT record through the Webhouse API. certbot runs it via `--manual-auth-hook` / `--manual-cleanup-hook`; once the certificate has been issued (or renewed) with those options, they're saved in the renewal config and `certbot.timer` renews on its own. After that, check with `sudo certbot renew --dry-run` and drop the calendar reminder.
