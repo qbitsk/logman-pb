@@ -51,6 +51,18 @@ export const auth = betterAuth({
     },
   },
 
+  rateLimit: {
+    customRules: {
+      // proxy.ts calls /get-session over the loopback on every protected request,
+      // so when self-hosted all of them share the client IP 127.0.0.1 and one
+      // 100-per-10s bucket. Hitting it returned 429, which the proxy turned into
+      // redirects to /login (spurious logouts, HTML where fetch expected JSON).
+      // It's a read-only session lookup, so limiting it protects nothing.
+      // Sign-in, NFC login etc. stay limited per real client IP (nginx forwards it).
+      "/get-session": false,
+    },
+  },
+
   plugins: [nfcPlugin()],
 });
 

@@ -356,12 +356,12 @@ Backups run nightly at 02:30 into `/var/backups/logman` and are kept for 14 days
 
 Do this **before the first deploy** — the first deploy runs `db:migrate`, and the restore fails if the tables already exist. The dump includes the `drizzle` schema, which records the applied migrations, so later migrations continue where Supabase left off.
 
-Use Supabase's **Session pooler** connection string (Supabase → Connect → Session pooler, port 5432); the "direct" `db.*.supabase.co` host is IPv6-only.
+The command uses Supabase's **Session pooler** (Supabase → **Connect** → Method: **Session pooler**): host `aws-0-eu-west-1.pooler.supabase.com`, port 5432, user `postgres.igwywamlqszldzpwyifz` (not plain `postgres`). Don't use the "Direct connection" host `db.igwywamlqszldzpwyifz.supabase.co`: it only has an IPv6 address, so from a server without IPv6 `pg_dump` fails with `Network is unreachable`. Don't use the Transaction pooler (port 6543) either.
 
 🖥
 ```bash
 read -rs PGPASSWORD && export PGPASSWORD   # paste the Supabase DB password, then Enter (keeps it out of shell history)
-pg_dump "postgresql://postgres.<project-ref>@aws-0-<region>.pooler.supabase.com:5432/postgres" \
+pg_dump "postgresql://postgres.igwywamlqszldzpwyifz@aws-0-eu-west-1.pooler.supabase.com:5432/postgres" \
   --schema=public --schema=drizzle --no-owner --no-privileges -Fc -f /tmp/supabase.dump
 unset PGPASSWORD
 

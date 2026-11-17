@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest) {
   );
 
   if (!sessionRes.ok) {
-    console.error("Failed to validate session token");
+    console.error(`Failed to validate session token: get-session returned ${sessionRes.status}`);
 
     const loginUrl = publicUrl(request, "/login");
     return NextResponse.redirect(loginUrl);
